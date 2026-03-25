@@ -258,8 +258,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-a
 
 ### 资产树为空
 
-- 新注册用户会自动创建默认资产树（"我的家"）
-- 如果返回为空，请确认登录是否成功
+- 如果返回为空，请确认登录是否成功，并检查是否已在 Sentino 后台配置资产树
 
 ---
 

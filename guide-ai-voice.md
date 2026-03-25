@@ -25,7 +25,7 @@ graph LR
 **核心设计**：
 
 - MQTT 只负责"拿票"（获取 RTC 连接参数），不承载音频流
-- Agora RTC 承载实时音频，端到端延迟低于 400ms
+- Agora RTC 承载实时音频
 - AI Agent 在设备加入频道前已在频道内等待，加入即可开始对话
 - 结束时设备只需离开频道，云端自动检测并清理
 
@@ -47,13 +47,13 @@ stateDiagram-v2
 
 ### 各阶段详解
 
-| 阶段 | 设备动作 | 预期耗时 |
-|---|---|---|
-| **Idle** | MQTT 在线，等待用户触发 | — |
-| **Requesting** | 发送 `agora_agent_device_access`，等待云端回复 | < 2 秒 |
-| **Joining** | 初始化 Agora SDK，加入 RTC 频道 | < 1 秒 |
-| **InCall** | 采集麦克风音频并发送，播放 AI 回复音频 | 用户控制 |
-| **Leaving** | 调用 `leave_channel()`，释放资源 | 即时 |
+| 阶段 | 设备动作 |
+|---|---|
+| **Idle** | MQTT 在线，等待用户触发 |
+| **Requesting** | 发送 `agora_agent_device_access`，等待云端回复 |
+| **Joining** | 初始化 Agora SDK，加入 RTC 频道 |
+| **InCall** | 采集麦克风音频并发送，播放 AI 回复音频 |
+| **Leaving** | 调用 `leave_channel()`，释放资源 |
 
 ---
 
@@ -98,7 +98,7 @@ stateDiagram-v2
 | 字段 | 类型 | 说明 | 对应 Agora API 参数 |
 |---|---|---|---|
 | `appId` | string | Agora 应用 ID | `agora_rtc_init(appId, ...)` |
-| `rtcToken` | string | RTC 通道令牌（有时效性） | `join_channel(..., rtcToken, ...)` |
+| `rtcToken` | string | RTC 通道令牌 | `join_channel(..., rtcToken, ...)` |
 | `channelName` | string | RTC 频道名称 | `join_channel(channelName, ...)` |
 | `uid` | int | 设备在频道中的成员 ID | `join_channel(..., uid)` |
 
@@ -148,11 +148,6 @@ static void on_audio_data(const char *channel, uint32_t uid,
     audio_play(data, len);
 }
 
-// 连接丢失
-static void on_connection_lost(const char *channel) {
-    // 触发重连逻辑，见第 5 节
-    handle_rtc_reconnect();
-}
 ```
 
 ### 3.4 结束对话
@@ -230,7 +225,7 @@ agora_rtc_leave_channel();
 
 ### 5.1 RTC 断连重连
 
-4G/WiFi 网络不稳定时，RTC 连接可能中断。
+网络不稳定时，RTC 连接可能中断。
 
 ```mermaid
 flowchart TD
@@ -247,28 +242,10 @@ flowchart TD
 |---|---|
 | 首次重连 | 使用原有 RTC 参数（appId / channelName / rtcToken / uid）直接重新加入频道 |
 | 参数过期 | 若旧参数重连失败，重新发送 `agora_agent_device_access` 获取新参数 |
-| 重连间隔 | 指数退避：1s → 2s → 4s → 8s，最大 30s |
-| 最大重试 | 建议 5 次，超过后放弃并提示用户 |
 
-### 5.2 MQTT 断连对 RTC 的影响
+### 5.2 会话超时
 
-| 场景 | 影响 | 处理方式 |
-|---|---|---|
-| RTC 通话中 MQTT 断开 | **不影响**正在进行的 RTC 通话 | MQTT 独立重连 |
-| MQTT 断开期间发起新对话 | **无法发起**（无法获取 RTC 参数） | 等待 MQTT 重连后重试 |
-| MQTT 重连后 | 可正常发起新对话 | 无需特殊处理 |
-
-### 5.3 会话超时
-
-Sentino 云端会在以下情况自动关闭 AI 会话：
-
-| 超时场景 | 说明 |
-|---|---|
-| 设备未加入频道 | 云端返回 RTC 参数后，设备长时间未加入频道 |
-| 长时间无语音活动 | 对话过程中无人说话，超过阈值自动结束 |
-| 设备离开频道 | 云端立即检测并清理 |
-
-> 设备应在收到 RTC 参数后尽快加入频道，避免 Token 或会话过期。
+会话启动后如长时间无人加入或无语音活动，Sentino 会自动关闭会话。
 
 ### 5.4 常见错误排查
 
@@ -339,9 +316,6 @@ int agora_rtc_join_channel(const char *channel, uint32_t uid,
 
 // 离开频道
 int agora_rtc_leave_channel(void);
-
-// 发送音频帧
-int agora_rtc_send_audio_data(const void *data, size_t len);
 ```
 
 ### 7.3 资源管理
@@ -356,8 +330,6 @@ void start_voice_session(rtc_params_t *params) {
 
 void stop_voice_session(void) {
     agora_rtc_leave_channel();
-    // 可选：如果不再需要对话，释放 SDK 资源
-    // agora_rtc_fini();
 }
 ```
 
@@ -374,14 +346,6 @@ void stop_voice_session(void) {
 | 长按按键 | 对讲机模式 | 按下发起，松开结束 |
 | 单击按键 | 自由对话模式 | 点击切换对话开/关 |
 | NFC 触碰 | 角色切换 | 读取 NFC → 发送 `agora_agent_nfc_report` |
-| 语音唤醒 | 免触控 | 唤醒词检测 → 发起对话 |
-
-### 8.2 用户体验建议
-
-1. **状态反馈**：在等待 RTC 参数和加入频道时，通过 LED / 提示音给用户反馈
-2. **快速响应**：从用户触发到开始对话，目标控制在 3 秒以内
-3. **优雅结束**：播放完 AI 最后一句话再离开频道，避免截断
-4. **断网提示**：如果无法发起对话（MQTT 断开），及时提示用户
 
 ---
 

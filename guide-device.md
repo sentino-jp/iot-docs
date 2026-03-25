@@ -70,28 +70,6 @@ content = "uuid=ct01wfjSNqGAqUUK,ts=1742536800"
 password = 894972927a0a6d1a22a89883b9fe187a891a5b5dec4afa374034b703f2455bdd
 ```
 
-**C 语言伪代码**：
-
-```c
-char content[128];
-snprintf(content, sizeof(content), "uuid=%s,ts=%d", uuid, (int)time(NULL));
-
-char password[65];
-hmac_sha256(device_key, strlen(device_key),
-            content, strlen(content),
-            password);
-```
-
-**Python 参考**：
-
-```python
-import hmac, hashlib, time
-
-ts = str(int(time.time()))
-content = f"uuid={uuid},ts={ts}"
-password = hmac.new(key.encode(), content.encode(), hashlib.sha256).hexdigest()
-```
-
 > 也支持 `hmacSha1`，根据硬件能力选择。签名方法在 Username 中通过 `signMethod` 字段声明。
 
 ### 2.3 Topic 订阅
@@ -192,7 +170,7 @@ sequenceDiagram
 }
 ```
 
-`res` 为 `0` 表示绑定成功。绑定成功后设备应保存绑定状态。
+`res` 为 `0` 表示绑定成功。
 
 ### 3.4 BLE 接收绑定信息
 
@@ -248,7 +226,6 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 
 - 设备每次上电连接 MQTT 后
 - 绑定成功后
-- MQTT 断线重连后
 
 ### 4.2 上报消息
 
@@ -296,7 +273,6 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 | `bindStatus` | 云端记录的绑定状态 |
 | `isClearData` | 是否需要清除数据 |
 
-> 如果云端 `bindStatus` 与设备本地不一致，以云端为准进行同步。
 
 ---
 
@@ -329,7 +305,7 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 }
 ```
 
-设备应清除本地绑定信息，根据 `clearData` 决定是否清除用户数据，然后回复：
+设备根据 `clearData` 决定是否清除用户数据，然后回复：
 
 ```json
 {
@@ -377,8 +353,8 @@ App 通过 BLE 发送 `thing.network.set` 消息：
   "code": "property_report",
   "data": {
     "properties": {
-      "brightness": 80,
-      "volume": 50
+      "color": "red",
+      "brightness": 80
     }
   },
   "ack": 0
@@ -396,7 +372,8 @@ App 通过 BLE 发送 `thing.network.set` 消息：
   "code": "property_set",
   "data": {
     "properties": {
-      "volume": 30
+      "color": "red",
+      "brightness": 80
     }
   }
 }
@@ -412,7 +389,8 @@ App 通过 BLE 发送 `thing.network.set` 消息：
   "code": "property_set",
   "data": {
     "properties": {
-      "volume": 30
+      "color": "red",
+      "brightness": 80
     }
   }
 }
@@ -434,7 +412,7 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 }
 ```
 
-`format` 支持三种级别：`complete`（完整）、`simple`（精简）、`mini`（迷你）。嵌入式设备建议使用 `simple` 或 `mini` 以减少内存占用。
+`format` 支持三种级别：`complete`（完整）、`simple`（精简）、`mini`（迷你）。
 
 ---
 
@@ -462,7 +440,7 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 
 | 字段 | 说明 |
 |---|---|
-| `firmwareType` | 固件类型：1=工厂固件 2=标准固件 3=MCU 固件 |
+| `firmwareType` | 固件类型：1=工厂固件 2=标准固件 3=MCU 固件 4=MCU 蓝牙固件 5=MCU Zigbee 6=MCU Matter |
 | `fileSize` | 固件大小（字节） |
 | `silence` | `true`=静默升级 |
 | `md5sum` | 文件 MD5 校验值 |
@@ -499,8 +477,11 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 | `0` | 成功 |
 | `-1` | 下载超时 |
 | `-2` | 文件不存在 |
+| `-3` | 签名过期 |
 | `-4` | MD5 不匹配 |
 | `-5` | 更新固件失败 |
+| `-6` | 更新超时 |
+| `-7` | 正在升级中 |
 
 ---
 
@@ -513,41 +494,7 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 | 重连间隔 | 指数退避：1s → 2s → 4s → 8s → ... 最大 60s |
 | 重新认证 | 使用相同三元组，重新计算签名（更新 `ts`） |
 | 重新订阅 | 重连成功后必须重新订阅 `report_response` 和 `issue` Topic |
-| 信息上报 | 重连成功后上报 `info`，获取遗留消息 |
-
-**伪代码**：
-
-```c
-void mqtt_reconnect() {
-    int retry = 0;
-    while (!mqtt_connected) {
-        int delay = min(1 << retry, 60);  // 1, 2, 4, 8, ... 60
-        sleep(delay);
-
-        // 重新计算签名
-        recalc_mqtt_credentials();
-
-        if (mqtt_connect() == SUCCESS) {
-            // 重新订阅
-            mqtt_subscribe("rlink/v2/{pid}/{uuid}/report_response");
-            mqtt_subscribe("rlink/v2/{pid}/{uuid}/issue");
-
-            // 上报设备信息
-            send_info_report();
-            break;
-        }
-        retry++;
-    }
-}
-```
-
-### 9.2 网络切换处理
-
-| 场景 | 处理方式 |
-|---|---|
-| WiFi 断开重连 | MQTT 自动断开，触发重连流程 |
-| 4G 信号恢复 | MQTT 自动断开，触发重连流程 |
-| WiFi → 4G 切换 | 断开当前连接，使用新网络重连 |
+| 信息上报 | 重连成功后建议上报 `info` |
 
 ---
 
@@ -578,10 +525,10 @@ void mqtt_reconnect() {
 
 ## 11. 安全注意事项
 
-1. **KEY 保密**：设备密钥禁止明文传输、日志打印、硬编码到源代码中
+1. **KEY 保密**：设备密钥禁止明文传输或日志打印
 2. **NVS 存储**：三元组存储在 NVS 分区，确保断电后数据保留
-3. **消息 ID 唯一**：使用 UUID 或递增计数器生成，避免重复
-4. **时间戳合理**：`ts` 必须接近当前时间，偏差过大会导致连接被拒绝
+3. **消息 ID 唯一**：使用 UUID 生成，避免重复
+4. **时间戳合理**：`ts` 不能偏差太大
 
 ---
 

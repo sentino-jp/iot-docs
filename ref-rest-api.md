@@ -10,8 +10,6 @@
 |---|---|
 | 基础 URL | `https://api-iot.sentino.jp` |
 | 认证方式 | Bearer Token（登录接口使用 Basic Auth） |
-| 数据格式 | JSON |
-| 字符编码 | UTF-8 |
 
 ---
 
@@ -19,7 +17,7 @@
 
 ### 2.1 获取 Token
 
-通过登录接口获取 `access_token`，有效期 7200 秒。
+通过登录接口获取 `access_token`（有效期参见登录响应中的 `expires_in` 字段）。
 
 ### 2.2 使用 Token
 
@@ -50,9 +48,7 @@ Authorization: Bearer {access_token}
 {
   "code": 200,
   "message": "success",
-  "data": {},
-  "reqId": "请求唯一ID",
-  "time": 1742536800
+  "data": {}
 }
 ```
 
@@ -262,15 +258,17 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/common/getDataCenterLis
   "code": 200,
   "data": [
     {
-      "dataCenterCode": "cn",
-      "dataCenterName": "中国",
-      "apiUrl": "https://api-iot.sentino.jp",
-      "mqttUrl": "mqtt-iot.sentino.jp",
-      "mqttSslPort": "8883"
+      "dataCenterCode": "",
+      "dataCenterName": "",
+      "apiUrl": "",
+      "mqttUrl": "",
+      "mqttSslPort": ""
     }
   ]
 }
 ```
+
+> 响应中还包含 `appId`、`areaId`、`createTime`、`dataCenterId`、`iotUrl`、`sort` 等字段，此处省略。
 
 ---
 
@@ -311,7 +309,7 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindRe
 | `0` | 绑定成功 |
 | 其他 | 绑定未完成或失败 |
 
-**使用方式**：配网信息发送后，每 10 秒轮询一次，超时 60 秒。
+**使用方式**：配网信息发送后，定时轮询（10s）。
 
 ---
 
@@ -646,7 +644,7 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/detail?agentId=1
 
 ### 6.3 绑定智能体到设备
 
-将智能体绑定到指定设备。绑定后设备发起 AI 对话时使用该智能体。
+将设备绑定到指定的智能体模板。
 
 ```
 POST /business-app/v1/agents/device/bind-agent
@@ -683,14 +681,14 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agen
 
 ## 7. 错误码
 
-| 错误码 | 说明 | 处理方式 |
-|---|---|---|
-| 200 | 成功 | — |
-| 400 | 请求参数错误 | 检查请求体和参数格式 |
-| 401 | 未授权（Token 无效或过期） | 刷新 Token 或重新登录 |
-| 403 | 禁止访问 | 检查权限 |
-| 404 | 资源不存在 | 检查请求路径和 ID |
-| 500 | 服务器内部错误 | 重试或联系技术支持 |
+| 错误码 | 说明 |
+|---|---|
+| 200 | 成功 |
+| 400 | 请求参数错误 |
+| 401 | 未授权（Token 无效或过期） |
+| 403 | 禁止访问 |
+| 404 | 资源不存在 |
+| 500 | 服务器内部错误 |
 
 ---
 

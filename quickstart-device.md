@@ -18,7 +18,8 @@
 |---|---|
 | UUID | `ct01wfjSNqGAqUUK` |
 | KEY | `944e53cda6ac4491ad7d453e3d2934bb` |
-| pid | `sEF4ljjdH8mo` |
+
+**产品 ID（pid）**：`sEF4ljjdH8mo`（用于 MQTT Topic 路径，非三元组字段）
 
 > 正式开发时请使用 Sentino 分配给你的三元组，不要使用示例数据。
 
@@ -103,14 +104,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
         send_time_request(client)
     else:
         print(f"连接失败, 错误码: {rc}")
-        error_messages = {
-            1: "协议版本不支持",
-            2: "Client ID 被拒绝",
-            3: "服务器不可用",
-            4: "用户名或密码错误 — 请检查三元组和签名",
-            5: "未授权",
-        }
-        print(f"  原因: {error_messages.get(rc, '未知错误')}")
+        print("  请检查三元组和签名是否正确")
 
 
 def on_message(client, userdata, msg):
@@ -317,7 +311,7 @@ mosquitto_pub \
   -h mqtt-iot.sentino.jp \
   -p 1883 \
   -V mqttv5 \
-  -i "rlink_ct01wfjSNqGAqUUK_V2_pub" \
+  -i "rlink_ct01wfjSNqGAqUUK_V2b" \
   -u "ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=$TS" \
   -P "$PASSWORD" \
   -t "rlink/v2/sEF4ljjdH8mo/ct01wfjSNqGAqUUK/report" \

@@ -92,19 +92,7 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 **物模型**是设备能力的结构化描述，定义了设备有哪些**属性**（properties），类似于数据库的 Schema。
 
-例如，一个智能灯泡的物模型可能包含：
-
-```json
-{
-  "properties": [
-    { "identifier": "brightness", "type": "int", "min": 0, "max": 100 },
-    { "identifier": "color", "type": "enum", "values": ["red", "blue", "green"] },
-    { "identifier": "power", "type": "bool" }
-  ]
-}
-```
-
-设备可以通过 MQTT 上报属性值，云端也可以通过 MQTT 下发属性设置指令。
+设备通过 MQTT 上报属性值（如 `{"color": "red", "brightness": 50}`），云端也可以通过 MQTT 下发属性设置指令。物模型的具体定义在 Sentino 后台配置。
 
 ### 3.4 智能体 (Agent)
 
@@ -112,7 +100,7 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 | 组成部分 | 说明 | 示例 |
 |---|---|---|
-| 人设 (Prompt) | AI 的角色描述和行为指令 | "你是一只活泼的小熊，喜欢讲故事..." |
+| 人设 (Prompt) | AI 的角色描述和行为指令 | — |
 | 声音 (TTS Voice) | AI 说话的声音 | 女声-温柔、男声-活力 |
 | 头像 (Avatar) | 在 App 中展示的角色图片 | — |
 | 标签 (Tags) | 角色分类 | 故事、教育、陪伴 |
@@ -124,11 +112,11 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 **资产**是 Sentino 中设备归属的管理单元，采用树形结构：
 
 ```
-我的家 (assetId: 100)
-├── 客厅 (assetId: 101)
-│   └── 小熊玩偶 (deviceId: xxx)
-└── 卧室 (assetId: 102)
-    └── 故事机 (deviceId: yyy)
+我的家 (assetId: ...)
+├── 客厅 (assetId: ...)
+│   └── 小熊玩偶 (deviceId: ...)
+└── 卧室 (assetId: ...)
+    └── 故事机 (deviceId: ...)
 ```
 
 设备绑定时需要指定一个 `assetId`，表示该设备属于哪个"家庭/空间"。这个信息由配网 App 从云端获取后通过 BLE 传给设备。
@@ -244,7 +232,7 @@ sequenceDiagram
 **关键设计决策：**
 
 - **MQTT 只负责"拿票"**（获取 RTC 连接参数），**不承载音频流**
-- **Agora RTC 承载实时音频**，延迟低于 400ms
+- **Agora RTC 承载实时低延迟音频**
 - **AI Agent 已在频道内等待**，设备加入即可开始对话
 - **结束时设备只需离开频道**，云端自动检测并清理，无需额外 MQTT 消息
 
@@ -265,7 +253,6 @@ sequenceDiagram
 | BLE | Bluetooth Low Energy | 低功耗蓝牙，用于近距离设备通信 |
 | GATT | Generic Attribute Profile | BLE 数据交换的标准协议 |
 | STA 模式 | Station Mode | WiFi 客户端模式，连接到路由器 |
-| AP 模式 | Access Point Mode | WiFi 热点模式，设备自身作为热点 |
 | MQTT | Message Queuing Telemetry Transport | 轻量级消息传输协议，IoT 领域广泛使用 |
 | QoS | Quality of Service | MQTT 消息质量等级。QoS 0 = 最多一次，QoS 1 = 至少一次 |
 | Keep Alive | — | MQTT 心跳间隔，超过此时间未通信则 Broker 认为设备离线 |
