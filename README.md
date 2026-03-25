@@ -1,6 +1,6 @@
 # Sentino IoT 开发者文档中心
 
-欢迎使用 Sentino IoT 开发者文档。Sentino IOT 是面向 AI 语音交互设备的物联网平台，提供从设备配网、云端通信到 AI 实时语音对话的完整解决方案。
+欢迎使用 Sentino IoT 开发者文档。Sentino IoT 是面向 AI 语音交互设备的物联网平台，提供从设备配网、云端通信到 AI 实时语音对话的完整方案。
 
 ---
 
