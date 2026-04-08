@@ -13,14 +13,14 @@ graph TB
         DevMQTT["MQTT Client<br/>MQTT 5.0 · HMAC-SHA256"]
         DevRTC["Agora RTC SDK<br/>OPUS · 16kHz · mono"]
         DevBLE["BLE GATT<br/>Service UUID 0xA101"]
-        DevNFC["NFC Reader"]
+        DevNFC["NFC Reader（可选）"]
         Device --- DevMQTT
         Device --- DevRTC
         Device --- DevBLE
         Device --- DevNFC
     end
 
-    subgraph AppLayer["配网 App"]
+    subgraph AppLayer["管理 App"]
         App["手机 App"]
         AppBLE["BLE Central"]
         AppREST["REST API Client"]
@@ -28,12 +28,12 @@ graph TB
         App --- AppREST
     end
 
-    NFC["NFC 角色卡片"]
+    NFC["NFC 角色卡片（可选）"]
 
     subgraph SentinoCloud["Sentino IoT 平台"]
         MQTTBroker["MQTT Broker<br/>设备认证 · 消息路由"]
         DevMgmt["设备生命周期管理<br/>配网绑定 · 在线状态 · OTA"]
-        AgentMgmt["AI 智能体管理<br/>角色配置 · NFC 映射 · 会话编排"]
+        AgentMgmt["AI 智能体管理<br/>角色配置 · 会话编排"]
         RESTAPI["REST API 网关<br/>用户认证 · 设备管理"]
         MQTTBroker --- DevMgmt
         MQTTBroker --- AgentMgmt
@@ -109,7 +109,7 @@ sequenceDiagram
 
     rect rgb(227, 242, 253)
     Note over User, ConvoAI: 会话建立
-    User->>Device: 按键 / NFC 触碰
+    User->>Device: 按键（或 NFC 触碰）
     Device->>Cloud: MQTT: agora_agent_device_access
     Cloud->>Cloud: 查询设备绑定的智能体配置<br/>（Prompt · LLM 模型 · TTS 声音）
     Cloud->>ConvoAI: HTTPS POST: 创建 AI Agent<br/>（传入智能体配置 + RTC 频道参数）
@@ -179,7 +179,7 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | **设备端极简** | 设备只需：(1) 发一条 MQTT 消息 (2) 用返回的参数加入 RTC 频道。AI 配置、Agent 创建、会话清理全部在云端 |
 | **AI Agent 先于设备就绪** | Sentino 云先在 Agora 创建 Agent，Agent 加入频道等待，然后才通知设备加入。保证设备进来就能对话 |
 | **自动清理** | 设备只需离开 RTC 频道，云端自动检测并清理 Agent 和会话资源，无需设备发额外消息 |
-| **NFC 即切即聊** | NFC 卡片触碰后，设备上报标识，云端自动匹配角色并创建新 Agent，一步完成切换 + 开始对话 |
+| **NFC 即切即聊**（可选） | 设备如配备 NFC，卡片触碰后上报标识，云端自动匹配角色并创建新 Agent，一步完成切换 + 开始对话 |
 
 ---
 

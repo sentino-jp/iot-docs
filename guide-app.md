@@ -314,7 +314,7 @@ App 与设备之间的 BLE 数据传输使用 Rlink BLE V1 协议：
 
 ```mermaid
 sequenceDiagram
-    participant App as 配网 App
+    participant App as 管理 App
     participant Device as IoT 设备
     participant Cloud as Sentino IoT 平台
 

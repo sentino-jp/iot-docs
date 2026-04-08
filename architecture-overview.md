@@ -10,7 +10,7 @@
 |------|------|----------|
 | **AI 实时语音对话** | 设备与云端 AI 角色进行低延迟实时语音通话 | 开口即聊，自然流畅 |
 | **多角色 AI 智能体** | 为设备配置不同 AI 角色（故事大王、英语老师、陪伴伙伴等） | 一台设备，多种体验 |
-| **NFC 角色切换** | 放置实体 NFC 卡片即可切换 AI 角色 | 儿童友好，无需操作屏幕 |
+| **NFC 角色切换**（可选） | 放置实体 NFC 卡片即可切换 AI 角色 | 儿童友好，无需操作屏幕 |
 | **BLE 一键配网** | 手机 App 扫码 + 蓝牙自动完成设备绑定 | 开箱即用，无需技术背景 |
 | **OTA 远程升级** | 云端推送固件更新，设备自动升级 | 持续迭代，无需返厂 |
 | **多设备管理** | 一个账户下管理多台设备和角色 | 一个 App 管理全部设备 |
@@ -22,7 +22,7 @@
 ```mermaid
 graph TB
     subgraph Customer["客户负责"]
-        C1["硬件制造<br/>（主控 + 麦克风 + 扬声器 + NFC）"]
+        C1["硬件制造<br/>（主控 + 麦克风 + 扬声器 + NFC 可选）"]
         C2["固件集成 SDK<br/>（MQTT + Agora RTC）"]
         C3["App 定制 UI<br/>（配网 + 角色管理界面）"]
     end
@@ -30,7 +30,7 @@ graph TB
     subgraph SentinoIoT["Sentino IoT 平台"]
         S1["设备云端接入<br/>MQTT Broker + 设备认证"]
         S2["配网绑定服务<br/>BLE 协议 + 设备生命周期"]
-        S3["AI 智能体管理<br/>角色配置 + NFC 映射 + 会话编排"]
+        S3["AI 智能体管理<br/>角色配置 + 会话编排"]
         S4["运维支撑<br/>OTA 升级 + 状态监控"]
     end
 
@@ -75,8 +75,8 @@ graph TB
 ```mermaid
 graph TB
     Device["IoT 智能硬件<br/>玩偶 / 故事机 / 机器人 / 音箱"]
-    App["配网 App<br/>（手机）"]
-    NFC["NFC 角色卡片"]
+    App["管理 App<br/>（手机）"]
+    NFC["NFC 角色卡片<br/>（可选）"]
     Cloud["Sentino IoT 平台<br/>设备管理 · 智能体管理 · 配网服务"]
     SentinoAgent["Sentino Agent 平台<br/>LLM 调度 · TTS 调度 · 工作流编排"]
     AgoraAI["Agora 对话式 AI 引擎<br/>AI Agent 管理 · 语音识别"]

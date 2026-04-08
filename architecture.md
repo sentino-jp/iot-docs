@@ -23,7 +23,7 @@ Sentino IoT 是一个**面向 AI 语音交互设备**的物联网平台。它解
 
 ```mermaid
 graph LR
-    App["配网 App<br/>(手机)"]
+    App["管理 App<br/>(手机)"]
     Device["IoT 设备<br/>(玩偶/音箱/机器人)"]
     Cloud["Sentino IoT 平台"]
     MQTT["MQTT Broker"]
@@ -44,7 +44,7 @@ graph LR
 | 角色 | 做什么 | 不做什么 |
 |---|---|---|
 | **IoT 设备** | 连接 MQTT、接收 BLE 配网信息、通过 MQTT 获取 RTC 参数、集成 Agora SDK 进行语音通话 | 不直接调 REST API，不自行生成 Token |
-| **配网 App** | BLE 扫描设备、从云端获取绑定信息、通过 BLE 写入设备、管理智能体 | 不参与语音通话 |
+| **管理 App** | BLE 扫描设备、从云端获取绑定信息、通过 BLE 写入设备、管理智能体 | 不参与语音通话 |
 | **Sentino IoT 平台** | 管理 MQTT Broker、管理设备生命周期、管理 AI Agent、生成 RTC 鉴权参数 | — |
 | **Agora RTC** | 提供设备与 AI Agent 之间的低延迟实时音频通道 | 不处理业务逻辑 |
 
@@ -111,7 +111,7 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 每个用户在 Sentino 中拥有一个**账户**，设备绑定时关联到该账户下。
 
-设备绑定时需要指定一个 `assetId`（账户 ID），表示该设备属于哪个用户。这个信息由配网 App 从云端获取后通过 BLE 传给设备。
+设备绑定时需要指定一个 `assetId`（账户 ID），表示该设备属于哪个用户。这个信息由管理 App 从云端获取后通过 BLE 传给设备。
 
 > **开发者提示**：调用 `POST /business-app/v1/asset/assetTree` 获取账户结构后，直接使用根节点的 `assetId` 作为绑定参数即可。API 字段名为历史原因保留为 `assetId`，在 AI 玩偶场景中等同于用户账户 ID。
 
@@ -209,7 +209,7 @@ sequenceDiagram
     participant Cloud as Sentino IoT 平台
     participant Agora as Agora RTC
 
-    User->>Device: 触发对话（按键/NFC）
+    User->>Device: 触发对话（按键 或 NFC）
     Device->>Cloud: MQTT: 请求 AI 接入
     Cloud->>Agora: 创建 AI Agent + RTC 频道
     Cloud-->>Device: 返回 RTC 参数 (appId, token, channel, uid)

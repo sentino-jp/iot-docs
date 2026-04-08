@@ -116,13 +116,13 @@ password = 894972927a0a6d1a22a89883b9fe187a891a5b5dec4afa374034b703f2455bdd
 
 ## 3. 设备绑定 (`bind`)
 
-设备首次使用时，需要通过 BLE 从配网 App 获取 `userId` 和账户 ID (`assetId`)，然后通过 MQTT 完成绑定。
+设备首次使用时，需要通过 BLE 从管理 App 获取 `userId` 和账户 ID (`assetId`)，然后通过 MQTT 完成绑定。
 
 ### 3.1 绑定流程
 
 ```mermaid
 sequenceDiagram
-    participant App as 配网 App
+    participant App as 管理 App
     participant Device as IoT 设备
     participant Cloud as Sentino IoT 平台
 
