@@ -27,12 +27,17 @@ graph TB
         C3["App 定制 UI<br/>（配网 + 角色管理界面）"]
     end
 
-    subgraph Sentino["Sentino 平台提供"]
+    subgraph SentinoIoT["Sentino IoT 平台"]
         S1["设备云端接入<br/>MQTT Broker + 设备认证"]
         S2["配网绑定服务<br/>BLE 协议 + 设备生命周期"]
         S3["AI 智能体管理<br/>角色配置 + NFC 映射 + 会话编排"]
         S4["运维支撑<br/>OTA 升级 + 状态监控"]
-        S5["AI 推理与语音合成调度<br/>LLM 调度 + TTS 调度 + 工作流"]
+    end
+
+    subgraph SentinoAgent["Sentino Agent 平台"]
+        S5["LLM 推理调度<br/>多模型适配 + 对话上下文"]
+        S6["TTS 语音合成调度<br/>多供应商适配"]
+        S7["工作流编排<br/>Function Calling + 记忆"]
     end
 
     subgraph Agora["Agora 声网提供"]
@@ -55,7 +60,8 @@ graph TB
     S5 -->|"调用"| E2
 
     style Customer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000
-    style Sentino fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#000
+    style SentinoIoT fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#000
+    style SentinoAgent fill:#FFF8E1,stroke:#F9A825,stroke-width:2px,color:#000
     style Agora fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#000
     style External fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
 ```
@@ -71,7 +77,7 @@ graph TB
     Device["IoT 智能硬件<br/>玩偶 / 故事机 / 机器人 / 音箱"]
     App["配网 App<br/>（手机）"]
     NFC["NFC 角色卡片"]
-    Cloud["Sentino 云平台<br/>设备管理 · 智能体管理 · 配网服务"]
+    Cloud["Sentino IoT 平台<br/>设备管理 · 智能体管理 · 配网服务"]
     SentinoAgent["Sentino Agent 平台<br/>LLM 调度 · TTS 调度 · 工作流编排"]
     AgoraAI["Agora 对话式 AI 引擎<br/>AI Agent 管理 · 语音识别"]
     AgoraRTC["Agora SD-RTN™<br/>全球实时音频网络"]
@@ -99,7 +105,7 @@ graph TB
 ```
 
 **设备有两条通信链路：**
-- **MQTT（信令通道）**：设备 ↔ Sentino 云平台，用于设备认证、状态上报、获取语音通道参数
+- **MQTT（信令通道）**：设备 ↔ Sentino IoT 平台，用于设备认证、状态上报、获取语音通道参数
 - **Agora RTC（音频通道）**：设备 ↔ Agora 音频网络，用于实时语音对话
 
 ---
@@ -109,7 +115,7 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant Device as IoT 设备
-    participant Cloud as Sentino 云平台
+    participant Cloud as Sentino IoT 平台
     participant Agora as Agora 声网
     participant SA as Sentino Agent 平台
 

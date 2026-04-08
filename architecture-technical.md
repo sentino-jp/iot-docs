@@ -41,7 +41,7 @@ graph TB
         RESTAPI --- AgentMgmt
     end
 
-    subgraph Sentino Agent 平台["Sentino Agent 平台 后端（Sentino 生态）"]
+    subgraph SentinoAgent["Sentino Agent 平台"]
         DFCtrl["Agent Controller<br/>Agent 生命周期管理"]
         DFExec["Workflow Executor<br/>工作流编排 · Function Calling"]
         DFProvider["LLM / TTS Provider<br/>多模型适配"]
@@ -87,7 +87,7 @@ graph TB
     style DeviceLayer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
     style AppLayer fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
     style SentinoCloud fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
-    style Sentino Agent 平台 fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
+    style SentinoAgent fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
     style AgoraPlatform fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
     style ExternalAI fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
 ```
@@ -100,7 +100,7 @@ graph TB
 sequenceDiagram
     participant User as 用户
     participant Device as IoT 设备
-    participant Cloud as Sentino 云平台
+    participant Cloud as Sentino IoT 平台
     participant ConvoAI as Agora AI 引擎
     participant RTN as SD-RTN™
     participant SA as Sentino Agent 平台
@@ -157,7 +157,7 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | **接入终端** | 嵌入式硬件（玩偶、音箱等） | Web 浏览器 |
 | **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
 | **信令通道** | MQTT 5.0 | HTTPS REST API |
-| **Agent 创建方** | Sentino IoT 云平台 | Sentino Agent 平台 后端 |
+| **Agent 创建方** | Sentino IoT 云平台 | Sentino Agent 平台 |
 | **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
 | **工作流能力** | 标准对话模式 | 支持 Function Calling、记忆检索、工作流编排 |
 | **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业级 AI Agent 应用（客服、会议助手） |
@@ -187,11 +187,11 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 
 | 通道 | 协议 | 用途 | 何时使用 |
 |------|------|------|----------|
-| 设备 ↔ Sentino 云 | **MQTT 5.0** | 设备认证、绑定、状态上报、指令下发、获取 RTC 参数 | 设备上电后始终保持 |
+| 设备 ↔ Sentino IoT 平台 | **MQTT 5.0** | 设备认证、绑定、状态上报、指令下发、获取 RTC 参数 | 设备上电后始终保持 |
 | App ↔ 设备 | **BLE**（GATT） | 首次配网传递绑定信息（WiFi 凭证或 userId） | 仅首次配网 |
-| App ↔ Sentino 云 | **HTTPS**（REST API） | 用户登录、设备管理、智能体管理 | App 运行时 |
+| App ↔ Sentino IoT 平台 | **HTTPS**（REST API） | 用户登录、设备管理、智能体管理 | App 运行时 |
 | 设备 ↔ Agora | **RTC**（UDP） | 实时双向音频传输 | 仅语音对话期间 |
-| Sentino 云 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
+| Sentino IoT 平台 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
 | Agora ↔ Sentino Agent 平台 | **HTTPS** + **HTTP Callback** + **SSE** | Agent 管理 + ASR 文本回调 + LLM/TTS 结果回传 | 语音对话期间 |
 | Sentino Agent 平台 ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
 
