@@ -12,6 +12,8 @@
 | **多角色 AI 智能体** | 为设备配置不同 AI 角色（故事大王、英语老师、陪伴伙伴等） | 一台设备，多种体验 |
 | **NFC 角色切换**（可选） | 放置实体 NFC 卡片即可切换 AI 角色 | 儿童友好，无需操作屏幕 |
 | **BLE 一键配网** | 手机 App 扫码 + 蓝牙自动完成设备绑定 | 开箱即用，无需技术背景 |
+| **工作流编排** | 支持 Function Calling、记忆检索、任务执行 | AI 不只是聊天，还能执行任务 |
+| **AI 设备控制** | 对话中通过语音指令控制设备硬件（LED、音量等） | 语音即控制，交互更自然 |
 | **OTA 远程升级** | 云端推送固件更新，设备自动升级 | 持续迭代，无需返厂 |
 | **多设备管理** | 一个账户下管理多台设备和角色 | 一个 App 管理全部设备 |
 
@@ -21,10 +23,10 @@
 
 ```mermaid
 graph TB
-    subgraph Customer["客户负责"]
-        C1["硬件制造<br/>（主控 + 麦克风 + 扬声器 + NFC 可选）"]
-        C2["固件集成 SDK<br/>（MQTT + Agora RTC）"]
-        C3["App 定制 UI<br/>（配网 + 角色管理界面）"]
+    subgraph Delivery["Sentino 全栈支持（按需选择）"]
+        C1["硬件开发<br/>（主控 + 麦克风 + 扬声器 + NFC 可选）"]
+        C2["固件开发<br/>（MQTT + Agora RTC SDK 集成）"]
+        C3["App 开发<br/>（配网 + 设备管理 + 角色管理）"]
     end
 
     subgraph SentinoIoT["Sentino IoT 平台"]
@@ -59,14 +61,14 @@ graph TB
     S5 -->|"调用"| E1
     S5 -->|"调用"| E2
 
-    style Customer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000
+    style Delivery fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#000
     style SentinoIoT fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#000
     style SentinoAgent fill:#FFF8E1,stroke:#F9A825,stroke-width:2px,color:#000
     style Agora fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#000
     style External fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
 ```
 
-> **核心价值**：客户只需关注硬件和 UI，设备接入、AI 对话、语音传输全部由平台处理。
+> **核心价值**：Sentino 提供从平台到硬件、App 的全栈支持，客户按需选择自研或委托，快速实现产品落地。
 
 ---
 
