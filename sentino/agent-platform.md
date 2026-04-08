@@ -1,4 +1,4 @@
-# Agora × DragonFlow (Sentino) 架构图
+# Agora × Sentino Agent 平台 (Sentino) 架构图
 
 ```mermaid
 graph TB
@@ -23,7 +23,7 @@ graph TB
         AgentBot["Agora AI Agent 实例<br/>(运行在 Agora 侧)"]
     end
 
-    subgraph Backend["DragonFlow 后端 (workflow-api)"]
+    subgraph Backend["Sentino Agent 平台 后端 (workflow-api)"]
         AgentCtrl["AgoraAgentController<br/>POST /api/agora/agent/start|stop"]
         AgentSvc["AgoraAgentService<br/>buildAgentConfig / startAgent"]
         MeetCtrl["MeetingController<br/>POST /api/meeting/chat"]
@@ -68,7 +68,7 @@ graph TB
     %% 实时转写
     RTM_SDK <-->|"RTM 消息<br/>(实时转写文本)"| SDR
 
-    %% Agora Agent → DragonFlow 后端 (LLM 回调)
+    %% Agora Agent → Sentino Agent 平台 后端 (LLM 回调)
     AgentBot -->|"HTTP Callback<br/>用户语音转文本"| AudioCtrl
     AgentBot -->|"HTTP Callback<br/>(会议模式)"| MeetCtrl
 
@@ -102,12 +102,12 @@ graph TB
 
 | 阶段 | 流程 |
 |------|------|
-| **1. 创建 Agent** | 前端 → DragonFlow 后端 → Agora ConvoAI API (`/join`) → Agent 实例加入 RTC 频道 |
+| **1. 创建 Agent** | 前端 → Sentino Agent 平台 后端 → Agora ConvoAI API (`/join`) → Agent 实例加入 RTC 频道 |
 | **2. 实时语音** | 用户麦克风 → RTC SDK → SD-RTN™ ↔ Agora Agent（双向音频流） |
-| **3. LLM 回调** | Agora Agent 将 ASR 文本通过 HTTP 回调发送到 DragonFlow 后端 (`/api/audio/chat`) |
-| **4. 工作流执行** | DragonFlow 后端执行 Agent 工作流：LLM 推理 → Function Calling → 记忆检索 |
+| **3. LLM 回调** | Agora Agent 将 ASR 文本通过 HTTP 回调发送到 Sentino Agent 平台 后端 (`/api/audio/chat`) |
+| **4. 工作流执行** | Sentino Agent 平台 后端执行 Agent 工作流：LLM 推理 → Function Calling → 记忆检索 |
 | **5. 响应回流** | LLM 流式文本 → Agora Agent → TTS 合成 → RTC 音频回传给用户 |
 | **6. 实时转写** | Agora Agent 通过 RTM 通道将 ASR/TTS 文本推送到前端（实时字幕） |
-| **7. 停止 Agent** | 前端 → DragonFlow 后端 → Agora ConvoAI API (`/leave`) → Agent 离开频道 |
+| **7. 停止 Agent** | 前端 → Sentino Agent 平台 后端 → Agora ConvoAI API (`/leave`) → Agent 离开频道 |
 
-**核心设计**: DragonFlow 不直接处理音频，而是将 LLM 推理能力作为 HTTP 回调服务暴露给 Agora Agent。Agora 负责所有音频传输、ASR 和 TTS，DragonFlow 负责 Agent 配置管理、工作流编排和 LLM 调用。
+**核心设计**: Sentino Agent 平台 不直接处理音频，而是将 LLM 推理能力作为 HTTP 回调服务暴露给 Agora Agent。Agora 负责所有音频传输、ASR 和 TTS，Sentino Agent 平台 负责 Agent 配置管理、工作流编排和 LLM 调用。

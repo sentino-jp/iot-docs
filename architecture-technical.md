@@ -41,7 +41,7 @@ graph TB
         RESTAPI --- AgentMgmt
     end
 
-    subgraph DragonFlow["DragonFlow 后端（Sentino 生态）"]
+    subgraph Sentino Agent 平台["Sentino Agent 平台 后端（Sentino 生态）"]
         DFCtrl["Agent Controller<br/>Agent 生命周期管理"]
         DFExec["Workflow Executor<br/>工作流编排 · Function Calling"]
         DFProvider["LLM / TTS Provider<br/>多模型适配"]
@@ -76,7 +76,7 @@ graph TB
     AgentInst -->|"API 调用"| LLM
     AgentInst -->|"API 调用"| TTS
 
-    %% DragonFlow 路径
+    %% Sentino Agent 平台 路径
     DFCtrl -->|"HTTPS<br/>创建/停止 Agent"| ConvoAI
     AgentInst -->|"HTTP Callback<br/>ASR 文本回调"| DFExec
     DFProvider -->|"SSE Streaming<br/>LLM 推理结果"| AgentInst
@@ -85,7 +85,7 @@ graph TB
     style DeviceLayer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
     style AppLayer fill:#E3F2FD,stroke:#1565C0,stroke-width:1px
     style SentinoCloud fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
-    style DragonFlow fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
+    style Sentino Agent 平台 fill:#FFF8E1,stroke:#F9A825,stroke-width:2px
     style AgoraPlatform fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
     style ExternalAI fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
 ```
@@ -151,19 +151,19 @@ sequenceDiagram
 
 Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conversational AI Engine 和 SD-RTN：
 
-| 对比项 | IoT 设备路径 | DragonFlow Web 路径 |
+| 对比项 | IoT 设备路径 | Sentino Agent 平台 Web 路径 |
 |--------|-------------|-------------------|
 | **接入终端** | 嵌入式硬件（玩偶、音箱等） | Web 浏览器 |
 | **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
 | **信令通道** | MQTT 5.0 | HTTPS REST API |
-| **Agent 创建方** | Sentino IoT 云平台 | DragonFlow 后端 |
-| **LLM 调用方** | Agora AI Agent 直接调用（全托管） | DragonFlow 后端通过 HTTP Callback 自行调用（自编排） |
+| **Agent 创建方** | Sentino IoT 云平台 | Sentino Agent 平台 后端 |
+| **LLM 调用方** | Agora AI Agent 直接调用（全托管） | Sentino Agent 平台 后端通过 HTTP Callback 自行调用（自编排） |
 | **工作流能力** | 固定对话模式 | 支持 Function Calling、记忆检索、工作流编排 |
 | **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业级 AI Agent 应用（客服、会议助手） |
 
 **架构差异核心**：
 - **IoT 路径**：设备极简，Agora 全托管 ASR + LLM + TTS，Sentino 云只负责 Agent 生命周期
-- **DragonFlow 路径**：Agora 负责音频传输和 ASR/TTS，LLM 推理回调到 DragonFlow 后端，支持复杂工作流编排
+- **Sentino Agent 平台 路径**：Agora 负责音频传输和 ASR/TTS，LLM 推理回调到 Sentino Agent 平台 后端，支持复杂工作流编排
 
 ---
 
@@ -189,9 +189,9 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | App ↔ Sentino 云 | **HTTPS**（REST API） | 用户登录、设备管理、智能体管理 | App 运行时 |
 | 设备 ↔ Agora | **RTC**（UDP） | 实时双向音频传输 | 仅语音对话期间 |
 | Sentino 云 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
-| DragonFlow ↔ Agora | **HTTPS** + **HTTP Callback** | Agent 管理 + LLM 推理回调 | DragonFlow 路径使用时 |
+| Sentino Agent 平台 ↔ Agora | **HTTPS** + **HTTP Callback** | Agent 管理 + LLM 推理回调 | Sentino Agent 平台 路径使用时 |
 | Agora ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
 
 ---
 
-**相关文档**：[方案概览（销售版）](./architecture-overview.md) | [架构与概念](./architecture.md) | [DragonFlow 架构](./sentino/dragonflow.md)
+**相关文档**：[方案概览（销售版）](./architecture-overview.md) | [架构与概念](./architecture.md) | [Sentino Agent 平台架构](./sentino/agent-platform.md)
