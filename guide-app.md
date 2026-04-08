@@ -316,7 +316,7 @@ App 与设备之间的 BLE 数据传输使用 Rlink BLE V1 协议：
 sequenceDiagram
     participant App as 配网 App
     participant Device as IoT 设备
-    participant Cloud as Sentino 云端
+    participant Cloud as Sentino IoT 平台
 
     App->>Cloud: 登录获取 Token
     App->>Cloud: 获取账户 ID（assetId）

@@ -13,7 +13,7 @@ AI 语音对话涉及三个系统的协作：
 ```mermaid
 graph LR
     Device["IoT 设备"]
-    Cloud["Sentino 云端"]
+    Cloud["Sentino IoT 平台"]
     Agora["Agora RTC"]
 
     Device -->|"1. MQTT: 请求 AI 接入"| Cloud
@@ -158,7 +158,7 @@ static void on_audio_data(const char *channel, uint32_t uid,
 agora_rtc_leave_channel();
 ```
 
-**设备无需发送额外的 MQTT 消息**。Sentino 云端会自动检测到设备离开 RTC 频道，并清理 AI 会话资源。
+**设备无需发送额外的 MQTT 消息**。Sentino IoT 平台会自动检测到设备离开 RTC 频道，并清理 AI 会话资源。
 
 ---
 
@@ -265,7 +265,7 @@ flowchart TD
 sequenceDiagram
     participant User as 用户
     participant Device as IoT 设备
-    participant Cloud as Sentino 云端
+    participant Cloud as Sentino IoT 平台
     participant Agora as Agora RTC
 
     Note over User, Agora: 前提：设备已连接 MQTT 并完成绑定

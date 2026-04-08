@@ -25,7 +25,7 @@ Sentino IoT 是一个**面向 AI 语音交互设备**的物联网平台。它解
 graph LR
     App["配网 App<br/>(手机)"]
     Device["IoT 设备<br/>(玩偶/音箱/机器人)"]
-    Cloud["Sentino 云端"]
+    Cloud["Sentino IoT 平台"]
     MQTT["MQTT Broker"]
     Agent["AI Agent<br/>管理"]
     Agora["Agora RTC"]
@@ -45,7 +45,7 @@ graph LR
 |---|---|---|
 | **IoT 设备** | 连接 MQTT、接收 BLE 配网信息、通过 MQTT 获取 RTC 参数、集成 Agora SDK 进行语音通话 | 不直接调 REST API，不自行生成 Token |
 | **配网 App** | BLE 扫描设备、从云端获取绑定信息、通过 BLE 写入设备、管理智能体 | 不参与语音通话 |
-| **Sentino 云端** | 管理 MQTT Broker、管理设备生命周期、管理 AI Agent、生成 RTC 鉴权参数 | — |
+| **Sentino IoT 平台** | 管理 MQTT Broker、管理设备生命周期、管理 AI Agent、生成 RTC 鉴权参数 | — |
 | **Agora RTC** | 提供设备与 AI Agent 之间的低延迟实时音频通道 | 不处理业务逻辑 |
 
 ### 通信协议总览
@@ -179,7 +179,7 @@ graph LR
 ```mermaid
 graph LR
     Device["IoT 设备"]
-    Cloud["Sentino 云端"]
+    Cloud["Sentino IoT 平台"]
 
     Device -->|"report<br/>(上报事件)"| Cloud
     Cloud -->|"report_response<br/>(回复上报)"| Device
@@ -206,7 +206,7 @@ AI 语音对话的核心流程分为两步：**获取通道** 和 **实时通话
 sequenceDiagram
     participant User as 用户
     participant Device as IoT 设备
-    participant Cloud as Sentino 云端
+    participant Cloud as Sentino IoT 平台
     participant Agora as Agora RTC
 
     User->>Device: 触发对话（按键/NFC）

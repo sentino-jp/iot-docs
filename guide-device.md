@@ -124,7 +124,7 @@ password = 894972927a0a6d1a22a89883b9fe187a891a5b5dec4afa374034b703f2455bdd
 sequenceDiagram
     participant App as 配网 App
     participant Device as IoT 设备
-    participant Cloud as Sentino 云端
+    participant Cloud as Sentino IoT 平台
 
     App->>Device: BLE: thing.network.set（userId, 账户 ID）
     Device-->>App: BLE: thing.network.set.response
