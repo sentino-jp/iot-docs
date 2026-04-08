@@ -161,7 +161,7 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
 | **工作流能力** | 支持 Function Calling、记忆检索、工作流编排 | 支持 Function Calling、记忆检索、工作流编排 |
 | **IoT 独有能力** | **设备控制** — Function Calling 经 RTC 通道下发指令控制硬件（表情、动作、LED、音量等） | — |
-| **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业级 AI Agent 应用（客服、会议助手） |
+| **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业与消费级 AI Agent 应用（客服、会议助手、智能助理等） |
 
 **架构共同点**：两条路径共享同一套 Sentino Agent 平台工作流引擎，均支持 Function Calling、记忆检索和工作流编排。Agora 负责音频传输和 ASR，Sentino Agent 平台负责 LLM 推理和 TTS 语音合成。Agora 不直接调用 LLM 和 TTS。
 
