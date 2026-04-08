@@ -72,14 +72,16 @@ graph TB
     DevRTC <-->|"Agora RTC（UDP）<br/>实时语音流"| SDRTN
     AgentMgmt -->|"HTTPS<br/>创建/停止 Agent"| ConvoAI
 
-    %% IoT 路径：Agora 全托管 LLM+TTS
-    AgentInst -->|"API 调用"| LLM
-    AgentInst -->|"API 调用"| TTS
-
-    %% Sentino Agent 平台 路径
-    DFCtrl -->|"HTTPS<br/>创建/停止 Agent"| ConvoAI
+    %% Agora Agent 回调 Sentino Agent 平台
     AgentInst -->|"HTTP Callback<br/>ASR 文本回调"| DFExec
     DFProvider -->|"SSE Streaming<br/>LLM 推理结果"| AgentInst
+
+    %% Sentino Agent 平台调度外部 AI 服务
+    DFProvider -->|"API 调用"| LLM
+    DFProvider -->|"API 调用"| TTS
+
+    %% Sentino Agent 平台也可独立创建 Agent
+    DFCtrl -->|"HTTPS<br/>创建/停止 Agent"| ConvoAI
 
     %% 样式
     style DeviceLayer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
@@ -101,10 +103,9 @@ sequenceDiagram
     participant Cloud as Sentino 云平台
     participant ConvoAI as Agora AI 引擎
     participant RTN as SD-RTN™
-    participant LLM as LLM 大模型
-    participant TTS as TTS 语音合成
+    participant SA as Sentino Agent 平台
 
-    Note over User, TTS: 前提：设备已完成配网绑定，MQTT 在线，已绑定 AI 智能体
+    Note over User, SA: 前提：设备已完成配网绑定，MQTT 在线，已绑定 AI 智能体
 
     rect rgb(227, 242, 253)
     Note over User, ConvoAI: 会话建立
@@ -120,15 +121,15 @@ sequenceDiagram
     end
 
     rect rgb(232, 245, 233)
-    Note over User, TTS: 实时语音对话（循环）
+    Note over User, SA: 实时语音对话（循环）
     User->>Device: 说话
     Device->>RTN: 发送音频流（OPUS · 16kHz · mono）
     RTN->>ConvoAI: 转发音频给 AI Agent
     ConvoAI->>ConvoAI: ASR 语音识别
-    ConvoAI->>LLM: 发送文本 + 对话上下文
-    LLM-->>ConvoAI: 返回 AI 回复文本
-    ConvoAI->>TTS: 文本转语音
-    TTS-->>ConvoAI: 返回语音流
+    ConvoAI->>SA: HTTP Callback: 发送识别文本 + 对话上下文
+    SA->>SA: LLM 推理（调用大模型）
+    SA->>SA: TTS 语音合成
+    SA-->>ConvoAI: SSE Streaming: 返回 AI 回复语音
     ConvoAI->>RTN: 发送 AI 语音
     RTN-->>Device: 转发 AI 语音
     Device->>User: 扬声器播放 AI 回复
@@ -157,13 +158,15 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
 | **信令通道** | MQTT 5.0 | HTTPS REST API |
 | **Agent 创建方** | Sentino IoT 云平台 | Sentino Agent 平台 后端 |
-| **LLM 调用方** | Agora AI Agent 直接调用（全托管） | Sentino Agent 平台 后端通过 HTTP Callback 自行调用（自编排） |
-| **工作流能力** | 固定对话模式 | 支持 Function Calling、记忆检索、工作流编排 |
+| **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
+| **工作流能力** | 标准对话模式 | 支持 Function Calling、记忆检索、工作流编排 |
 | **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业级 AI Agent 应用（客服、会议助手） |
 
-**架构差异核心**：
-- **IoT 路径**：设备极简，Agora 全托管 ASR + LLM + TTS，Sentino 云只负责 Agent 生命周期
-- **Sentino Agent 平台 路径**：Agora 负责音频传输和 ASR/TTS，LLM 推理回调到 Sentino Agent 平台 后端，支持复杂工作流编排
+**架构共同点**：两条路径均由 Agora 负责音频传输和 ASR，Sentino Agent 平台负责 LLM 推理和 TTS 语音合成。Agora 不直接调用 LLM 和 TTS。
+
+**路径差异**：
+- **IoT 路径**：设备极简，通过 MQTT 信令触发，标准对话模式
+- **Web 路径**：通过 HTTPS 触发，支持 Function Calling、记忆检索等复杂工作流编排
 
 ---
 
@@ -172,7 +175,7 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | 决策 | 说明 |
 |------|------|
 | **MQTT 只做信令** | MQTT 负责设备认证、状态上报、获取 RTC 参数，不承载音频流。音频走 Agora RTC（UDP），延迟更低 |
-| **Agora 纯传输层** | Agora 提供实时音频网络和 AI Agent 运行时，不处理设备管理等业务逻辑 |
+| **Agora 负责音频传输和 ASR** | Agora 提供实时音频网络、AI Agent 运行时和语音识别，LLM 和 TTS 通过 HTTP Callback 回调 Sentino Agent 平台处理 |
 | **设备端极简** | 设备只需：(1) 发一条 MQTT 消息 (2) 用返回的参数加入 RTC 频道。AI 配置、Agent 创建、会话清理全部在云端 |
 | **AI Agent 先于设备就绪** | Sentino 云先在 Agora 创建 Agent，Agent 加入频道等待，然后才通知设备加入。保证设备进来就能对话 |
 | **自动清理** | 设备只需离开 RTC 频道，云端自动检测并清理 Agent 和会话资源，无需设备发额外消息 |
@@ -189,8 +192,8 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | App ↔ Sentino 云 | **HTTPS**（REST API） | 用户登录、设备管理、智能体管理 | App 运行时 |
 | 设备 ↔ Agora | **RTC**（UDP） | 实时双向音频传输 | 仅语音对话期间 |
 | Sentino 云 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
-| Sentino Agent 平台 ↔ Agora | **HTTPS** + **HTTP Callback** | Agent 管理 + LLM 推理回调 | Sentino Agent 平台 路径使用时 |
-| Agora ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
+| Agora ↔ Sentino Agent 平台 | **HTTPS** + **HTTP Callback** + **SSE** | Agent 管理 + ASR 文本回调 + LLM/TTS 结果回传 | 语音对话期间 |
+| Sentino Agent 平台 ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
 
 ---
 

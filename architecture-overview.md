@@ -32,6 +32,7 @@ graph TB
         S2["配网绑定服务<br/>BLE 协议 + 设备生命周期"]
         S3["AI 智能体管理<br/>角色配置 + NFC 映射 + 会话编排"]
         S4["运维支撑<br/>OTA 升级 + 状态监控"]
+        S5["AI 推理与语音合成调度<br/>LLM 调度 + TTS 调度 + 工作流"]
     end
 
     subgraph Agora["Agora 声网提供"]
@@ -49,8 +50,9 @@ graph TB
     C3 -.->|"调用"| S2
     S3 -->|"创建 AI Agent"| A2
     A2 --> A1
-    A2 -->|"调用"| E1
-    A2 -->|"调用"| E2
+    A2 -->|"回调"| S5
+    S5 -->|"调用"| E1
+    S5 -->|"调用"| E2
 
     style Customer fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000
     style Sentino fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px,color:#000
@@ -70,6 +72,7 @@ graph TB
     App["配网 App<br/>（手机）"]
     NFC["NFC 角色卡片"]
     Cloud["Sentino 云平台<br/>设备管理 · 智能体管理 · 配网服务"]
+    SentinoAgent["Sentino Agent 平台<br/>LLM 调度 · TTS 调度 · 工作流编排"]
     AgoraAI["Agora 对话式 AI 引擎<br/>AI Agent 管理 · 语音识别"]
     AgoraRTC["Agora SD-RTN™<br/>全球实时音频网络"]
     LLM["大语言模型<br/>（GPT / DeepSeek 等）"]
@@ -82,11 +85,13 @@ graph TB
     Device <-->|"Agora RTC<br/>实时语音流"| AgoraRTC
     Cloud -->|"HTTPS<br/>创建/停止 AI Agent"| AgoraAI
     AgoraAI <--> AgoraRTC
-    AgoraAI -->|"API"| LLM
-    AgoraAI -->|"API"| TTS
+    AgoraAI <-->|"HTTP Callback"| SentinoAgent
+    SentinoAgent -->|"API"| LLM
+    SentinoAgent -->|"API"| TTS
 
     style Device fill:#1565C0,stroke:#0D47A1,color:#fff,stroke-width:2px
     style Cloud fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
+    style SentinoAgent fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
     style AgoraAI fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
     style AgoraRTC fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
     style LLM fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
@@ -106,7 +111,7 @@ sequenceDiagram
     participant Device as IoT 设备
     participant Cloud as Sentino 云平台
     participant Agora as Agora 声网
-    participant AI as AI 服务（LLM + TTS）
+    participant SA as Sentino Agent 平台
 
     Device->>Cloud: 用户按键，设备发送 MQTT 请求
     Cloud->>Cloud: 查询设备绑定的 AI 角色配置
@@ -117,10 +122,11 @@ sequenceDiagram
     Device->>Agora: 加入语音频道
 
     rect rgb(232, 245, 233)
-    Note over Device, AI: 实时语音对话
+    Note over Device, SA: 实时语音对话
     Device->>Agora: 用户说话 → 发送音频
-    Agora->>AI: 语音识别 + AI 推理 + 语音合成
-    AI-->>Agora: AI 回复语音
+    Agora->>SA: 语音识别文本回调
+    SA->>SA: LLM 推理 + TTS 语音合成
+    SA-->>Agora: AI 回复语音
     Agora-->>Device: 播放 AI 回复
     end
 
@@ -131,7 +137,7 @@ sequenceDiagram
 
 **要点**：
 - 设备只需做两件事：发 MQTT 请求 + 加入语音频道
-- 所有 AI 推理、语音识别、语音合成全部在云端完成
+- Agora 负责音频传输和语音识别，Sentino Agent 平台负责 LLM 推理和 TTS 语音合成
 - 对话结束后云端自动清理，无需设备额外操作
 
 ---
