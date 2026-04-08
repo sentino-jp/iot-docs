@@ -25,7 +25,7 @@
 |---|---|---|
 | [架构与概念](./architecture.md) | 整体架构、核心概念、联网模式、术语表 | 已完成 |
 | [快速入门 — 设备端](./quickstart-device.md) | 10 分钟跑通 MQTT 连接并验证 AI 语音接入 | 已完成 |
-| [快速入门 — App 端](./quickstart-app.md) | curl 跑通登录 → 资产树 → 设备绑定的完整链路 | 已完成 |
+| [快速入门 — App 端](./quickstart-app.md) | curl 跑通登录 → 获取账户 ID → 设备绑定的完整链路 | 已完成 |
 
 ### 集成指南
 

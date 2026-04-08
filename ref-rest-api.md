@@ -202,7 +202,7 @@ POST /business-app/v1/distributionNet/dataEncrypt
 | `pw` | string | WiFi 密码 |
 | `mq` | string | MQTT Broker 地址 |
 | `mqttSslPort` | string | MQTT SSL 端口，默认 `"8883"` |
-| `bid` | string | 资产 ID（assetId） |
+| `bid` | string | 账户 ID（assetId） |
 | `port` | int | MQTT 端口，默认 `1883` |
 | `country` | string | 国家代码：`CN` / `US` / `JP` / `EP` / `AU` |
 | `userID` | string | 用户 ID |
@@ -315,9 +315,9 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindRe
 
 ## 5. 设备管理接口
 
-### 5.1 获取资产树
+### 5.1 获取账户 ID
 
-获取用户的家庭房间树结构，返回 assetId。
+获取用户账户结构，返回 assetId（账户 ID）。
 
 ```
 POST /business-app/v1/asset/assetTree
@@ -444,7 +444,7 @@ POST /business-app/v1/device/getHomeDeviceAndGroupList
 
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `assetIds` | string[] | 是 | 资产 ID 数组 |
+| `assetIds` | string[] | 是 | 账户 ID 数组 |
 
 **curl 示例**：
 
@@ -701,7 +701,7 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agen
 | 3 | 配网数据加密 | `POST /business-app/v1/distributionNet/dataEncrypt` | 加密配网数据 |
 | 4 | 获取数据中心列表 | `POST /business-app/v1/common/getDataCenterList` | 查询数据中心 |
 | 5 | 绑定状态查询 | `POST /business-app/v1/device/bind/checkBindResult/{uuid}` | 轮询配网结果 |
-| 6 | 获取资产树 | `POST /business-app/v1/asset/assetTree` | 获取家庭/房间结构 |
+| 6 | 获取账户 ID | `POST /business-app/v1/asset/assetTree` | 获取用户账户 ID |
 | 7 | 获取设备信息 | `POST /business-app/v1/device/getSimpleDeviceInfo` | 查询设备状态 |
 | 8 | 获取产品品类 | `POST /business-app/v1/category/top` | 品类列表（可选） |
 | 9 | 获取设备列表 | `POST /business-app/v1/device/getHomeDeviceAndGroupList` | 用户全部设备 |

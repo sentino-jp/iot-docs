@@ -116,7 +116,7 @@ password = 894972927a0a6d1a22a89883b9fe187a891a5b5dec4afa374034b703f2455bdd
 
 ## 3. 设备绑定 (`bind`)
 
-设备首次使用时，需要通过 BLE 从配网 App 获取 `userId` 和 `assetId`，然后通过 MQTT 完成绑定。
+设备首次使用时，需要通过 BLE 从配网 App 获取 `userId` 和账户 ID (`assetId`)，然后通过 MQTT 完成绑定。
 
 ### 3.1 绑定流程
 
@@ -126,7 +126,7 @@ sequenceDiagram
     participant Device as IoT 设备
     participant Cloud as Sentino 云端
 
-    App->>Device: BLE: thing.network.set（userId, assetId）
+    App->>Device: BLE: thing.network.set（userId, 账户 ID）
     Device-->>App: BLE: thing.network.set.response
     Device->>Cloud: MQTT report: bind
     Cloud-->>Device: MQTT report_response: bind（res=0 成功）
@@ -153,7 +153,7 @@ sequenceDiagram
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `userId` | string | 是 | 用户 ID，由 App 通过 BLE 传入 |
-| `assetId` | string | 是 | 资产 ID，由 App 通过 BLE 传入（BLE 消息中的 `bid` 字段） |
+| `assetId` | string | 是 | 账户 ID，由 App 通过 BLE 传入（BLE 消息中的 `bid` 字段） |
 | `version` | string | 是 | 固件版本号 |
 | `mcuVersion` | string | 否 | MCU 版本号 |
 | `cleanData` | boolean | 否 | 是否清除数据，默认 `false` |

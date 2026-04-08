@@ -107,19 +107,13 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 一台设备通过"绑定智能体"来确定它使用哪个 AI 角色进行对话。
 
-### 3.5 资产 (Asset)
+### 3.5 账户与设备归属
 
-**资产**是 Sentino 中设备归属的管理单元，采用树形结构：
+每个用户在 Sentino 中拥有一个**账户**，设备绑定时关联到该账户下。
 
-```
-我的家 (assetId: ...)
-├── 客厅 (assetId: ...)
-│   └── 小熊玩偶 (deviceId: ...)
-└── 卧室 (assetId: ...)
-    └── 故事机 (deviceId: ...)
-```
+设备绑定时需要指定一个 `assetId`（账户 ID），表示该设备属于哪个用户。这个信息由配网 App 从云端获取后通过 BLE 传给设备。
 
-设备绑定时需要指定一个 `assetId`，表示该设备属于哪个"家庭/空间"。这个信息由配网 App 从云端获取后通过 BLE 传给设备。
+> **开发者提示**：调用 `POST /business-app/v1/asset/assetTree` 获取账户结构后，直接使用根节点的 `assetId` 作为绑定参数即可。API 字段名为历史原因保留为 `assetId`，在 AI 玩偶场景中等同于用户账户 ID。
 
 ---
 
@@ -143,7 +137,7 @@ graph TD
 | 对比项 | WiFi 模式 | 4G 模式 |
 |---|---|---|
 | 设备联网方式 | 连接用户家中的 WiFi 路由器 | 通过内置 SIM 卡直连蜂窝网络 |
-| BLE 配网传递的内容 | WiFi SSID + 密码 + userId + assetId + MQTT 地址 | 仅 userId + assetId |
+| BLE 配网传递的内容 | WiFi SSID + 密码 + userId + 账户 ID (assetId) + MQTT 地址 | 仅 userId + 账户 ID (assetId) |
 | 设备何时能连 MQTT | 收到 WiFi 信息、连上 WiFi 之后 | **上电即可连接**（无需等待配网） |
 | 适用场景 | 固定场所使用（家、教室） | 移动场景或无 WiFi 环境 |
 | 网络依赖 | 依赖用户的路由器 | 依赖运营商信号 |
@@ -172,7 +166,7 @@ graph LR
 |---|---|---|
 | **出厂** | 工厂 | 将三元组 (UUID/KEY/MAC) 烧录到 NVS，Barcode 印刷到外壳 |
 | **首次上电** | 设备自动 | 从 NVS 读取三元组 → 计算 HMAC 签名 → 连接 MQTT Broker → 订阅 Topic |
-| **配网绑定** | 用户 + App | App 扫码 → 获取 userId/assetId → BLE 传给设备 → 设备 MQTT 上报 `bind` |
+| **配网绑定** | 用户 + App | App 扫码 → 获取 userId/账户 ID → BLE 传给设备 → 设备 MQTT 上报 `bind` |
 | **日常使用** | 用户 + 设备 | 用户触发对话 → 设备 MQTT 上报 `agora_agent_device_access` → 获取 RTC 参数 → 加入 Agora 频道 → 实时语音 |
 | **维护** | 远程 | OTA 固件升级、设备重置、解绑 |
 
@@ -246,7 +240,7 @@ sequenceDiagram
 | NVS | Non-Volatile Storage | 非易失性存储，断电后数据保留的存储区域 |
 | 物模型 | Thing Model / TSL | 设备能力的结构化描述（属性、事件） |
 | 智能体 | Agent | AI 角色配置（人设、声音、行为） |
-| 资产 | Asset | 设备归属的管理单元（家庭/空间），树形结构 |
+| 账户 ID (assetId) | Asset ID | 设备归属标识，绑定时指定设备属于哪个用户账户 |
 | 配网 | Provisioning | 首次使用时为设备配置网络和绑定信息的过程 |
 | 产品 | Product | 同一型号设备的集合，共享 pid、物模型、配网模式 |
 | pid | Product ID | 产品唯一标识，Sentino 分配 |

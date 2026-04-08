@@ -1,6 +1,6 @@
 # 快速入门 — App 端
 
-本文档帮助你在 **10 分钟内**用 curl 跑通 App 端核心链路：登录 → 获取资产树 → 查询设备信息 → 绑定智能体。
+本文档帮助你在 **10 分钟内**用 curl 跑通 App 端核心链路：登录 → 获取账户 ID → 查询设备信息 → 绑定智能体。
 
 > **前置知识**：建议先阅读 [架构与概念](./architecture.md) 了解整体架构。
 
@@ -67,9 +67,9 @@ echo "Token: $TOKEN"
 
 ---
 
-## 第 2 步：获取资产树
+## 第 2 步：获取账户 ID
 
-资产树是设备归属的管理结构（家庭 → 房间）。绑定设备时需要指定 `assetId`。
+绑定设备时需要指定 `assetId`（账户 ID）。调用以下接口获取，直接使用根节点的 `assetId`。
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
@@ -101,7 +101,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
 }
 ```
 
-记下根节点的 `assetId`，后续配网绑定时需要使用。
+记下根节点的 `assetId`（账户 ID），后续配网绑定时需要使用。
 
 ---
 
@@ -256,9 +256,9 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-a
 - `access_token` 有效期为 7200 秒（2 小时）
 - 过期后使用 `refresh_token` 刷新，或重新登录
 
-### 资产树为空
+### 账户 ID 为空
 
-- 如果返回为空，请确认登录是否成功，并检查是否已在 Sentino 后台配置资产树
+- 如果返回为空，请确认登录是否成功，并检查是否已在 Sentino 后台配置账户
 
 ---
 

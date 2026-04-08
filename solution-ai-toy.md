@@ -94,8 +94,8 @@ sequenceDiagram
     User->>App: 打开 App，点击"添加设备"
     App->>Toy: BLE 扫描发现玩偶
     User->>App: 扫描玩偶底部条码
-    App->>Cloud: 发送条码，获取 userId + assetId
-    Cloud-->>App: 返回 userId + assetId
+    App->>Cloud: 发送条码，获取 userId + 账户 ID
+    Cloud-->>App: 返回 userId + 账户 ID
     User->>App: 选择家中 WiFi，输入密码
     App->>Cloud: 请求配网数据加密
     Cloud-->>App: 返回加密后的配网数据
@@ -122,9 +122,9 @@ sequenceDiagram
     Toy->>Cloud: 上电后自动 MQTT 连接（4G）
     User->>App: 打开 App，点击"添加设备"
     User->>App: 扫描玩偶底部条码
-    App->>Cloud: 发送条码，获取 userId + assetId
-    Cloud-->>App: 返回 userId + assetId
-    App->>Toy: BLE 发送绑定信息（仅 userId + assetId）
+    App->>Cloud: 发送条码，获取 userId + 账户 ID
+    Cloud-->>App: 返回 userId + 账户 ID
+    App->>Toy: BLE 发送绑定信息（仅 userId + 账户 ID）
     Toy->>Cloud: MQTT 上报 bind
     Cloud-->>Toy: 绑定成功
 ```
