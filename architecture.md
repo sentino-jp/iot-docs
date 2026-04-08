@@ -229,7 +229,7 @@ sequenceDiagram
 - **Agora RTC 承载实时低延迟音频**
 - **AI Agent 已在频道内等待**，设备加入即可开始对话
 - **结束时设备只需离开频道**，云端自动检测并清理，无需额外 MQTT 消息
-- **工作流与设备控制** — AI 对话支持完整的工作流编排（Function Calling、记忆检索），IoT 设备还可通过 Function Calling 经 RTC 通道下发指令实现硬件控制（如调节音量、控制 LED）
+- **工作流与设备控制** — AI 对话支持完整的工作流编排（Function Calling、记忆检索），IoT 设备还可通过 Function Calling 经 RTC 通道下发指令实现硬件控制（如表情、动作、LED、音量）
 
 ---
 
