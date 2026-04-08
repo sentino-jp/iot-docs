@@ -30,7 +30,7 @@ graph TB
 
     NFC["NFC 角色卡片"]
 
-    subgraph SentinoCloud["Sentino IoT 云平台"]
+    subgraph SentinoCloud["Sentino IoT 平台"]
         MQTTBroker["MQTT Broker<br/>设备认证 · 消息路由"]
         DevMgmt["设备生命周期管理<br/>配网绑定 · 在线状态 · OTA"]
         AgentMgmt["AI 智能体管理<br/>角色配置 · NFC 映射 · 会话编排"]
@@ -157,7 +157,7 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 | **接入终端** | 嵌入式硬件（玩偶、音箱等） | Web 浏览器 |
 | **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
 | **信令通道** | MQTT 5.0 | HTTPS REST API |
-| **Agent 创建方** | Sentino IoT 云平台 | Sentino Agent 平台 |
+| **Agent 创建方** | Sentino IoT 平台 | Sentino Agent 平台 |
 | **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
 | **工作流能力** | 标准对话模式 | 支持 Function Calling、记忆检索、工作流编排 |
 | **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业级 AI Agent 应用（客服、会议助手） |
