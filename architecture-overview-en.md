@@ -48,8 +48,8 @@ graph TB
     end
 
     subgraph External["Choose as Needed"]
-        E1["Large Language Models (LLM)<br/>(GPT / DeepSeek / Qwen, etc.)"]
-        E2["Text-to-Speech (TTS)<br/>(MiniMax / ElevenLabs, etc.)"]
+        E1["Large Language Models (LLM)<br/>(Claude / ChatGPT / Gemini, etc.)"]
+        E2["Text-to-Speech (TTS)<br/>(ElevenLabs / MiniMax, etc.)"]
     end
 
     C1 -.->|"Integrate"| C2
@@ -83,8 +83,8 @@ graph TB
     SentinoAgent["Sentino Agent Platform<br/>LLM Scheduling · TTS Scheduling · Workflow Orchestration"]
     AgoraAI["Agora Conversational AI Engine<br/>AI Agent Mgmt · Speech Recognition"]
     AgoraRTC["Agora SD-RTN™<br/>Global Real-Time Audio Network"]
-    LLM["Large Language Models<br/>(GPT / DeepSeek, etc.)"]
-    TTS["Text-to-Speech<br/>(MiniMax, etc.)"]
+    LLM["Large Language Models<br/>(Claude / ChatGPT / Gemini, etc.)"]
+    TTS["Text-to-Speech<br/>(ElevenLabs / MiniMax, etc.)"]
 
     NFC -.-|"Tap to switch character"| Device
     App <-->|"BLE Bluetooth (first-time provisioning only)"| Device
@@ -155,7 +155,7 @@ sequenceDiagram
 | Document | Target Reader | Content |
 |----------|---------------|---------|
 | [Technical Architecture Deep Dive](./architecture-technical-en.md) | Technical Evaluators | Complete system architecture, detailed data flows, protocol specifications |
-| [Architecture & Concepts](./architecture.md) | Developers | Core concepts, communication models, glossary |
-| [AI Toy Integration Solution](./solution-ai-toy.md) | Product Managers | User journey, NFC design, mass production readiness |
-| [Device Integration Guide](./guide-device.md) | Firmware Engineers | MQTT protocol integration |
-| [AI Voice Conversation Integration](./guide-ai-voice.md) | Firmware Engineers | Agora RTC integration |
+| [Architecture & Concepts](./architecture-en.md) | Developers | Core concepts, communication models, glossary |
+| [AI Toy Integration Solution](./solution-ai-toy-en.md) | Product Managers | User journey, NFC design, mass production readiness |
+| [Device Integration Guide](./guide-device-en.md) | Firmware Engineers | MQTT protocol integration |
+| [AI Voice Conversation Integration](./guide-ai-voice-en.md) | Firmware Engineers | Agora RTC integration |

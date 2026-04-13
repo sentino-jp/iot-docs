@@ -60,8 +60,8 @@ graph TB
     end
 
     subgraph ExternalAI["External AI Services"]
-        LLM["Large Language Models (LLM)<br/>GPT · DeepSeek · Qwen"]
-        TTS["Text-to-Speech (TTS)<br/>MiniMax · ElevenLabs"]
+        LLM["Large Language Models (LLM)<br/>Claude · ChatGPT · Gemini"]
+        TTS["Text-to-Speech (TTS)<br/>ElevenLabs · MiniMax"]
     end
 
     %% IoT path
@@ -198,4 +198,4 @@ The Sentino ecosystem offers two paths to integrate Agora voice AI, sharing the 
 
 ---
 
-**Related Documents**: [Solution Overview](./architecture-overview-en.md) | [Architecture & Concepts](./architecture.md) | [Sentino Agent Platform Architecture](./sentino/agent-platform.md)
+**Related Documents**: [Solution Overview](./architecture-overview-en.md) | [Architecture & Concepts](./architecture-en.md) | [Sentino Agent Platform Architecture](./sentino/agent-platform-en.md)

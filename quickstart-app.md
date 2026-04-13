@@ -29,10 +29,19 @@ Sentino 使用 UID 方式登录 — 如果 UID 不存在则自动注册。
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "app_id: krfjnsim9vs7yd" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "app_id: krfjnsim9vs7yd" \
+  -H "channel_identifier: gk6853gq" \
+  -H "package_name: com.yiyuan" \
+  -H "encrypt_type: AES/ECB/PKCS5Padding" \
+  -H "timezone: Asia/Shanghai" \
+  -H "language: zh_CN" \
+  -H "data_center_code: cn" \
   -d "grant_type=uid&uid=test_user_001&password=test123456&area_code=86&user_country_key=CN" | jq .
 ```
+
+> **注意**：登录接口也需要携带公共请求头（`client_id`、`channel_identifier` 等），否则签发的 Token 将无法通过后续业务接口的验证。
 
 **预期响应**：
 
@@ -41,10 +50,12 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
   "code": 200,
   "message": "success",
   "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "access_token": "6ea8368a-127c-4203-b7e8-83fbeb9d0239",
     "token_type": "bearer",
-    "expires_in": 7200,
-    "refresh_token": "..."
+    "expires_in": 2591999,
+    "refresh_token": "...",
+    "userId": "cn2042488223219761152",
+    "username": "test_user_001"
   }
 }
 ```
@@ -53,13 +64,20 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 
 ```bash
 # 提取 access_token 并保存为变量
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
 # 或者用 jq 自动提取
 TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "app_id: krfjnsim9vs7yd" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "app_id: krfjnsim9vs7yd" \
+  -H "channel_identifier: gk6853gq" \
+  -H "package_name: com.yiyuan" \
+  -H "encrypt_type: AES/ECB/PKCS5Padding" \
+  -H "timezone: Asia/Shanghai" \
+  -H "language: zh_CN" \
+  -H "data_center_code: cn" \
   -d "grant_type=uid&uid=test_user_001&password=test123456&area_code=86&user_country_key=CN" | jq -r '.data.access_token')
 
 echo "Token: $TOKEN"
@@ -87,21 +105,22 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
 {
   "code": 200,
   "message": "success",
-  "data": {
-    "assetId": "1983052957022670848",
-    "assetName": "我的家",
-    "children": [
-      {
-        "assetId": "1983052957022670849",
-        "assetName": "客厅",
-        "children": []
-      }
-    ]
-  }
+  "data": [
+    {
+      "id": "2042488223647580161",
+      "parentId": "0",
+      "name": "My Home",
+      "childrens": [],
+      "sortNumber": 999,
+      "isLock": false,
+      "memberRole": 1,
+      "isShare": false
+    }
+  ]
 }
 ```
 
-记下根节点的 `assetId`（账户 ID），后续配网绑定时需要使用。
+记下根节点的 `id`（账户 ID，即 assetId），后续配网绑定时需要使用。注意响应 `data` 为数组格式，字段名为 `id`（非 `assetId`）。
 
 ---
 

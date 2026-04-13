@@ -48,10 +48,19 @@ POST /auth/oauth/token
 ```bash
 curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "app_id: krfjnsim9vs7yd" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "app_id: krfjnsim9vs7yd" \
+  -H "channel_identifier: gk6853gq" \
+  -H "package_name: com.yiyuan" \
+  -H "encrypt_type: AES/ECB/PKCS5Padding" \
+  -H "timezone: Asia/Shanghai" \
+  -H "language: zh_CN" \
+  -H "data_center_code: cn" \
   -d "grant_type=uid&uid=YOUR_UID&password=YOUR_PASSWORD&area_code=86&user_country_key=CN"
 ```
+
+> **注意**：登录接口也需要携带公共请求头，否则签发的 Token 将无法通过后续业务接口的验证。
 
 **响应**：
 
@@ -59,10 +68,12 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
 {
   "code": 200,
   "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "access_token": "6ea8368a-127c-4203-b7e8-83fbeb9d0239",
     "token_type": "bearer",
-    "expires_in": 7200,
-    "refresh_token": "..."
+    "expires_in": 2591999,
+    "refresh_token": "...",
+    "userId": "cn2042488223219761152",
+    "username": "test_user_001"
   }
 }
 ```
@@ -75,11 +86,11 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
 Authorization: Bearer {access_token}
 ```
 
-Token 有效期 7200 秒（2 小时），过期后使用 `refresh_token` 刷新。
+Token 有效期约 30 天（`expires_in` 秒），过期后使用 `refresh_token` 刷新。
 
 ### 2.4 公共请求头
 
-所有业务接口（除登录外）需要携带以下公共请求头：
+所有接口（包括登录）需要携带以下公共请求头：
 
 | Header | 值 | 说明 |
 |---|---|---|
