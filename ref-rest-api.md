@@ -1,6 +1,6 @@
 # REST API 参考
 
-> **TL;DR**：Sentino IoT 平台 REST API 完整参考。涵盖认证、配网、设备管理、智能体管理共 14 个接口，每个接口附带 curl 示例。
+> **TL;DR**：Sentino IoT 平台 REST API 完整参考。涵盖认证、配网、设备管理、智能体管理共 22 个接口，每个接口附带 curl 示例。
 
 ---
 
@@ -29,7 +29,7 @@ Authorization: Bearer {access_token}
 
 ### 2.3 公共请求头
 
-所有业务接口需携带以下请求头：
+所有接口（包括登录）需携带以下请求头：
 
 | Header | 值 | 必填 |
 |---|---|---|
@@ -39,7 +39,7 @@ Authorization: Bearer {access_token}
 | `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` | 是 |
 | `encrypt_type` | `AES/ECB/PKCS5Padding` | 是 |
 | `channel_identifier` | `gk6853gq` | 是 |
-| `package_name` | `com.yiyuan` | 是 |
+| `package_name` | `com.kingstar.lululand` | 是 |
 | `app_id` | `krfjnsim9vs7yd` | 是 |
 
 ### 2.4 公共响应格式
@@ -69,8 +69,10 @@ POST /auth/oauth/token
 | Header | 值 |
 |---|---|
 | Content-Type | `application/x-www-form-urlencoded` |
-| app_id | `krfjnsim9vs7yd` |
 | Authorization | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
+| 公共请求头 | 需携带 2.3 节中的所有公共请求头（`client_id`、`app_id` 等） |
+
+> **注意**：登录接口也需要携带公共请求头，否则签发的 Token 将无法通过后续业务接口的验证。
 
 **Query 参数**：
 
@@ -96,8 +98,15 @@ POST /auth/oauth/token
 ```bash
 curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "app_id: krfjnsim9vs7yd" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "app_id: krfjnsim9vs7yd" \
+  -H "channel_identifier: gk6853gq" \
+  -H "package_name: com.kingstar.lululand" \
+  -H "encrypt_type: AES/ECB/PKCS5Padding" \
+  -H "timezone: Asia/Shanghai" \
+  -H "language: zh_CN" \
+  -H "data_center_code: cn" \
   -d "grant_type=uid&uid=test_user_001&password=test123456&area_code=86&user_country_key=CN"
 ```
 
@@ -108,10 +117,15 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
   "code": 200,
   "message": "success",
   "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "access_token": "6ea8368a-127c-4203-b7e8-83fbeb9d0239",
     "token_type": "bearer",
-    "expires_in": 7200,
-    "refresh_token": "..."
+    "expires_in": 2591999,
+    "refresh_token": "...",
+    "userId": "cn2042488223219761152",
+    "memberId": "cn2042488223219761152",
+    "tenantId": "1955088720032829440",
+    "nickname": "z3dwog17",
+    "username": "test_user_001"
   }
 }
 ```
@@ -284,7 +298,7 @@ POST /business-app/v1/device/bind/checkBindResult/{uuid}
 
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `uuid` | string | 是 | 设备 UUID |
+| `uuid` | string | 是 | 设备 UUID（三元组中的 UUID，通过扫描设备条码获取） |
 
 **curl 示例**：
 
@@ -340,19 +354,22 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
 ```json
 {
   "code": 200,
-  "data": {
-    "assetId": "1983052957022670848",
-    "assetName": "我的家",
-    "children": [
-      {
-        "assetId": "1983052957022670849",
-        "assetName": "客厅",
-        "children": []
-      }
-    ]
-  }
+  "data": [
+    {
+      "id": "2042488223647580161",
+      "parentId": "0",
+      "name": "My Home",
+      "childrens": [],
+      "sortNumber": 999,
+      "isLock": false,
+      "memberRole": 1,
+      "isShare": false
+    }
+  ]
 }
 ```
+
+> **注意**：响应 `data` 为数组格式，使用 `id` 和 `name` 字段（非 `assetId` / `assetName`），子节点字段为 `childrens`。配网时使用根节点的 `id` 作为 `assetId`。
 
 ---
 
@@ -642,7 +659,245 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/detail?agentId=1
 
 ---
 
-### 6.3 绑定智能体到设备
+### 6.3 获取自定义智能体列表
+
+获取用户自定义的智能体模板列表。
+
+```
+POST /business-app/v1/agents/customize/agents-list
+```
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/agents-list" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d "{}"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "agentId": "2000436153759151101",
+      "name": "樱木花道",
+      "avatar": "https://...",
+      "description": "我是樱木花道，热爱篮球的少年",
+      "langId": "1947925380891516929",
+      "llmModelId": "1980896877851869185",
+      "ttsVoiceId": "1947925380891516931"
+    }
+  ]
+}
+```
+
+---
+
+### 6.4 创建自定义智能体
+
+创建自定义智能体模板。
+
+```
+POST /business-app/v1/agents/customize/create
+```
+
+**Body 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `name` | string | 是 | 智能体名称 |
+| `description` | string | 是 | 智能体描述（角色设定） |
+| `avatarUrl` | string | 是 | 头像 URL |
+| `llmModelId` | string | 是 | 大模型 ID |
+| `ttsVoiceId` | string | 是 | TTS 音色 ID |
+| `langId` | string | 是 | 语言 ID |
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/create" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "name": "樱木花道",
+    "description": "我是樱木花道，热爱篮球的少年",
+    "avatarUrl": "https://example.com/avatar.jpg",
+    "llmModelId": "1980896877851869185",
+    "ttsVoiceId": "1947925380891516931",
+    "langId": "1947925380891516929"
+  }'
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": true
+}
+```
+
+---
+
+### 6.5 删除自定义智能体
+
+删除指定的自定义智能体模板。
+
+```
+POST /business-app/v1/agents/customize/deleteById
+```
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `agentId` | string | 是 | 智能体 ID |
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/deleteById?agentId=2000436153759151101" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": true
+}
+```
+
+---
+
+### 6.6 获取推荐 Sentino 智能体列表
+
+获取官方推荐的 Sentino 智能体模板列表。Sentino 智能体模板定义了智能体关联的 Sentino 角色。
+
+```
+POST /business-app/v1/sentino-agents/recommend/agents-list
+```
+
+**请求头**（除公共请求头外）：
+
+| Header | 值 | 必填 |
+|---|---|---|
+| `client_id` | 应用 client_id | 是 |
+| `app_id` | 应用 app_id | 是 |
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/recommend/agents-list" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
+  -H "app_id: krfjnsim9vs7yd" \
+  -d "{}"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "agentId": "2000436153759152123",
+      "avatar": "https://...",
+      "name": "Sentino 助手",
+      "description": "Sentino 智能体角色",
+      "tags": ["Sentino"]
+    }
+  ]
+}
+```
+
+---
+
+### 6.7 获取 Sentino 智能体详情
+
+获取指定 Sentino 智能体模板的详细信息。
+
+```
+POST /business-app/v1/sentino-agents/detail
+```
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `agentId` | string | 是 | 智能体 ID |
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/detail?agentId=2000436153759152123" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "agentId": "2000436153759152123",
+    "avatar": "https://...",
+    "name": "Sentino 助手",
+    "description": "Sentino 智能体角色",
+    "tags": ["Sentino"]
+  }
+}
+```
+
+---
+
+### 6.8 获取用户已绑定智能体列表
+
+获取当前用户已绑定的智能体列表。
+
+```
+POST /business-app/v1/user-agents/list
+```
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/user-agents/list" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "agentId": "1980570366486159361",
+      "avatar": "https://...",
+      "name": "小助手",
+      "description": "我是你的智能助手",
+      "tags": ["助手"]
+    }
+  ]
+}
+```
+
+---
+
+### 6.9 绑定智能体到设备
 
 将设备绑定到指定的智能体模板。
 
@@ -655,7 +910,7 @@ POST /business-app/v1/agents/device/bind-agent
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `agentId` | string | 是 | 智能体 ID |
-| `agentType` | string | 是 | `official`=官方, `customize`=自定义 |
+| `agentType` | string | 是 | `official`=官方, `customize`=自定义, `sentino`=Sentino 智能体 |
 | `deviceId` | string | 是 | 设备 ID |
 
 **curl 示例**：
@@ -665,6 +920,77 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agen
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"agentId": "1980570366486159361", "agentType": "official", "deviceId": "2008424975449309184"}'
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": true
+}
+```
+
+---
+
+### 6.10 NFC 卡片列表
+
+读取底座设备上已绑定的 NFC 卡片列表。
+
+```
+POST /business-app/v1/agents/nfc/list
+```
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/list" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d "{}"
+```
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "nfcUuid": "1111111111",
+      "agentId": "1947925380891516929",
+      "agentType": "official"
+    }
+  ]
+}
+```
+
+---
+
+### 6.11 NFC 卡片绑定智能体
+
+将 NFC 卡片绑定到指定的智能体模板。
+
+```
+POST /business-app/v1/agents/nfc/bind-agent
+```
+
+**Body 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `nfcUuid` | string | 是 | NFC 卡片 UUID |
+| `agentId` | string | 是 | 智能体 ID |
+| `agentType` | string | 是 | `official`=官方, `customize`=自定义 |
+
+**curl 示例**：
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"nfcUuid": "1111111111", "agentId": "1947925380891516929", "agentType": "official"}'
 ```
 
 **响应**：
@@ -709,7 +1035,15 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agen
 | 11 | 设备解绑 | `POST /business-app/v1/device/bind/unbind` | 解绑设备 |
 | 12 | 推荐智能体列表 | `POST /business-app/v1/agents/recommend/agents-list` | 官方 AI 角色 |
 | 13 | 智能体详情 | `POST /business-app/v1/agents/detail` | 角色详细配置 |
-| 14 | 绑定智能体 | `POST /business-app/v1/agents/device/bind-agent` | 绑定 AI 角色到设备 |
+| 14 | 自定义智能体列表 | `POST /business-app/v1/agents/customize/agents-list` | 用户自定义角色 |
+| 15 | 创建自定义智能体 | `POST /business-app/v1/agents/customize/create` | 创建自定义角色 |
+| 16 | 删除自定义智能体 | `POST /business-app/v1/agents/customize/deleteById` | 删除自定义角色 |
+| 17 | Sentino 智能体列表 | `POST /business-app/v1/sentino-agents/recommend/agents-list` | Sentino 角色 |
+| 18 | Sentino 智能体详情 | `POST /business-app/v1/sentino-agents/detail` | Sentino 角色配置 |
+| 19 | 已绑定智能体列表 | `POST /business-app/v1/user-agents/list` | 用户已绑定角色 |
+| 20 | 绑定智能体 | `POST /business-app/v1/agents/device/bind-agent` | 绑定 AI 角色到设备 |
+| 21 | NFC 卡片列表 | `POST /business-app/v1/agents/nfc/list` | 底座 NFC 卡片 |
+| 22 | NFC 卡片绑定智能体 | `POST /business-app/v1/agents/nfc/bind-agent` | NFC 绑定角色 |
 
 ---
 

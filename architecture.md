@@ -88,13 +88,56 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 例如，"小熊玩偶 V2"是一个产品，这个产品下可能有 10000 台设备，每台设备有各自的三元组。
 
-### 3.3 物模型 (Thing Model)
+### 3.3 应用 (App)
+
+**应用**是 App 端（手机 App 或 Web App）接入 Sentino 平台时的身份标识。以下配置从 Sentino IoT 平台的**「App 开发」管理页面**获取：
+
+| 配置项 | 用途 | 示例 |
+|--------|------|------|
+| `app_id` | 业务层应用标识，所有 REST API 请求头必带 | `krfjnsim9vs7yd` |
+| 渠道标识符 (`channel_identifier`) | 标识 App 的发布渠道 | `gk6853gq` |
+| `package_name` | App 包名（iOS / Android） | `com.yiyuan` |
+| 数据中心 (`data_center_code`) | 服务器区域 | `cn` |
+| OAuth2 `client_id` / `client_secret` | HTTP Basic Auth 认证 | 获取方式待沟通 |
+
+> **注意**：`app_id` 和 `PID` 是不同层级的标识。`app_id` 标识客户端应用，`PID` 标识产品型号。一个 App 可以管理多个产品下的设备，设备固件不需要知道 `app_id`。
+
+### 3.4 身份体系总览
+
+```
+Sentino IoT 平台
+│
+├── 应用 (App) ─── REST API 身份，仅 App 端使用
+│   ├── app_id             ← 「App 开发」页面获取
+│   ├── client_id/secret   ← OAuth2 认证
+│   └── channel_identifier
+│
+├── 产品 (Product) ─── 设备型号，同型号共享
+│   ├── PID                ← 「产品管理」页面获取
+│   ├── 三元组分配
+│   └── 物模型 / 配网模式 / OTA 通道
+│       │
+│       └── 设备 (Device) × N ─── 每台唯一
+│           ├── UUID        ← 「产品管理」页面获取，烧录到 NVS
+│           ├── KEY         ← MQTT HMAC 签名密钥
+│           └── MAC
+│
+└── 用户 (User) ─── App 登录产生
+    ├── userId              ← 登录 API 返回
+    └── assetId             ← 资产树 API 返回，设备绑定到此节点
+```
+
+- **App 端**用 `app_id` + `client_id` 调 REST API（用户登录、设备绑定）
+- **设备端**用 `UUID` + `KEY` 连 MQTT broker，`PID` 用于 Topic 路径
+- **配网绑定**：App 把 `userId` + `assetId` 通过 BLE 传给设备 → 设备 MQTT 上报 `bind` → 云端关联
+
+### 3.5 物模型 (Thing Model)
 
 **物模型**是设备能力的结构化描述，定义了设备有哪些**属性**（properties），类似于数据库的 Schema。
 
 设备通过 MQTT 上报属性值（如 `{"color": "red", "brightness": 50}`），云端也可以通过 MQTT 下发属性设置指令。物模型的具体定义在 Sentino 后台配置。
 
-### 3.4 智能体 (Agent)
+### 3.6 智能体 (Agent)
 
 **智能体**是 AI 角色的配置单元，定义了 AI 在语音对话中的行为：
 

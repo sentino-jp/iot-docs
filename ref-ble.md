@@ -15,7 +15,8 @@
 │  128 字节分包 / CRC 校验                 │
 ├─────────────────────────────────────────┤
 │  GATT 层                                │
-│  Service UUID: 0xA101 / Notify + Write  │
+│  Service: 0x1910 / Write: 0x2B11        │
+│  Notify: 0x2B10                         │
 ├─────────────────────────────────────────┤
 │  BLE 物理层                             │
 │  GATT Profile                           │
@@ -27,6 +28,8 @@
 ## 2. BLE 广播
 
 设备进入配网模式后启动 BLE 广播，App 通过广播数据发现和识别设备。
+
+> **空间限制**：BLE 4.x Legacy Advertising 的广播包 (ADV Data) 和扫描应答包 (Scan Response) 各有 **31 字节**上限（Bluetooth Core Spec Vol 6, Part B, §2.3.1: Legacy ADV PDU 总长 37B，减去 6B header = 31B 有效数据）。BLE 5.0 Extended Advertising 可达 254 字节，但 Web Bluetooth API 和大部分手机默认使用 Legacy 模式扫描。设计广播数据时注意 PID 字符串长度会直接影响广播包总大小。
 
 ### 2.1 广播数据
 
@@ -129,6 +132,23 @@
 | bit4 | `0x10` | 通用固件 | 非通用固件 |
 | bit1 | `0x02` | 使用聚合协议 | 不使用 |
 | bit0 | `0x01` | 请求连接 | 未请求连接 |
+
+---
+
+## 3. GATT 服务
+
+> **注意**：广播中的 Service UUID (`0xA101`) 仅用于设备发现和扫描过滤。实际 GATT 数据通信使用不同的 Service 和 Characteristic UUID。
+
+| 项目 | UUID | 说明 |
+|---|---|---|
+| GATT Service | `0x1910` | 数据传输服务 |
+| Write Characteristic | `0x2B11` | App → 设备（write / write-without-response） |
+| Notify Characteristic | `0x2B10` | 设备 → App（notify / indicate） |
+
+App 连接设备后需要：
+1. 发现 Service `0x1910`
+2. 获取 Write Characteristic `0x2B11`（用于发送数据）
+3. 启用 Notify Characteristic `0x2B10` 的通知（用于接收数据）
 
 ---
 
