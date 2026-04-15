@@ -88,13 +88,56 @@ A **Product** is a collection of devices of the same model, identified by a **Pr
 
 For example, "Bear Doll V2" is a product. This product might have 10,000 devices, each with its own triplet.
 
-### 3.3 Thing Model
+### 3.3 App
+
+An **App** is the identity for a client application (mobile or web) connecting to the Sentino platform. The following configurations are obtained from the **"App Development" management page** on the Sentino IoT platform:
+
+| Configuration | Purpose | Example |
+|---------------|---------|---------|
+| `app_id` | Application identifier, required in all REST API headers | `krfjnsim9vs7yd` |
+| Channel identifier (`channel_identifier`) | Identifies the App's distribution channel | `gk6853gq` |
+| `package_name` | App package name (iOS / Android) | `jp.sentino.general` |
+| Data center (`data_center_code`) | Server region | `cn` |
+| OAuth2 `client_id` / `client_secret` | HTTP Basic Auth authentication | TBD |
+
+> **Note**: `app_id` and `PID` are identifiers at different levels. `app_id` identifies the client application, while `PID` identifies the product model. A single App can manage devices across multiple products. Device firmware does not need to know the `app_id`.
+
+### 3.4 Identity Hierarchy
+
+```
+Sentino IoT Platform
+│
+├── App ─── REST API identity, App-side only
+│   ├── app_id             ← from "App Development" page
+│   ├── client_id/secret   ← OAuth2 authentication
+│   └── channel_identifier
+│
+├── Product ─── Device model, shared across same model
+│   ├── PID                ← from "Product Management" page
+│   ├── Triplet allocation
+│   └── Thing Model / Provisioning mode / OTA channel
+│       │
+│       └── Device × N ─── Unique per device
+│           ├── UUID        ← from "Product Management" page, flashed to NVS
+│           ├── KEY         ← MQTT HMAC signing key
+│           └── MAC
+│
+└── User ─── Created on App login
+    ├── userId              ← returned by login API
+    └── assetId             ← returned by asset tree API, devices bind to this node
+```
+
+- **App side** uses `app_id` + `client_id` to call REST APIs (user login, device binding)
+- **Device side** uses `UUID` + `KEY` to connect to MQTT broker, `PID` for Topic path
+- **Provisioning binding**: App sends `userId` + `assetId` to device via BLE → device reports `bind` via MQTT → cloud associates them
+
+### 3.5 Thing Model
 
 The **Thing Model** is a structured description of device capabilities, defining what **properties** the device has, similar to a database schema.
 
 Devices report property values via MQTT (e.g., `{"color": "red", "brightness": 50}`), and the cloud can also send property-setting commands via MQTT. The Thing Model definition is configured in the Sentino backend.
 
-### 3.4 Agent
+### 3.6 Agent
 
 An **Agent** is the configuration unit for an AI character, defining the AI's behavior during voice conversations:
 
