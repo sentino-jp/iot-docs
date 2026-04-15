@@ -29,18 +29,30 @@ Authorization: Bearer {access_token}
 
 ### 2.3 公共请求头
 
-所有接口（包括登录）需携带以下请求头：
+所有接口（包括登录）需携带以下请求头。
 
-| Header | 值 | 必填 |
-|---|---|---|
-| `timezone` | `Asia/Shanghai` | 是 |
-| `language` | `zh_CN` | 是 |
-| `data_center_code` | `cn` | 是 |
-| `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` | 是 |
-| `encrypt_type` | `AES/ECB/PKCS5Padding` | 是 |
-| `channel_identifier` | `gk6853gq` | 是 |
-| `package_name` | `jp.sentino.general` | 是 |
-| `app_id` | `krfjnsim9vs7yd` | 是 |
+**由 Sentino 提供（每个客户应用不同）**：
+
+| Header | 说明 |
+|--------|------|
+| `app_id` | 应用标识 |
+| `channel_identifier` | 渠道标识 |
+| `package_name` | App 包名 |
+| `data_center_code` | 数据中心（按部署区域） |
+
+**固定值（直接复制）**：
+
+| Header | 值 |
+|--------|-----|
+| `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
+| `encrypt_type` | `AES/ECB/PKCS5Padding` |
+
+**客户端设置（按用户实际情况）**：
+
+| Header | 默认值 | 说明 |
+|--------|--------|------|
+| `timezone` | `Asia/Shanghai` | 用户时区 |
+| `language` | `zh_CN` | 用户语言 |
 
 ### 2.4 公共响应格式
 
@@ -1047,14 +1059,18 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" 
 
 ---
 
-## 附录：应用配置
+## 附录：应用配置示例
 
-| 配置项 | 值 |
-|---|---|
-| `app_id` | `krfjnsim9vs7yd` |
-| `package_name` | `jp.sentino.general` |
-| `channel_identifier` | `gk6853gq` |
-| `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
+以下为测试环境的配置值，正式接入时由 Sentino 提供。
+
+| 配置项 | 值 | 说明 |
+|---|---|---|
+| `app_id` | `krfjnsim9vs7yd` | 由 Sentino 提供 |
+| `package_name` | `jp.sentino.general` | 由 Sentino 提供 |
+| `channel_identifier` | `gk6853gq` | 由 Sentino 提供 |
+| `data_center_code` | `cn` | 由 Sentino 提供 |
+| `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` | 固定值 |
+| `encrypt_type` | `AES/ECB/PKCS5Padding` | 固定值 |
 
 ---
 
