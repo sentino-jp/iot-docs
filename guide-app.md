@@ -52,7 +52,7 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "app_id: krfjnsim9vs7yd" \
   -H "channel_identifier: gk6853gq" \
-  -H "package_name: com.yiyuan" \
+  -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
   -H "language: zh_CN" \
@@ -100,7 +100,7 @@ Token 有效期约 30 天（`expires_in` 秒），过期后使用 `refresh_token
 | `client_id` | `Y2V0dXMtaW90LWFwcDpv...` | 客户端标识 |
 | `encrypt_type` | `AES/ECB/PKCS5Padding` | 加密类型 |
 | `channel_identifier` | `gk6853gq` | 渠道标识 |
-| `package_name` | `com.yiyuan` | 包名 |
+| `package_name` | `jp.sentino.general` | 包名 |
 | `app_id` | `krfjnsim9vs7yd` | 应用 ID |
 
 ---

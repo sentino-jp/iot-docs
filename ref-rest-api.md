@@ -39,7 +39,7 @@ Authorization: Bearer {access_token}
 | `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` | 是 |
 | `encrypt_type` | `AES/ECB/PKCS5Padding` | 是 |
 | `channel_identifier` | `gk6853gq` | 是 |
-| `package_name` | `com.kingstar.lululand` | 是 |
+| `package_name` | `jp.sentino.general` | 是 |
 | `app_id` | `krfjnsim9vs7yd` | 是 |
 
 ### 2.4 公共响应格式
@@ -102,7 +102,7 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "app_id: krfjnsim9vs7yd" \
   -H "channel_identifier: gk6853gq" \
-  -H "package_name: com.kingstar.lululand" \
+  -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
   -H "language: zh_CN" \
@@ -1052,7 +1052,7 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" 
 | 配置项 | 值 |
 |---|---|
 | `app_id` | `krfjnsim9vs7yd` |
-| `package_name` | `com.kingstar.lululand` |
+| `package_name` | `jp.sentino.general` |
 | `channel_identifier` | `gk6853gq` |
 | `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 

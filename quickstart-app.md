@@ -33,7 +33,7 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "app_id: krfjnsim9vs7yd" \
   -H "channel_identifier: gk6853gq" \
-  -H "package_name: com.yiyuan" \
+  -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
   -H "language: zh_CN" \
@@ -73,7 +73,7 @@ TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "app_id: krfjnsim9vs7yd" \
   -H "channel_identifier: gk6853gq" \
-  -H "package_name: com.yiyuan" \
+  -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
   -H "language: zh_CN" \
