@@ -335,7 +335,7 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindRe
 | `0` | 绑定成功 |
 | 其他 | 绑定未完成或失败 |
 
-**使用方式**：配网信息发送后，定时轮询（10s）。
+**使用方式**：配网信息发送后，每 10 秒轮询一次，最多 120 秒（12 次）。
 
 ---
 

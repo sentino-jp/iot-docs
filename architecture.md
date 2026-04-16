@@ -98,7 +98,6 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 | 渠道标识符 (`channel_identifier`) | 标识 App 的发布渠道 | `gk6853gq` |
 | `package_name` | App 包名（iOS / Android） | `jp.sentino.general` |
 | 数据中心 (`data_center_code`) | 服务器区域 | `cn` |
-| OAuth2 `client_id` / `client_secret` | HTTP Basic Auth 认证 | 获取方式待沟通 |
 
 > **注意**：`app_id` 和 `PID` 是不同层级的标识。`app_id` 标识客户端应用，`PID` 标识产品型号。一个 App 可以管理多个产品下的设备，设备固件不需要知道 `app_id`。
 

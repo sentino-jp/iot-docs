@@ -98,7 +98,6 @@ An **App** is the identity for a client application (mobile or web) connecting t
 | Channel identifier (`channel_identifier`) | Identifies the App's distribution channel | `gk6853gq` |
 | `package_name` | App package name (iOS / Android) | `jp.sentino.general` |
 | Data center (`data_center_code`) | Server region | `cn` |
-| OAuth2 `client_id` / `client_secret` | HTTP Basic Auth authentication | TBD |
 
 > **Note**: `app_id` and `PID` are identifiers at different levels. `app_id` identifies the client application, while `PID` identifies the product model. A single App can manage devices across multiple products. Device firmware does not need to know the `app_id`.
 
