@@ -31,7 +31,7 @@ Authorization: Bearer {access_token}
 
 所有接口（包括登录）需携带以下请求头。
 
-**由 Sentino 提供（每个客户应用不同）**：
+**由 Sentino 提供（每个客户应用不同，需联系 Sentino 获取）**：
 
 | Header | 说明 |
 |--------|------|
@@ -154,11 +154,13 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
 POST /business-app/v1/product/getByProductId
 ```
 
+> **productId 来源**：从设备 BLE 广播的 Service Data 中解析得到（PID 字段）。详见 [BLE 协议参考 §2.1 广播数据](./ref-ble.md#21-广播数据)。
+
 **Query 参数**：
 
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `productId` | string | 是 | 产品 ID |
+| `productId` | string | 是 | 产品 ID（即 BLE 广播中的 PID） |
 
 **curl 示例**：
 
