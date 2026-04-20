@@ -11,6 +11,45 @@
 | 基础 URL | `https://api-iot.sentino.jp` |
 | 认证方式 | Bearer Token（登录接口使用 Basic Auth） |
 
+### 1.1 环境变量准备
+
+本文档所有 curl 示例使用环境变量。运行示例前先导出以下变量（按你测试的环境填写）：
+
+```bash
+# 应用凭据（由 Sentino 提供，每个客户应用不同）
+export APP_ID="krfjnsim9vs7yd"
+export CHANNEL_IDENTIFIER="gk6853gq"
+export PACKAGE_NAME="jp.sentino.general"
+export DATA_CENTER_CODE="cn"
+
+# 固定值（直接复制）
+export CLIENT_ID="Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg=="
+export ENCRYPT_TYPE="AES/ECB/PKCS5Padding"
+
+# 客户端属性
+export TIMEZONE="Asia/Shanghai"
+export LANGUAGE="zh_CN"
+
+# 用户登录凭据（按需替换）
+export UID="test_user_001"
+export AREA_CODE="86"
+export USER_COUNTRY_KEY="CN"
+
+# 登录后获取（见 §3.1 用户登录）
+export TOKEN=""
+export USER_ID=""
+
+# 业务上下文（按测试设备/账户填写）
+export PRODUCT_ID="vqB8C7fniWRLWL"   # 当前 mock 设备 PID
+export UUID="ct01kQBXBK7h63H8"        # 当前 mock 设备 UUID
+export ASSET_ID=""                    # 通过 §5.1 获取
+export DEVICE_ID=""                   # 通过 §5.4 获取
+export AGENT_ID=""                    # 通过 §6.1 / §6.3 获取
+export NFC_UUID=""                    # 物理 NFC 卡片 UUID
+```
+
+> 后续所有 curl 示例假设上述变量已导出。切换数据中心或测试设备只改环境变量即可。
+
 ---
 
 ## 2. 认证
@@ -81,7 +120,7 @@ POST /auth/oauth/token
 | Header | 值 |
 |---|---|
 | Content-Type | `application/x-www-form-urlencoded` |
-| Authorization | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
+| Authorization | `Basic $CLIENT_ID` |
 | 公共请求头 | 需携带 2.3 节中的所有公共请求头（`client_id`、`app_id` 等） |
 
 > **注意**：登录接口也需要携带公共请求头，否则签发的 Token 将无法通过后续业务接口的验证。
@@ -108,18 +147,18 @@ POST /auth/oauth/token
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=$AREA_CODE&app_id=$APP_ID" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
-  -H "package_name: jp.sentino.general" \
-  -H "encrypt_type: AES/ECB/PKCS5Padding" \
-  -H "timezone: Asia/Shanghai" \
-  -H "language: zh_CN" \
-  -H "data_center_code: cn" \
-  -d "grant_type=uid&uid=test_user_001&password=test123456&area_code=86&user_country_key=CN"
+  -H "Authorization: Basic $CLIENT_ID" \
+  -H "client_id: $CLIENT_ID" \
+  -H "app_id: $APP_ID" \
+  -H "channel_identifier: $CHANNEL_IDENTIFIER" \
+  -H "package_name: $PACKAGE_NAME" \
+  -H "encrypt_type: $ENCRYPT_TYPE" \
+  -H "timezone: $TIMEZONE" \
+  -H "language: $LANGUAGE" \
+  -H "data_center_code: $DATA_CENTER_CODE" \
+  -d "grant_type=uid&uid=$UID&password=test123456&area_code=$AREA_CODE&user_country_key=$USER_COUNTRY_KEY"
 ```
 
 **响应**：
@@ -165,7 +204,7 @@ POST /business-app/v1/product/getByProductId
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=$PRODUCT_ID" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -243,12 +282,14 @@ POST /business-app/v1/distributionNet/dataEncrypt
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/distributionNet/dataEncrypt" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "content": "{\"sid\":\"MyWiFi\",\"pw\":\"password\",\"bid\":\"assetId\",\"userID\":\"userId\",\"mq\":\"mqtt-iot.sentino.jp\",\"port\":1883,\"country\":\"CN\",\"tz\":\"Asia/Shanghai\",\"force_bind\":true}",
-    "encryptType": 0,
-    "protocol": "1",
-    "type": "thing.network.set"
-  }'
+  -d @- <<EOF
+{
+  "content": "{\"sid\":\"MyWiFi\",\"pw\":\"password\",\"bid\":\"$ASSET_ID\",\"userID\":\"$USER_ID\",\"mq\":\"mqtt-iot.sentino.jp\",\"port\":1883,\"country\":\"$USER_COUNTRY_KEY\",\"tz\":\"$TIMEZONE\",\"force_bind\":true}",
+  "encryptType": 0,
+  "protocol": "1",
+  "type": "thing.network.set"
+}
+EOF
 ```
 
 **响应**：
@@ -317,7 +358,7 @@ POST /business-app/v1/device/bind/checkBindResult/{uuid}
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindResult/ct01wfjSNqGAqUUK" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindResult/$UUID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -357,9 +398,9 @@ POST /business-app/v1/asset/assetTree
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "timezone: Asia/Shanghai" \
-  -H "language: zh_CN" \
-  -H "data_center_code: cn" \
+  -H "timezone: $TIMEZONE" \
+  -H "language: $LANGUAGE" \
+  -H "data_center_code: $DATA_CENTER_CODE" \
   -d "{}"
 ```
 
@@ -408,7 +449,7 @@ POST /business-app/v1/device/getSimpleDeviceInfo
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}'
+  -d "{\"productId\": \"$PRODUCT_ID\", \"uuid\": \"$UUID\"}"
 ```
 
 **响应**：
@@ -483,7 +524,7 @@ POST /business-app/v1/device/getHomeDeviceAndGroupList
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/getHomeDeviceAndGroupList" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"assetIds": ["1983052957022670848"]}'
+  -d "{\"assetIds\": [\"$ASSET_ID\"]}"
 ```
 
 **响应**：
@@ -535,7 +576,7 @@ POST /business-app/v1/ota/checkUpgrade/{deviceId}/{firmwareType}
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/ota/checkUpgrade/2008424975449309184/module" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/ota/checkUpgrade/$DEVICE_ID/module" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -579,7 +620,7 @@ POST /business-app/v1/device/bind/unbind
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/unbind" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"deviceId": "2008424975449309184", "isCleanData": 1}'
+  -d "{\"deviceId\": \"$DEVICE_ID\", \"isCleanData\": 1}"
 ```
 
 **响应**：
@@ -649,7 +690,7 @@ POST /business-app/v1/agents/detail
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/detail?agentId=1980570366486159361" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/detail?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -775,7 +816,7 @@ POST /business-app/v1/agents/customize/deleteById
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/deleteById?agentId=2000436153759151101" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/deleteById?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -813,8 +854,8 @@ POST /business-app/v1/sentino-agents/recommend/agents-list
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
+  -H "client_id: $CLIENT_ID" \
+  -H "app_id: $APP_ID" \
   -d "{}"
 ```
 
@@ -854,7 +895,7 @@ POST /business-app/v1/sentino-agents/detail
 **curl 示例**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/detail?agentId=2000436153759152123" \
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/detail?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -933,7 +974,7 @@ POST /business-app/v1/agents/device/bind-agent
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"agentId": "1980570366486159361", "agentType": "official", "deviceId": "2008424975449309184"}'
+  -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"official\", \"deviceId\": \"$DEVICE_ID\"}"
 ```
 
 **响应**：
@@ -1004,7 +1045,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"nfcUuid": "1111111111", "agentId": "1947925380891516929", "agentType": "official"}'
+  -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"official\"}"
 ```
 
 **响应**：
@@ -1058,21 +1099,6 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" 
 | 20 | 绑定智能体 | `POST /business-app/v1/agents/device/bind-agent` | 绑定 AI 角色到设备 |
 | 21 | NFC 卡片列表 | `POST /business-app/v1/agents/nfc/list` | 底座 NFC 卡片 |
 | 22 | NFC 卡片绑定智能体 | `POST /business-app/v1/agents/nfc/bind-agent` | NFC 绑定角色 |
-
----
-
-## 附录：应用配置示例
-
-以下为测试环境的配置值，正式接入时由 Sentino 提供。
-
-| 配置项 | 值 | 说明 |
-|---|---|---|
-| `app_id` | `krfjnsim9vs7yd` | 由 Sentino 提供 |
-| `package_name` | `jp.sentino.general` | 由 Sentino 提供 |
-| `channel_identifier` | `gk6853gq` | 由 Sentino 提供 |
-| `data_center_code` | `cn` | 由 Sentino 提供 |
-| `client_id` | `Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` | 固定值 |
-| `encrypt_type` | `AES/ECB/PKCS5Padding` | 固定值 |
 
 ---
 
