@@ -2,7 +2,7 @@
 
 > **TL;DR**：本文档覆盖设备端 MQTT 接入的完整实现：鉴权连接、设备绑定、信息上报、属性管理、OTA 升级、断线重连。按本文档顺序实现即可完成设备端开发。
 
-> **前置知识**：建议先阅读 [架构与概念](./architecture.md)，协议字段细节请查阅 [MQTT 协议参考](./ref-mqtt.md)。
+> **前置知识**：建议先阅读 [架构与概念](../architecture.md)，协议字段细节请查阅 [MQTT 协议参考](../reference/ref-mqtt.md)。
 
 ---
 
@@ -331,7 +331,7 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 }
 ```
 
-云端回复包含时区和夏令时信息，具体字段见 [MQTT 协议参考](./ref-mqtt.md#32-获取云端时间-time)。
+云端回复包含时区和夏令时信息，具体字段见 [MQTT 协议参考](../reference/ref-mqtt.md#32-获取云端时间-time)。
 
 **时间计算方式**（三选一）：
 1. 使用 `ts` + `sys_tz` 计算
@@ -532,4 +532,4 @@ App 通过 BLE 发送 `thing.network.set` 消息：
 
 ---
 
-**相关文档**：[架构与概念](./architecture.md) | [快速入门](./quickstart-device.md) | [MQTT 协议参考](./ref-mqtt.md) | [AI 语音对话集成指南](./guide-ai-voice.md)
+**相关文档**：[架构与概念](../architecture.md) | [快速入门](../tutorials/quickstart-device.md) | [MQTT 协议参考](../reference/ref-mqtt.md) | [AI 语音对话集成指南](./guide-ai-voice.md)

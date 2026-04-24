@@ -2,7 +2,7 @@
 
 > **TL;DR**：本文档覆盖 App 端完整集成：用户登录、BLE 配网（WiFi / 4G 两种模式）、设备管理、智能体管理。按本文档流程实现即可完成 App 端开发。
 
-> **前置知识**：建议先阅读 [架构与概念](./architecture.md)，API 字段细节请查阅 [REST API 参考](./ref-rest-api.md)。
+> **前置知识**：建议先阅读 [架构与概念](../architecture.md)，API 字段细节请查阅 [REST API 参考](../reference/ref-rest-api.md)。
 
 ---
 
@@ -319,7 +319,7 @@ App 与设备之间的 BLE 数据传输使用 Rlink BLE V1 协议：
 | 包间延迟 | 10 ms |
 | 应用层格式 | JSON |
 
-大于 118 字节的 JSON 消息会被自动分包传输。详细的分包协议请参考 [BLE 协议参考](./ref-ble.md)。
+大于 118 字节的 JSON 消息会被自动分包传输。详细的分包协议请参考 [BLE 协议参考](../reference/ref-ble.md)。
 
 ### 3.5 配网时序总览
 
@@ -492,4 +492,4 @@ flowchart TD
 
 ---
 
-**相关文档**：[架构与概念](./architecture.md) | [BLE 协议参考](./ref-ble.md) | [REST API 参考](./ref-rest-api.md)
+**相关文档**：[架构与概念](../architecture.md) | [BLE 协议参考](../reference/ref-ble.md) | [REST API 参考](../reference/ref-rest-api.md)

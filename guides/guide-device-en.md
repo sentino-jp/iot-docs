@@ -2,7 +2,7 @@
 
 > **TL;DR**: This document covers the complete device-side MQTT integration: authentication, device binding, info reporting, property management, OTA updates, and disconnection recovery. Follow this document sequentially to complete device-side development.
 
-> **Prerequisites**: We recommend reading [Architecture & Concepts](./architecture-en.md) first. For protocol field details, refer to [MQTT Protocol Reference](./ref-mqtt.md).
+> **Prerequisites**: We recommend reading [Architecture & Concepts](../architecture-en.md) first. For protocol field details, refer to [MQTT Protocol Reference](../reference/ref-mqtt.md).
 
 ---
 
@@ -330,7 +330,7 @@ Recommended to sync cloud time after device power-up:
 }
 ```
 
-The cloud reply includes timezone and DST information. See [MQTT Protocol Reference](./ref-mqtt.md#32-获取云端时间-time) for specific fields.
+The cloud reply includes timezone and DST information. See [MQTT Protocol Reference](../reference/ref-mqtt.md#32-获取云端时间-time) for specific fields.
 
 **Time calculation methods** (choose one):
 1. Use `ts` + `sys_tz` to calculate
@@ -531,4 +531,4 @@ All command replies are sent to the `issue_response` Topic, format:
 
 ---
 
-**Related Documents**: [Architecture & Concepts](./architecture-en.md) | [Quick Start](./quickstart-device.md) | [MQTT Protocol Reference](./ref-mqtt.md) | [AI Voice Conversation Integration Guide](./guide-ai-voice-en.md)
+**Related Documents**: [Architecture & Concepts](../architecture-en.md) | [Quick Start](../tutorials/quickstart-device.md) | [MQTT Protocol Reference](../reference/ref-mqtt.md) | [AI Voice Conversation Integration Guide](./guide-ai-voice-en.md)

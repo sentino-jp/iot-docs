@@ -321,11 +321,11 @@ graph TD
 
 | 文档 | 角色 | 内容 |
 |---|---|---|
-| [架构与概念](./architecture.md) | 所有人 | 整体架构、核心概念 |
-| [快速入门 — 设备端](./quickstart-device.md) | 固件工程师 | 10 分钟验证 MQTT 连通性 |
-| [设备端集成指南](./guide-device.md) | 固件工程师 | MQTT 完整集成 |
-| [AI 语音对话集成指南](./guide-ai-voice.md) | 固件工程师 | Agora RTC 集成 |
-| [MQTT 协议参考](./ref-mqtt.md) | 固件工程师 | 协议字段查阅 |
+| [架构与概念](../architecture.md) | 所有人 | 整体架构、核心概念 |
+| [快速入门 — 设备端](../tutorials/quickstart-device.md) | 固件工程师 | 10 分钟验证 MQTT 连通性 |
+| [设备端集成指南](../guides/guide-device.md) | 固件工程师 | MQTT 完整集成 |
+| [AI 语音对话集成指南](../guides/guide-ai-voice.md) | 固件工程师 | Agora RTC 集成 |
+| [MQTT 协议参考](../reference/ref-mqtt.md) | 固件工程师 | 协议字段查阅 |
 
 ---
 
@@ -356,4 +356,4 @@ graph TD
 
 ---
 
-**相关文档**：[架构与概念](./architecture.md) | [设备端集成指南](./guide-device.md) | [AI 语音对话集成指南](./guide-ai-voice.md)
+**相关文档**：[架构与概念](../architecture.md) | [设备端集成指南](../guides/guide-device.md) | [AI 语音对话集成指南](../guides/guide-ai-voice.md)

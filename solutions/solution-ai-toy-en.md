@@ -321,11 +321,11 @@ graph TD
 
 | Document | Audience | Content |
 |---|---|---|
-| [Architecture & Concepts](./architecture-en.md) | Everyone | Overall architecture, core concepts |
-| [Quick Start — Device](./quickstart-device.md) | Firmware Engineers | Verify MQTT connectivity in 10 minutes |
-| [Device Integration Guide](./guide-device-en.md) | Firmware Engineers | Complete MQTT integration |
-| [AI Voice Conversation Integration Guide](./guide-ai-voice-en.md) | Firmware Engineers | Agora RTC integration |
-| [MQTT Protocol Reference](./ref-mqtt.md) | Firmware Engineers | Protocol field reference |
+| [Architecture & Concepts](../architecture-en.md) | Everyone | Overall architecture, core concepts |
+| [Quick Start — Device](../tutorials/quickstart-device.md) | Firmware Engineers | Verify MQTT connectivity in 10 minutes |
+| [Device Integration Guide](../guides/guide-device-en.md) | Firmware Engineers | Complete MQTT integration |
+| [AI Voice Conversation Integration Guide](../guides/guide-ai-voice-en.md) | Firmware Engineers | Agora RTC integration |
+| [MQTT Protocol Reference](../reference/ref-mqtt.md) | Firmware Engineers | Protocol field reference |
 
 ---
 
@@ -356,4 +356,4 @@ graph TD
 
 ---
 
-**Related Documents**: [Architecture & Concepts](./architecture-en.md) | [Device Integration Guide](./guide-device-en.md) | [AI Voice Conversation Integration Guide](./guide-ai-voice-en.md)
+**Related Documents**: [Architecture & Concepts](../architecture-en.md) | [Device Integration Guide](../guides/guide-device-en.md) | [AI Voice Conversation Integration Guide](../guides/guide-ai-voice-en.md)

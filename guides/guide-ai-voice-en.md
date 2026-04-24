@@ -2,7 +2,7 @@
 
 > **TL;DR**: Devices obtain Agora RTC parameters via MQTT and join a channel to conduct real-time voice conversations with cloud AI. This document covers the complete conversation lifecycle, Agora SDK integration, NFC character switching (optional), error handling, and best practices.
 
-> **Prerequisites**: We recommend reading [Architecture & Concepts](./architecture-en.md) and [MQTT Protocol Reference](./ref-mqtt.md) first.
+> **Prerequisites**: We recommend reading [Architecture & Concepts](../architecture-en.md) and [MQTT Protocol Reference](../reference/ref-mqtt.md) first.
 
 ---
 
@@ -351,4 +351,4 @@ void stop_voice_session(void) {
 
 ---
 
-**Related Documents**: [Architecture & Concepts](./architecture-en.md) | [MQTT Protocol Reference](./ref-mqtt.md) | [Device Integration Guide](./guide-device-en.md)
+**Related Documents**: [Architecture & Concepts](../architecture-en.md) | [MQTT Protocol Reference](../reference/ref-mqtt.md) | [Device Integration Guide](./guide-device-en.md)

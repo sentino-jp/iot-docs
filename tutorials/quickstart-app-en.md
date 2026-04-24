@@ -1,30 +1,30 @@
-# 快速入门 — App 端
+# Quick Start — App Side
 
-本文档帮助你在 **10 分钟内**用 curl 跑通 App 端核心链路：登录 → 获取账户 ID → 查询设备信息 → 绑定智能体。
+This document helps you run the App-side core flow with curl in **10 minutes**: login -> get account ID -> query device info -> bind agent.
 
-> **前置知识**：建议先阅读 [架构与概念](./architecture.md) 了解整体架构。
+> **Prerequisites**: We recommend reading [Architecture & Concepts](../architecture-en.md) first to understand the overall architecture.
 
 ---
 
-## 你需要准备什么
+## What You Need
 
-- 一台能联网的电脑（macOS / Linux / Windows）
-- curl 命令行工具（macOS / Linux 自带）
-- jq（可选，用于格式化 JSON 输出）
+- A computer with internet access (macOS / Linux / Windows)
+- The curl command-line tool (built-in on macOS / Linux)
+- jq (optional, for formatting JSON output)
 
-**测试环境信息**：
+**Test environment**:
 
-| 项目 | 值 |
+| Item | Value |
 |---|---|
-| REST API 基础 URL | `https://api-iot.sentino.jp` |
+| REST API base URL | `https://api-iot.sentino.jp` |
 | app_id | `krfjnsim9vs7yd` |
-| Authorization (登录用) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
+| Authorization (for login) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 
 ---
 
-## 第 1 步：用户登录
+## Step 1: User Login
 
-Sentino 使用 UID 方式登录 — 如果 UID 不存在则自动注册。
+Sentino uses UID-based login — if the UID does not exist, an account is automatically created.
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
@@ -41,9 +41,9 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
   -d "grant_type=uid&uid=test_user_001&password=test123456&area_code=86&user_country_key=CN" | jq .
 ```
 
-> **注意**：登录接口也需要携带公共请求头（`client_id`、`channel_identifier` 等），否则签发的 Token 将无法通过后续业务接口的验证。
+> **Note**: The login endpoint also requires the public request headers (`client_id`, `channel_identifier`, etc.); otherwise the issued Token will not pass validation on subsequent business endpoints.
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -60,13 +60,13 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 }
 ```
 
-**保存 Token**（后续步骤使用）：
+**Save the Token** (used in subsequent steps):
 
 ```bash
-# 提取 access_token 并保存为变量
+# Extract access_token and save as a variable
 TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
-# 或者用 jq 自动提取
+# Or extract automatically with jq
 TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
@@ -85,9 +85,9 @@ echo "Token: $TOKEN"
 
 ---
 
-## 第 2 步：获取账户 ID
+## Step 2: Get the Account ID
 
-绑定设备时需要指定 `assetId`（账户 ID）。调用以下接口获取，直接使用根节点的 `assetId`。
+Binding a device requires specifying an `assetId` (account ID). Call the following endpoint to obtain it, and use the `assetId` of the root node directly.
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
@@ -99,7 +99,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
   -d "{}" | jq .
 ```
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -120,13 +120,13 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
 }
 ```
 
-记下根节点的 `id`（账户 ID，即 assetId），后续配网绑定时需要使用。注意响应 `data` 为数组格式，字段名为 `id`（非 `assetId`）。
+Take note of the root node's `id` (the account ID, i.e. assetId); it will be used during provisioning and binding. Note that the response `data` is an array, and the field name is `id` (not `assetId`).
 
 ---
 
-## 第 3 步：获取产品信息
+## Step 3: Get Product Info
 
-通过产品 ID 查询产品的配网模式和基本配置。
+Query the product's provisioning mode and basic configuration by product ID.
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
@@ -134,7 +134,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProduct
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -142,7 +142,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProduct
   "message": "success",
   "data": {
     "id": "sEF4ljjdH8mo",
-    "productName": "智能玩具",
+    "productName": "AI Toy",
     "protocolType": "MQTT",
     "distributionNetMode": "1",
     "bindMode": 1,
@@ -151,16 +151,16 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProduct
 }
 ```
 
-| 关键字段 | 说明 |
+| Key field | Description |
 |---|---|
-| `distributionNetMode` | 配网模式：`1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
-| `bindMode` | 绑定模式：`1`=强绑（同一时间仅一个用户可绑定），`2`=弱绑 |
+| `distributionNetMode` | Provisioning mode: `1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
+| `bindMode` | Binding mode: `1`=strong binding (only one user may bind at a time), `2`=weak binding |
 
 ---
 
-## 第 4 步：查询设备信息
+## Step 4: Query Device Info
 
-通过设备 UUID 和产品 ID 查询设备基本信息和绑定状态。
+Query a device's basic info and binding status by device UUID and product ID.
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDeviceInfo" \
@@ -169,7 +169,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDevi
   -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}' | jq .
 ```
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -178,7 +178,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDevi
   "data": {
     "uuid": "ct01wfjSNqGAqUUK",
     "productId": "sEF4ljjdH8mo",
-    "deviceName": "智能设备",
+    "deviceName": "Smart Device",
     "protocolType": "MQTT",
     "configMode": "BLE",
     "bindStatus": 0
@@ -186,13 +186,13 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDevi
 }
 ```
 
-`bindStatus` 为 `0` 表示设备未绑定，可以进行配网。
+A `bindStatus` of `0` indicates the device is unbound and ready for provisioning.
 
 ---
 
-## 第 5 步：查看智能体列表
+## Step 5: List Available Agents
 
-获取官方推荐的智能体（AI 角色）列表。
+Get the list of officially recommended agents (AI characters).
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/agents-list" \
@@ -201,7 +201,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/age
   -d "{}" | jq .
 ```
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -211,9 +211,9 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/age
     {
       "agentId": "1980570366486159361",
       "avatar": "https://...",
-      "name": "小助手",
-      "description": "我是你的智能助手",
-      "tags": ["助手", "智能"]
+      "name": "Little Helper",
+      "description": "I'm your smart assistant",
+      "tags": ["assistant", "smart"]
     }
   ]
 }
@@ -221,9 +221,9 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/age
 
 ---
 
-## 第 6 步：绑定智能体到设备
+## Step 6: Bind an Agent to the Device
 
-选择一个智能体，将其绑定到设备。绑定后设备发起 AI 对话时将使用该智能体。
+Pick an agent and bind it to the device. After binding, the device will use this agent when initiating an AI conversation.
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agent" \
@@ -232,13 +232,13 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-a
   -d '{
     "agentId": "1980570366486159361",
     "agentType": "official",
-    "deviceId": "你的设备ID"
+    "deviceId": "your-device-id"
   }' | jq .
 ```
 
-> 注意：这里的 `deviceId` 是设备绑定后由云端分配的 ID，不是 UUID。可通过设备列表接口获取。
+> Note: The `deviceId` here is the ID assigned by the cloud after the device is bound, not the UUID. It can be obtained via the device list endpoint.
 
-**预期响应**：
+**Expected response**:
 
 ```json
 {
@@ -250,35 +250,35 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-a
 
 ---
 
-## 验证成功后的下一步
+## Next Steps After Verification
 
-你已跑通了 App 端核心链路。接下来：
+You have completed the App-side core flow. What's next:
 
-| 目标 | 去哪里看 |
+| Goal | Where to look |
 |---|---|
-| 了解完整的 App 端集成流程 | [App 端集成指南](./guide-app.md) |
-| 了解 BLE 配网的实现细节 | [BLE 协议参考](./ref-ble.md) |
-| 查看所有 REST API 接口 | [REST API 参考](./ref-rest-api.md) |
-| 了解设备端的接入方式 | [快速入门 — 设备端](./quickstart-device.md) |
+| Learn the full App-side integration flow | [App Integration Guide](../guides/guide-app-en.md) |
+| Learn BLE provisioning implementation details | [BLE Protocol Reference](../reference/ref-ble-en.md) |
+| Browse all REST API endpoints | [REST API Reference](../reference/ref-rest-api-en.md) |
+| Learn how to integrate the device side | [Quick Start — Device Side](./quickstart-device-en.md) |
 
 ---
 
-## 常见问题
+## FAQ
 
-### 登录返回 401
+### Login returns 401
 
-1. 检查 `Authorization` header 是否正确（注意是 `Basic` 认证，不是 `Bearer`）
-2. 检查 `app_id` 是否匹配
+1. Check that the `Authorization` header is correct (note: it is `Basic` auth, not `Bearer`)
+2. Check that the `app_id` matches
 
-### Token 过期
+### Token Expiration
 
-- `access_token` 有效期为 7200 秒（2 小时）
-- 过期后使用 `refresh_token` 刷新，或重新登录
+- The `access_token` is valid for 7200 seconds (2 hours)
+- After expiration, refresh it with the `refresh_token`, or log in again
 
-### 账户 ID 为空
+### Account ID Is Empty
 
-- 如果返回为空，请确认登录是否成功，并检查是否已在 Sentino 后台配置账户
+- If the response is empty, confirm that login succeeded and check that the account is configured in the Sentino backend
 
 ---
 
-**下一步**：[App 端集成指南](./guide-app.md) | [REST API 参考](./ref-rest-api.md)
+**Next**: [App Integration Guide](../guides/guide-app-en.md) | [REST API Reference](../reference/ref-rest-api-en.md)
