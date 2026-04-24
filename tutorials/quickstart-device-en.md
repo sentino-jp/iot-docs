@@ -6,11 +6,15 @@ This document helps you verify connectivity with the Sentino MQTT Broker **in 10
 
 ---
 
+> [!IMPORTANT]
+> **The triplet (UUID / KEY / MAC) and Product ID (PID) must be issued by the Sentino team for your devices.**
+> Sample values in this document are provided only to demonstrate connectivity (registered on the test broker); do not reuse them in production.
+
 ## What You Need
 
 - A computer with internet access (macOS / Linux / Windows)
 - Python 3.7+ (Method 1) or the mosquitto CLI tools (Method 2)
-- A **test triplet** provided by Sentino (this document uses sample data)
+- A test triplet provided by Sentino (this document uses sample data)
 
 **Test triplet (sample):**
 
@@ -20,8 +24,6 @@ This document helps you verify connectivity with the Sentino MQTT Broker **in 10
 | KEY | `944e53cda6ac4491ad7d453e3d2934bb` |
 
 **Product ID (pid)**: `sEF4ljjdH8mo` (used in MQTT Topic paths; not part of the triplet)
-
-> For real development, use the triplet that Sentino assigns to you. Do not use the sample data.
 
 ---
 
@@ -39,11 +41,12 @@ Save the following content as `sentino_quickstart.py`:
 
 ```python
 """
-Sentino IoT Quick Start — Device-side MQTT connectivity verification
+Sentino IoT Quick Start — Device-side MQTT connectivity verification (8883 TLS)
 """
 import json
 import hmac
 import hashlib
+import ssl
 import time
 import uuid as uuid_lib
 
@@ -57,7 +60,7 @@ DEVICE_KEY  = "944e53cda6ac4491ad7d453e3d2934bb"
 PRODUCT_ID  = "sEF4ljjdH8mo"
 
 BROKER_HOST = "mqtt-iot.sentino.jp"
-BROKER_PORT = 1883
+BROKER_PORT = 8883          # MQTTS (TLS)
 
 # ============================================================
 # Compute MQTT connection parameters
@@ -172,6 +175,13 @@ def main():
     )
     client.username_pw_set(username, password)
 
+    # TLS configuration (quickstart simplified): skip cert verification,
+    # only encrypt traffic. For production, use real CA pinning:
+    #   client.tls_set(ca_certs="sentino_broker_ca.pem", cert_reqs=ssl.CERT_REQUIRED)
+    # Contact the Sentino team to obtain the CA certificate.
+    client.tls_set(cert_reqs=ssl.CERT_NONE)
+    client.tls_insecure_set(True)
+
     # Register callbacks
     client.on_connect = on_connect
     client.on_message = on_message
@@ -204,14 +214,14 @@ python sentino_quickstart.py
 ```
 Sentino IoT Quick Start
 --------------------------------------------------
-Connecting to mqtt-iot.sentino.jp:1883 ...
+Connecting to mqtt-iot.sentino.jp:8883 ...
   Client ID: rlink_ct01wfjSNqGAqUUK_V2
   Username:  ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=1742536800
   Password:  894972927a0a6d1a...
 
 ==================================================
 MQTT connected successfully!
-  Broker:    mqtt-iot.sentino.jp:1883
+  Broker:    mqtt-iot.sentino.jp:8883
   Client ID: rlink_ct01wfjSNqGAqUUK_V2
   UUID:      ct01wfjSNqGAqUUK
 ==================================================
@@ -292,7 +302,8 @@ PASSWORD=$(echo -n "$CONTENT" | openssl dgst -sha256 -hmac "$KEY" | awk '{print 
 
 mosquitto_sub \
   -h mqtt-iot.sentino.jp \
-  -p 1883 \
+  -p 8883 \
+  --cafile /etc/ssl/cert.pem --insecure \
   -V mqttv5 \
   -i "rlink_ct01wfjSNqGAqUUK_V2" \
   -u "ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=$TS" \
@@ -302,6 +313,10 @@ mosquitto_sub \
   -v
 ```
 
+> **Quickstart-simplified**: `--cafile + --insecure` only encrypts traffic, skipping certificate verification. `--cafile` is required but the value doesn't matter (`/etc/ssl/cert.pem` is the macOS system CA bundle; on Linux it's typically `/etc/ssl/certs/ca-certificates.crt`).
+>
+> **Production**: switch to real CA pinning — point `--cafile` at the Sentino self-signed CA and drop `--insecure`. Contact the Sentino team to obtain the CA certificate.
+
 ### Step 4: Send a time Request (Terminal 2)
 
 > Note: Because an MQTT Client ID cannot be connected twice simultaneously, `mosquitto_pub` needs to use a different Client ID (or operate within the same connection). For real use, the Python approach is recommended.
@@ -309,7 +324,8 @@ mosquitto_sub \
 ```bash
 mosquitto_pub \
   -h mqtt-iot.sentino.jp \
-  -p 1883 \
+  -p 8883 \
+  --cafile /etc/ssl/cert.pem --insecure \
   -V mqttv5 \
   -i "rlink_ct01wfjSNqGAqUUK_V2b" \
   -u "ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=$TS" \
@@ -353,7 +369,7 @@ You have verified MQTT connectivity and communication. Next:
 ### Cannot connect to the Broker
 
 1. Verify the network can reach `mqtt-iot.sentino.jp`: `ping mqtt-iot.sentino.jp`
-2. Verify that port `1883` is not blocked by a firewall: `telnet mqtt-iot.sentino.jp 1883`
+2. Verify that port `8883` is not blocked by a firewall: `telnet mqtt-iot.sentino.jp 8883` (or fall back to plaintext 1883 for diagnosis)
 3. Verify that you are using MQTT 5.0 protocol version
 
 ---

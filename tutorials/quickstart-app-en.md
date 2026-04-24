@@ -4,6 +4,10 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 
 > **Prerequisites**: We recommend reading [Architecture & Concepts](../architecture-en.md) first to understand the overall architecture.
 
+> [!IMPORTANT]
+> **App credentials (`app_id` / `channel_identifier` / `package_name`) and test-device triplets (UUID / KEY / MAC) must be issued by the Sentino team for your application.**
+> Sample values in this document are for quickstart demonstration only; do not reuse them in production.
+
 ---
 
 ## What You Need
@@ -24,7 +28,9 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 
 ## Step 1: User Login
 
-Sentino uses UID-based login — if the UID does not exist, an account is automatically created.
+This quickstart uses **UID mode** (`grant_type=uid`): if the UID does not exist, an account is **created automatically**, so a single curl call gets you a token — ideal for quick verification.
+
+> Sentino also supports **Password mode** (`grant_type=password`, three-step email + password + verification-code signup); the white-label Flutter App template (`sentino-app-sample`) uses password mode by default. Tokens issued by both modes are fully equivalent — pick whichever fits your scenario. See [REST API §3.1 User Login](../reference/ref-rest-api-en.md#31-user-login-authorization).
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \

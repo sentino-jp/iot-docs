@@ -6,11 +6,15 @@
 
 ---
 
+> [!IMPORTANT]
+> **三元组（UUID / KEY / MAC）+ 产品 ID（PID）必须由 Sentino 团队为你的设备分配。**
+> 本文档示例值仅作连通性演示（已在测试 broker 注册），生产请勿直接复用。
+
 ## 你需要准备什么
 
 - 一台能联网的电脑（macOS / Linux / Windows）
 - Python 3.7+（方式一）或 mosquitto CLI 工具（方式二）
-- Sentino 提供的**测试三元组**（本文档使用示例数据）
+- Sentino 提供的测试三元组（本文档使用示例数据）
 
 **测试三元组（示例）：**
 
@@ -20,8 +24,6 @@
 | KEY | `944e53cda6ac4491ad7d453e3d2934bb` |
 
 **产品 ID（pid）**：`sEF4ljjdH8mo`（用于 MQTT Topic 路径，非三元组字段）
-
-> 正式开发时请使用 Sentino 分配给你的三元组，不要使用示例数据。
 
 ---
 
@@ -39,11 +41,12 @@ pip install paho-mqtt
 
 ```python
 """
-Sentino IoT Quick Start — 设备端 MQTT 连通性验证
+Sentino IoT Quick Start — 设备端 MQTT 连通性验证（8883 TLS）
 """
 import json
 import hmac
 import hashlib
+import ssl
 import time
 import uuid as uuid_lib
 
@@ -57,7 +60,7 @@ DEVICE_KEY  = "944e53cda6ac4491ad7d453e3d2934bb"
 PRODUCT_ID  = "sEF4ljjdH8mo"
 
 BROKER_HOST = "mqtt-iot.sentino.jp"
-BROKER_PORT = 1883
+BROKER_PORT = 8883          # MQTTS (TLS)
 
 # ============================================================
 # 计算 MQTT 连接参数
@@ -172,6 +175,13 @@ def main():
     )
     client.username_pw_set(username, password)
 
+    # TLS 配置（quickstart 简化版）：跳过证书验证，仅做传输加密
+    # 生产环境应改用真正的 CA pinning：
+    #   client.tls_set(ca_certs="sentino_broker_ca.pem", cert_reqs=ssl.CERT_REQUIRED)
+    # CA 证书请联系 Sentino 团队获取
+    client.tls_set(cert_reqs=ssl.CERT_NONE)
+    client.tls_insecure_set(True)
+
     # 注册回调
     client.on_connect = on_connect
     client.on_message = on_message
@@ -204,14 +214,14 @@ python sentino_quickstart.py
 ```
 Sentino IoT Quick Start
 --------------------------------------------------
-正在连接 mqtt-iot.sentino.jp:1883 ...
+正在连接 mqtt-iot.sentino.jp:8883 ...
   Client ID: rlink_ct01wfjSNqGAqUUK_V2
   Username:  ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=1742536800
   Password:  894972927a0a6d1a...
 
 ==================================================
 MQTT 连接成功!
-  Broker:    mqtt-iot.sentino.jp:1883
+  Broker:    mqtt-iot.sentino.jp:8883
   Client ID: rlink_ct01wfjSNqGAqUUK_V2
   UUID:      ct01wfjSNqGAqUUK
 ==================================================
@@ -292,7 +302,8 @@ PASSWORD=$(echo -n "$CONTENT" | openssl dgst -sha256 -hmac "$KEY" | awk '{print 
 
 mosquitto_sub \
   -h mqtt-iot.sentino.jp \
-  -p 1883 \
+  -p 8883 \
+  --cafile /etc/ssl/cert.pem --insecure \
   -V mqttv5 \
   -i "rlink_ct01wfjSNqGAqUUK_V2" \
   -u "ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=$TS" \
@@ -302,6 +313,10 @@ mosquitto_sub \
   -v
 ```
 
+> **quickstart 简化版**：`--cafile + --insecure` 仅做传输加密，跳过证书验证。`--cafile` 必填但内容不重要（`/etc/ssl/cert.pem` 是 macOS 系统 CA 集，Linux 通常 `/etc/ssl/certs/ca-certificates.crt`）。
+>
+> **生产环境**应改用真正的 CA pinning：把 `--cafile` 指向 Sentino 自签 CA 证书 + 去掉 `--insecure`。CA 证书请联系 Sentino 团队获取。
+
 ### 第 4 步：发送 time 请求（终端 2）
 
 > 注意：由于 MQTT Client ID 不能重复连接，mosquitto_pub 需要使用不同的 Client ID 或者在同一连接中操作。实际使用时推荐 Python 方式。
@@ -309,7 +324,8 @@ mosquitto_sub \
 ```bash
 mosquitto_pub \
   -h mqtt-iot.sentino.jp \
-  -p 1883 \
+  -p 8883 \
+  --cafile /etc/ssl/cert.pem --insecure \
   -V mqttv5 \
   -i "rlink_ct01wfjSNqGAqUUK_V2b" \
   -u "ct01wfjSNqGAqUUK|signMethod=hmacSha256,ts=$TS" \
@@ -353,7 +369,7 @@ mosquitto_pub \
 ### 连不上 Broker
 
 1. 确认网络能访问 `mqtt-iot.sentino.jp`：`ping mqtt-iot.sentino.jp`
-2. 确认端口 `1883` 未被防火墙拦截：`telnet mqtt-iot.sentino.jp 1883`
+2. 确认端口 `8883` 未被防火墙拦截：`telnet mqtt-iot.sentino.jp 8883`（或 1883 明文兜底测试）
 3. 确认使用的是 MQTT 5.0 协议版本
 
 ---

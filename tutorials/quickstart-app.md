@@ -4,6 +4,10 @@
 
 > **前置知识**：建议先阅读 [架构与概念](../architecture.md) 了解整体架构。
 
+> [!IMPORTANT]
+> **App 凭证（`app_id` / `channel_identifier` / `package_name`）和测试设备的三元组（UUID / KEY / MAC）必须由 Sentino 团队为你的应用分配。**
+> 本文档示例值仅作 quickstart 演示，生产请勿直接复用。
+
 ---
 
 ## 你需要准备什么
@@ -24,7 +28,9 @@
 
 ## 第 1 步：用户登录
 
-Sentino 使用 UID 方式登录 — 如果 UID 不存在则自动注册。
+本 quickstart 使用 **UID 模式**（`grant_type=uid`）：UID 不存在则**自动注册**，单一 curl 调用即可拿到 token，最适合快速验证。
+
+> Sentino 同时支持 **Password 模式**（`grant_type=password`，邮箱+密码+验证码三步注册），白标 Flutter App 模板（`sentino-app-sample`）默认走 password。两种模式签发的 token 完全等价，可按业务场景任选。详见 [REST API §3.1 用户登录](../reference/ref-rest-api.md#31-用户登录授权)。
 
 ```bash
 curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
