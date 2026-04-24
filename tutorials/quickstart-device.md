@@ -358,4 +358,8 @@ mosquitto_pub \
 
 ---
 
-**下一步**：[MQTT 协议参考](../reference/ref-mqtt.md) | [架构与概念](../architecture.md)
+**下一步**：
+
+- 把验证扩展为完整集成 → [设备端集成指南](../guides/guide-device.md) + [MQTT 协议参考](../reference/ref-mqtt.md)
+- **跑实物固件（BK7258 + Agora RTC）** → fork [`sentino-jp/sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample)，按 [`device/BUILD_GUIDE.md`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/BUILD_GUIDE.md) 编译烧录
+- 回到全局 → [架构与概念](../architecture.md)

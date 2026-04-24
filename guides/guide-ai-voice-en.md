@@ -337,6 +337,18 @@ void stop_voice_session(void) {
 
 > **Tip**: If the device needs to initiate conversations frequently, consider initializing the Agora SDK once (`agora_rtc_init`), and only calling `join_channel` / `leave_channel` for each conversation to avoid repeated initialization overhead.
 
+### 7.4 Integration Notes
+
+| Note | Description |
+|---|---|
+| **`datastream_queue` must be initialized first** | When Agora RTC receives a stream message from the AI Agent (e.g., expression / motion Function Call), it pushes to `datastream_queue`. If the queue has not been created (NULL) before `agora_rtc_init`, `xQueueGenericSend` will trigger an assert and reboot the device |
+| **`uid` must not be hardcoded** | See the warning in §3.2 |
+| **OPUS / 16kHz / mono** | Any mismatch causes silent audio or unrecognizable speech; full parameter list in §3.2 |
+
+> **Reference implementation**:
+> - Agora RTC integration code: [`sentino-iot-sample/device/projects/common_components/network_transfer/agora_rtc/agora_rtc_main.c`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/projects/common_components/network_transfer/agora_rtc/agora_rtc_main.c)
+> - Detailed pitfall notes: [`sentino-iot-sample/device/BUILD_GUIDE.md` §3.2](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/BUILD_GUIDE.md#32-sentino-iot-模式)
+
 ---
 
 ## 8. Best Practices

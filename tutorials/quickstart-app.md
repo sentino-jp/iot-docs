@@ -281,4 +281,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-a
 
 ---
 
-**下一步**：[App 端集成指南](../guides/guide-app.md) | [REST API 参考](../reference/ref-rest-api.md)
+**下一步**：
+
+- 把验证扩展为完整集成 → [App 端集成指南](../guides/guide-app.md) + [REST API 参考](../reference/ref-rest-api.md)
+- **拿白标 Flutter 模板改 UI 与品牌** → fork [`sentino-jp/sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample)，按其 [`doc/quick-start.md`](https://github.com/sentino-jp/sentino-app-sample/blob/main/doc/quick-start.md) 跑起来

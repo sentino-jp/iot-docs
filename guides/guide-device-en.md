@@ -34,6 +34,8 @@ graph LR
 
 ## 2. MQTT Connection
 
+> **Reference implementation**: For complete BK7258 + ali_mqtt integration code, see [`sentino-iot-sample/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c). For common integration pitfalls, see [MQTT Protocol Reference §7](../reference/ref-mqtt-en.md#7-integration-notes).
+
 ### 2.1 Connection Parameters
 
 | Parameter | Value / Format | Description |

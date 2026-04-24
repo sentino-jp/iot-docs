@@ -358,4 +358,8 @@ You have verified MQTT connectivity and communication. Next:
 
 ---
 
-**Next**: [MQTT Protocol Reference](../reference/ref-mqtt-en.md) | [Architecture & Concepts](../architecture-en.md)
+**Next**:
+
+- Extend this verification into a full integration → [Device Integration Guide](../guides/guide-device-en.md) + [MQTT Protocol Reference](../reference/ref-mqtt-en.md)
+- **Run real-hardware firmware (BK7258 + Agora RTC)** → fork [`sentino-jp/sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample) and follow [`device/BUILD_GUIDE.md`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/BUILD_GUIDE.md) to build and flash
+- Back to the big picture → [Architecture & Concepts](../architecture-en.md)

@@ -109,6 +109,12 @@ All endpoints (including login) must include the following public request header
 
 Provisioning is the process by which a user binds a device to their account on first use. The App transfers the binding info to the device via BLE Bluetooth.
 
+> **Reference implementation**:
+> - BLE scan / connect / GATT write: [`sentino-app-sample/lib/services/ble_service.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/services/ble_service.dart)
+> - V1 packet protocol (Dart): [`sentino-app-sample/lib/utils/generic_ble_packet_protocol.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_packet_protocol.dart)
+> - BLE advertisement parsing: [`sentino-app-sample/lib/utils/generic_ble_advertisement_parser.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_advertisement_parser.dart)
+> - Web BLE tool (browser implementation, easier to read): [`sentino-iot-sample/web-app/js/ble.js`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/web-app/js/ble.js)
+
 ### 3.1 Pre-Provisioning Preparation
 
 Before initiating BLE provisioning, the App needs to obtain the following information:

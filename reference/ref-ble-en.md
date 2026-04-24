@@ -156,6 +156,10 @@ After connecting to the device, the App must:
 
 The amount of data that can be transferred in a single BLE transmission is limited (ATT MTU constraint). JSON messages larger than 118 bytes must be fragmented before transmission.
 
+> **Reference implementations** (same protocol, two languages — useful for cross-reference):
+> - JS: [`sentino-iot-sample/web-app/js/packet.js`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/web-app/js/packet.js)
+> - Dart: [`sentino-app-sample/lib/utils/generic_ble_packet_protocol.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_packet_protocol.dart)
+
 ### 4.1 Protocol Frame Format
 
 Each packet is at most **128 bytes**. The protocol header occupies **10 bytes**, leaving up to **118 bytes** for the payload.

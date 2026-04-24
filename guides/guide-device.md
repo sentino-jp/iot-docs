@@ -34,6 +34,8 @@ graph LR
 
 ## 2. MQTT 连接
 
+> **参考实现**：BK7258 + ali_mqtt 完整接入代码见 [`sentino-iot-sample/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c)。常见集成陷阱见 [MQTT 协议参考 §7](../reference/ref-mqtt.md#7-集成注意事项)。
+
 ### 2.1 连接参数
 
 | 参数 | 值 / 格式 | 说明 |

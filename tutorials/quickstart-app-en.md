@@ -281,4 +281,7 @@ You have completed the App-side core flow. What's next:
 
 ---
 
-**Next**: [App Integration Guide](../guides/guide-app-en.md) | [REST API Reference](../reference/ref-rest-api-en.md)
+**Next**:
+
+- Extend this verification into a full integration -> [App Integration Guide](../guides/guide-app-en.md) + [REST API Reference](../reference/ref-rest-api-en.md)
+- **Take the white-label Flutter template and rebrand the UI** -> fork [`sentino-jp/sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample) and follow its [`doc/quick-start.md`](https://github.com/sentino-jp/sentino-app-sample/blob/main/doc/quick-start.md) to get running

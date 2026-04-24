@@ -109,6 +109,12 @@ Token 有效期约 30 天（`expires_in` 秒），过期后使用 `refresh_token
 
 配网是用户首次使用设备时将其绑定到自己账号的过程。App 通过 BLE 蓝牙将绑定信息传给设备。
 
+> **参考实现**：
+> - BLE 扫描 / 连接 / 写入 GATT：[`sentino-app-sample/lib/services/ble_service.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/services/ble_service.dart)
+> - V1 分包协议（Dart）：[`sentino-app-sample/lib/utils/generic_ble_packet_protocol.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_packet_protocol.dart)
+> - BLE 广播解析：[`sentino-app-sample/lib/utils/generic_ble_advertisement_parser.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_advertisement_parser.dart)
+> - Web 版 BLE 工具（浏览器实现，结构更易读）：[`sentino-iot-sample/web-app/js/ble.js`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/web-app/js/ble.js)
+
 ### 3.1 配网前准备
 
 在发起 BLE 配网前，App 需要先获取以下信息：

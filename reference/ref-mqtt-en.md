@@ -713,6 +713,10 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 
 The following notes are based on real-world integration experience with BK7258 + the ali_mqtt client; other MQTT clients (such as paho or mosquitto) typically do not encounter these issues.
 
+> **Reference implementation**:
+> - Detailed raw notes: [`sentino-iot-sample/device/BUILD_GUIDE.md` §3.2 "Sentino Integration Pitfalls"](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/BUILD_GUIDE.md#32-sentino-iot-模式)
+> - MQTT client code: [`sentino-iot-sample/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/projects/common_components/sentino_iot_sdk/sentino_mqtt/sentino_mqtt.c)
+
 ### 7.1 Username Must Include the Sign Method and Timestamp Delimiters
 
 Username is not simply `uuid`—it must be assembled as `${uuid}|signMethod=${signMethod},ts=${ts}`, otherwise the broker returns `CONNACK not_authorized` (rc=5). For the complete format, see §1.

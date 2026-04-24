@@ -347,6 +347,10 @@ void stop_voice_session(void) {
 | **uid 不可硬编码** | 见 §3.2 的告警 |
 | **OPUS / 16kHz / 单声道** | 任一项不匹配都会导致音频静默或无法识别，参数清单见 §3.2 |
 
+> **参考实现**：
+> - Agora RTC 集成代码：[`sentino-iot-sample/device/projects/common_components/network_transfer/agora_rtc/agora_rtc_main.c`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/projects/common_components/network_transfer/agora_rtc/agora_rtc_main.c)
+> - 详细踩坑记录：[`sentino-iot-sample/device/BUILD_GUIDE.md` §3.2](https://github.com/sentino-jp/sentino-iot-sample/blob/main/device/BUILD_GUIDE.md#32-sentino-iot-模式)
+
 ---
 
 ## 8. 最佳实践

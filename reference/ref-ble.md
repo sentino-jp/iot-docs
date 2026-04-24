@@ -156,6 +156,10 @@ App 连接设备后需要：
 
 BLE 单次传输数据量有限（MTU 限制），大于 118 字节的 JSON 消息需要分包传输。
 
+> **参考实现**（同一协议两个语言版本，便于对照）：
+> - JS：[`sentino-iot-sample/web-app/js/packet.js`](https://github.com/sentino-jp/sentino-iot-sample/blob/main/web-app/js/packet.js)
+> - Dart：[`sentino-app-sample/lib/utils/generic_ble_packet_protocol.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/generic_ble_packet_protocol.dart)
+
 ### 4.1 协议帧格式
 
 每个数据包最大 **128 字节**，协议头占用 **10 字节**，有效数据最大 **118 字节**。
