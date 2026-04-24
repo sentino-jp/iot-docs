@@ -2,6 +2,10 @@
 
 本文档帮助你建立对 Sentino IoT 平台的整体认知。建议在阅读其他文档之前先通读本文。
 
+> **视角分层**：本文是中等抽象层级的开发者参考。如需更详细视图，参见：
+> - [方案概览（商务视角）](./architecture-overview.md)：责任分层 mermaid + 一次语音对话发生过程
+> - [技术架构详解（架构师视角）](./architecture-technical.md)：详细系统全景 mermaid + 完整数据流时序图 + 关键设计决策
+
 ---
 
 ## 1. Sentino 是什么
@@ -10,12 +14,27 @@ Sentino IoT 是一个**面向 AI 语音交互设备**的物联网平台。它解
 
 > 让一台嵌入式设备（比如玩偶、音箱、机器人）能够与云端 AI 进行**实时语音对话**。
 
+> **平台定位**：Sentino IoT 是 **Tuya 模式**（终端直调）——你的 App / 设备直接调 Sentino 云，**没有客户后端**这一层；不是 AWS IoT 模式（开发者后端集成）。这套文档只覆盖「物」的部分（设备接入、配网、MQTT、OTA、智能体绑定）；自定义 AI Agent 行为（LLM/TTS 编排、记忆、工作流、自定义工具）属于 Sentino Agent 平台范畴，请联系 Sentino 团队获取相关文档。
+
 平台提供了实现这一目标所需的全部基础设施：
 
 - **设备接入** — 设备通过 MQTT 协议连接云端，上报状态、接收指令
 - **设备配网** — 用户首次使用时，通过手机 App 蓝牙 (BLE) 完成设备绑定
 - **AI 语音对话** — 设备通过 Agora RTC 与云端 AI Agent 进行低延迟实时语音通话
 - **智能体管理** — 为设备配置不同的 AI 角色（人设、声音、行为）
+
+### 产品能力一览
+
+| 能力 | 说明 | 用户价值 |
+|------|------|----------|
+| **AI 实时语音对话** | 设备与云端 AI 角色进行低延迟实时语音通话 | 开口即聊，自然流畅 |
+| **多角色 AI 智能体** | 为设备配置不同 AI 角色（故事大王、英语老师、陪伴伙伴等） | 一台设备，多种体验 |
+| **NFC 角色切换**（可选） | 放置实体 NFC 卡片即可切换 AI 角色 | 儿童友好，无需操作屏幕 |
+| **BLE 一键配网** | 手机 App 扫码 + 蓝牙自动完成设备绑定 | 开箱即用，无需技术背景 |
+| **工作流编排** | 支持 Function Calling、记忆检索、任务执行 | AI 不只是聊天，还能执行任务 |
+| **AI 设备控制** | 对话中通过语音指令控制设备硬件（表情、动作、LED、音量等） | 语音即控制，交互更自然 |
+| **OTA 远程升级** | 云端推送固件更新，设备自动升级 | 持续迭代，无需返厂 |
+| **多设备管理** | 一个账户下管理多台设备和角色 | 一个 App 管理全部设备 |
 
 ---
 
@@ -52,10 +71,13 @@ graph LR
 
 | 通道 | 协议 | 用途 | 何时使用 |
 |---|---|---|---|
-| 设备 ↔ 云端 | **MQTT 5.0** | 设备认证、绑定、状态上报、指令下发、获取 RTC 参数 | 设备上电后始终保持 |
+| 设备 ↔ Sentino IoT 平台 | **MQTT 5.0** | 设备认证、绑定、状态上报、指令下发、获取 RTC 参数 | 设备上电后始终保持 |
 | App ↔ 设备 | **BLE** (Bluetooth Low Energy) | 首次配网时传递绑定信息（WiFi 凭证或用户 ID） | 仅首次配网 |
-| App ↔ 云端 | **HTTPS** (REST API) | 用户登录、设备管理、智能体管理 | App 运行时 |
+| App ↔ Sentino IoT 平台 | **HTTPS** (REST API) | 用户登录、设备管理、智能体管理 | App 运行时 |
 | 设备 ↔ Agora | **RTC** (UDP) | 实时音频传输 | 仅语音对话期间 |
+| Sentino IoT 平台 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
+| Agora ↔ Sentino Agent 平台 | **HTTPS** + **HTTP Callback** + **SSE** | Agent 管理 + ASR 文本回调 + LLM/TTS 结果回传 | 语音对话期间 |
+| Sentino Agent 平台 ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
 
 ---
 
@@ -149,7 +171,7 @@ Sentino IoT 平台
 
 一台设备通过"绑定智能体"来确定它使用哪个 AI 角色进行对话。
 
-### 3.5 账户与设备归属
+### 3.7 账户与设备归属
 
 每个用户在 Sentino 中拥有一个**账户**，设备绑定时关联到该账户下。
 
@@ -236,7 +258,7 @@ graph LR
 | **上报-回复** | 设备发起 | 设备 → `report` → 云端处理 → `report_response` → 设备 | 设备绑定、请求 AI 接入、属性上报 |
 | **下发-回复** | 云端发起 | 云端 → `issue` → 设备处理 → `issue_response` → 云端 | OTA 升级、属性设置、设备重置 |
 
-所有消息均为 JSON 格式，通过 `code` 字段区分协议类型（如 `bind`、`info`、`ota` 等）。详细的协议定义请参考 [MQTT 协议参考](./ref-mqtt.md)。
+所有消息均为 JSON 格式，通过 `code` 字段区分协议类型（如 `bind`、`info`、`ota` 等）。详细的协议定义请参考 [MQTT 协议参考](reference/ref-mqtt.md)。
 
 ---
 
@@ -275,7 +297,26 @@ sequenceDiagram
 
 ---
 
-## 8. 术语表
+## 8. 两条产品路径对比
+
+Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conversational AI Engine 和 SD-RTN，但接入终端、信令通道、Agent 创建方都不同：
+
+| 对比项 | IoT 设备路径（本文档主要覆盖） | Sentino Agent 平台 Web 路径 |
+|--------|-------------|-------------------|
+| **接入终端** | 嵌入式硬件（玩偶、音箱等） | Web 浏览器 |
+| **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
+| **信令通道** | MQTT 5.0 | HTTPS REST API |
+| **Agent 创建方** | Sentino IoT 平台 | Sentino Agent 平台 |
+| **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
+| **工作流能力** | Function Calling、记忆检索、工作流编排 | Function Calling、记忆检索、工作流编排 |
+| **IoT 独有能力** | **设备控制** — Function Calling 经 RTC 通道下发指令控制硬件（表情、动作、LED、音量等） | — |
+| **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业与消费级 AI Agent 应用（客服、会议助手等） |
+
+> 两条路径共享同一套 Sentino Agent 平台工作流引擎。Agora 负责音频传输和 ASR，Sentino Agent 平台负责 LLM 推理和 TTS 语音合成（Agora 不直接调用 LLM/TTS）。
+
+---
+
+## 9. 术语表
 
 | 术语 | 英文 | 说明 |
 |---|---|---|
@@ -302,4 +343,4 @@ sequenceDiagram
 
 ---
 
-**下一步**：[快速入门 — 设备端](./quickstart-device.md) | [MQTT 协议参考](./ref-mqtt.md)
+**下一步**：[快速入门 — 设备端](tutorials/quickstart-device.md) | [MQTT 协议参考](reference/ref-mqtt.md)

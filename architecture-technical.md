@@ -1,6 +1,10 @@
 # Sentino IoT × Agora 技术架构详解
 
-> 本文面向技术评估者和架构师，详细展示 Sentino IoT 平台与 Agora 声网的系统架构、通信协议和数据流。
+> 本文面向技术评估者和架构师，重点呈现**详细系统全景**和**完整数据流时序图**。
+>
+> - 中等抽象层级架构 + 通信协议总览见 [架构与概念 §2](./architecture.md#2-整体架构)
+> - 两条产品路径对比见 [架构与概念 §8](./architecture.md#8-两条产品路径对比)
+> - 商务视角的责任分层与简化对话流程见 [方案概览](./architecture-overview.md)
 
 ---
 
@@ -148,30 +152,7 @@ sequenceDiagram
 
 ---
 
-## 3. 两条产品路径对比
-
-Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conversational AI Engine 和 SD-RTN：
-
-| 对比项 | IoT 设备路径 | Sentino Agent 平台 Web 路径 |
-|--------|-------------|-------------------|
-| **接入终端** | 嵌入式硬件（玩偶、音箱等） | Web 浏览器 |
-| **音频载体** | Agora RTC C SDK（RTOS） | Agora RTC Web SDK（浏览器） |
-| **信令通道** | MQTT 5.0 | HTTPS REST API |
-| **Agent 创建方** | Sentino IoT 平台 | Sentino Agent 平台 |
-| **LLM/TTS 调用方** | Sentino Agent 平台（Agora 通过 HTTP Callback 回调） | Sentino Agent 平台（同左） |
-| **工作流能力** | 支持 Function Calling、记忆检索、工作流编排 | 支持 Function Calling、记忆检索、工作流编排 |
-| **IoT 独有能力** | **设备控制** — Function Calling 经 RTC 通道下发指令控制硬件（表情、动作、LED、音量等） | — |
-| **适用场景** | 消费电子产品（玩偶、故事机、教育机器人） | 企业与消费级 AI Agent 应用（客服、会议助手、智能助理等） |
-
-**架构共同点**：两条路径共享同一套 Sentino Agent 平台工作流引擎，均支持 Function Calling、记忆检索和工作流编排。Agora 负责音频传输和 ASR，Sentino Agent 平台负责 LLM 推理和 TTS 语音合成。Agora 不直接调用 LLM 和 TTS。
-
-**路径差异**：
-- **IoT 路径**：设备极简，通过 MQTT 信令触发，支持完整工作流能力，并可通过 Function Calling 经 RTC 通道控制设备硬件（如表情、动作、LED、音量等）
-- **Web 路径**：通过 HTTPS 触发，支持 Function Calling、记忆检索等工作流编排
-
----
-
-## 4. 关键设计决策
+## 3. 关键设计决策
 
 | 决策 | 说明 |
 |------|------|
@@ -184,18 +165,8 @@ Sentino 生态有两条路径接入 Agora 语音 AI，共享同一套 Agora Conv
 
 ---
 
-## 5. 通信协议总览
-
-| 通道 | 协议 | 用途 | 何时使用 |
-|------|------|------|----------|
-| 设备 ↔ Sentino IoT 平台 | **MQTT 5.0** | 设备认证、绑定、状态上报、指令下发、获取 RTC 参数 | 设备上电后始终保持 |
-| App ↔ 设备 | **BLE**（GATT） | 首次配网传递绑定信息（WiFi 凭证或 userId） | 仅首次配网 |
-| App ↔ Sentino IoT 平台 | **HTTPS**（REST API） | 用户登录、设备管理、智能体管理 | App 运行时 |
-| 设备 ↔ Agora | **RTC**（UDP） | 实时双向音频传输 | 仅语音对话期间 |
-| Sentino IoT 平台 ↔ Agora | **HTTPS** | 创建/停止 AI Agent | 语音对话开始/结束时 |
-| Agora ↔ Sentino Agent 平台 | **HTTPS** + **HTTP Callback** + **SSE** | Agent 管理 + ASR 文本回调 + LLM/TTS 结果回传 | 语音对话期间 |
-| Sentino Agent 平台 ↔ LLM/TTS | **HTTPS** | AI 推理、语音合成 | 语音对话期间 |
+> 通信协议总览（设备 / App / Sentino / Agora / Sentino Agent / LLM-TTS 之间所有通道）见 [架构与概念 §2 通信协议总览](./architecture.md#通信协议总览)。
 
 ---
 
-**相关文档**：[方案概览（销售版）](./architecture-overview.md) | [架构与概念](./architecture.md) | [Sentino Agent 平台架构](./sentino/agent-platform.md)
+**相关文档**：[架构与概念](./architecture.md) | [方案概览（销售版）](./architecture-overview.md)

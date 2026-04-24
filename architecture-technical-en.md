@@ -1,6 +1,10 @@
-# Sentino IoT x Agora Technical Architecture Deep Dive
+# Sentino IoT × Agora — Technical Architecture Deep Dive
 
-> This document is intended for technical evaluators and architects, providing a detailed view of the Sentino IoT platform and Agora's system architecture, communication protocols, and data flows.
+> Intended for technical evaluators and architects. This document focuses on the **detailed system topology** and the **full voice-conversation data flow**.
+>
+> - Mid-level architecture + protocol overview: see [Architecture & Concepts §2](./architecture-en.md#2-overall-architecture)
+> - Two product paths comparison: see [Architecture & Concepts §8](./architecture-en.md#8-two-product-paths)
+> - Business view (responsibility layering, simplified conversation flow): see [Solution Overview](./architecture-overview-en.md)
 
 ---
 
@@ -148,30 +152,7 @@ sequenceDiagram
 
 ---
 
-## 3. Two Product Paths Compared
-
-The Sentino ecosystem offers two paths to integrate Agora voice AI, sharing the same Agora Conversational AI Engine and SD-RTN:
-
-| Comparison | IoT Device Path | Sentino Agent Platform Web Path |
-|------------|----------------|--------------------------------|
-| **Access Terminal** | Embedded hardware (dolls, speakers, etc.) | Web browser |
-| **Audio Carrier** | Agora RTC C SDK (RTOS) | Agora RTC Web SDK (Browser) |
-| **Signaling Channel** | MQTT 5.0 | HTTPS REST API |
-| **Agent Creator** | Sentino IoT Platform | Sentino Agent Platform |
-| **LLM/TTS Caller** | Sentino Agent Platform (Agora calls back via HTTP Callback) | Sentino Agent Platform (same) |
-| **Workflow Capabilities** | Supports Function Calling, memory retrieval, workflow orchestration | Supports Function Calling, memory retrieval, workflow orchestration |
-| **IoT-Exclusive Capabilities** | **Device Control** — Function Calling sends commands via RTC channel to control hardware (expressions, actions, LEDs, volume, etc.) | — |
-| **Use Cases** | Consumer electronics (dolls, story machines, educational robots) | Enterprise & consumer AI Agent applications (customer service, meeting assistants, smart assistants, etc.) |
-
-**Architectural Commonalities**: Both paths share the same Sentino Agent Platform workflow engine, both supporting Function Calling, memory retrieval, and workflow orchestration. Agora handles audio transmission and ASR; the Sentino Agent Platform handles LLM inference and TTS synthesis. Agora does not call LLM and TTS directly.
-
-**Path Differences**:
-- **IoT Path**: Minimal device complexity, triggered via MQTT signaling, supports full workflow capabilities, and can control device hardware via Function Calling through the RTC channel (e.g., expressions, actions, LEDs, volume, etc.)
-- **Web Path**: Triggered via HTTPS, supports Function Calling, memory retrieval, and workflow orchestration
-
----
-
-## 4. Key Design Decisions
+## 3. Key Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
@@ -184,18 +165,8 @@ The Sentino ecosystem offers two paths to integrate Agora voice AI, sharing the 
 
 ---
 
-## 5. Communication Protocol Overview
-
-| Channel | Protocol | Purpose | When Used |
-|---------|----------|---------|-----------|
-| Device <-> Sentino IoT Platform | **MQTT 5.0** | Device auth, binding, status reporting, command dispatch, obtaining RTC params | Always connected after device powers on |
-| App <-> Device | **BLE** (GATT) | First-time provisioning to transfer binding info (WiFi credentials or userId) | First-time provisioning only |
-| App <-> Sentino IoT Platform | **HTTPS** (REST API) | User login, device management, agent management | While App is running |
-| Device <-> Agora | **RTC** (UDP) | Real-time bidirectional audio transmission | During voice conversations only |
-| Sentino IoT Platform <-> Agora | **HTTPS** | Create/Stop AI Agent | At voice conversation start/end |
-| Agora <-> Sentino Agent Platform | **HTTPS** + **HTTP Callback** + **SSE** | Agent management + ASR text callback + LLM/TTS result return | During voice conversations |
-| Sentino Agent Platform <-> LLM/TTS | **HTTPS** | AI inference, speech synthesis | During voice conversations |
+> The full communication protocol overview (every channel between Device / App / Sentino / Agora / Sentino Agent / LLM-TTS) is in [Architecture & Concepts §2 Communication Protocol Overview](./architecture-en.md#communication-protocol-overview).
 
 ---
 
-**Related Documents**: [Solution Overview](./architecture-overview-en.md) | [Architecture & Concepts](./architecture-en.md) | [Sentino Agent Platform Architecture](./sentino/agent-platform-en.md)
+**Related Documents**: [Architecture & Concepts](./architecture-en.md) | [Solution Overview](./architecture-overview-en.md)

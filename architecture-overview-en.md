@@ -1,25 +1,13 @@
-# Sentino IoT x Agora Solution Overview
+# Sentino IoT × Agora — Solution Overview (Business View)
 
-> This document is intended for product and business decision-makers, introducing how the Sentino IoT platform enables smart hardware (dolls, story machines, robots, speakers, etc.) to quickly gain AI real-time voice conversation capabilities.
-
----
-
-## 1. Product Capabilities
-
-| Capability | Description | User Value |
-|------------|-------------|------------|
-| **AI Real-Time Voice Conversation** | Device conducts low-latency real-time voice calls with cloud-based AI characters | Instant, natural, fluid conversations |
-| **Multi-Character AI Agents** | Configure different AI characters for devices (Storyteller, English Tutor, Companion, etc.) | One device, multiple experiences |
-| **NFC Character Switching** (Optional) | Place a physical NFC card to switch AI characters | Child-friendly, no screen interaction needed |
-| **BLE One-Tap Provisioning** | Phone App scans QR code + Bluetooth automatically completes device binding | Out-of-box ready, no technical background required |
-| **Workflow Orchestration** | Supports Function Calling, memory retrieval, task execution | AI does more than chat — it executes tasks |
-| **AI Device Control** | Voice commands during conversation control device hardware (expressions, actions, LEDs, volume, etc.) | Voice is control — more natural interaction |
-| **OTA Remote Updates** | Cloud pushes firmware updates, devices upgrade automatically | Continuous iteration without factory returns |
-| **Multi-Device Management** | Manage multiple devices and characters under one account | One App to manage all devices |
+> Intended for product and business decision-makers. This document focuses on **responsibility layering** and **how a voice conversation happens**.
+>
+> - Product capabilities: see [Architecture & Concepts §1](./architecture-en.md#product-capabilities-at-a-glance)
+> - Detailed technical architecture: see [Architecture & Concepts §2](./architecture-en.md#2-overall-architecture) and [Technical Architecture Deep Dive](./architecture-technical-en.md)
 
 ---
 
-## 2. Who Does What — Responsibility Layers
+## 1. Who Does What — Responsibility Layers
 
 ```mermaid
 graph TB
@@ -72,7 +60,7 @@ graph TB
 
 ---
 
-## 3. System Architecture
+## 2. System Architecture
 
 ```mermaid
 graph TB
@@ -112,7 +100,7 @@ graph TB
 
 ---
 
-## 4. How a Voice Conversation Happens
+## 3. How a Voice Conversation Happens
 
 ```mermaid
 sequenceDiagram
@@ -150,12 +138,12 @@ sequenceDiagram
 
 ---
 
-## 5. Related Documents
+## 4. Related Documents
 
 | Document | Target Reader | Content |
 |----------|---------------|---------|
-| [Technical Architecture Deep Dive](./architecture-technical-en.md) | Technical Evaluators | Complete system architecture, detailed data flows, protocol specifications |
-| [Architecture & Concepts](./architecture-en.md) | Developers | Core concepts, communication models, glossary |
-| [AI Toy Integration Solution](./solution-ai-toy-en.md) | Product Managers | User journey, NFC design, mass production readiness |
-| [Device Integration Guide](./guide-device-en.md) | Firmware Engineers | MQTT protocol integration |
-| [AI Voice Conversation Integration](./guide-ai-voice-en.md) | Firmware Engineers | Agora RTC integration |
+| [Architecture & Concepts](./architecture-en.md) | Developers | Core concepts, product capabilities, protocol overview, two product paths, glossary |
+| [Technical Architecture Deep Dive](./architecture-technical-en.md) | Technical Evaluators / Architects | Detailed system topology, full data-flow sequence, key design decisions |
+| [AI Toy Integration Solution](solutions/solution-ai-toy-en.md) | Product Managers | User journey, NFC design, mass production readiness |
+| [Device Integration Guide](guides/guide-device-en.md) | Firmware Engineers | MQTT protocol integration |
+| [AI Voice Conversation Integration](guides/guide-ai-voice-en.md) | Firmware Engineers | Agora RTC integration |

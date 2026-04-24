@@ -4,11 +4,19 @@ This document helps you build a holistic understanding of the Sentino IoT platfo
 
 ---
 
+> **Layered views**: This is the mid-level developer reference. For richer visuals see:
+> - [Solution Overview (business view)](./architecture-overview-en.md): responsibility-layer mermaid + how a voice conversation happens
+> - [Technical Architecture Deep Dive (architect view)](./architecture-technical-en.md): detailed system topology mermaid + full data-flow sequence + key design decisions
+
+---
+
 ## 1. What Is Sentino
 
 Sentino IoT is an IoT platform **designed for AI voice-interactive devices**. The core problem it solves is:
 
 > Enabling an embedded device (such as a doll, speaker, or robot) to conduct **real-time voice conversations** with cloud-based AI.
+
+> **Positioning**: Sentino IoT follows the **Tuya model** (terminal-direct)—your App / device calls Sentino's cloud directly; **there is no customer-owned backend** in between. This is not the AWS IoT model (developer backend integration). This documentation covers only the "thing" layer (device access, provisioning, MQTT, OTA, agent binding). Customizing AI agent behavior (LLM/TTS orchestration, memory, workflows, custom tools) belongs to the Sentino Agent Platform — please contact the Sentino team for those docs.
 
 The platform provides all the infrastructure needed to achieve this goal:
 
@@ -16,6 +24,19 @@ The platform provides all the infrastructure needed to achieve this goal:
 - **Device Provisioning** — On first use, users complete device binding via phone App Bluetooth (BLE)
 - **AI Voice Conversation** — Devices conduct low-latency real-time voice calls with cloud AI Agents via Agora RTC
 - **Agent Management** — Configure different AI characters (persona, voice, behavior) for devices
+
+### Product Capabilities at a Glance
+
+| Capability | Description | User Value |
+|------|------|----------|
+| **Real-time AI Voice** | Low-latency voice conversation with cloud AI characters | Speak naturally, no waiting |
+| **Multi-role AI Agents** | Configure different AI roles (storyteller, English tutor, companion, etc.) | One device, many experiences |
+| **NFC Role Switching** (optional) | Tap a physical NFC card to switch AI role | Kid-friendly, no screen needed |
+| **One-tap BLE Provisioning** | Phone App scans + Bluetooth completes device binding | Ready out-of-the-box |
+| **Workflow Orchestration** | Function Calling, memory retrieval, task execution | AI doesn't just chat, it acts |
+| **AI-driven Device Control** | Voice commands control hardware (expression, motion, LED, volume, etc.) | Voice is the controller |
+| **OTA Remote Updates** | Cloud pushes firmware updates, device upgrades automatically | Iterate without recall |
+| **Multi-device Management** | Manage multiple devices and roles under one account | One App for everything |
 
 ---
 
@@ -52,10 +73,13 @@ graph LR
 
 | Channel | Protocol | Purpose | When Used |
 |---|---|---|---|
-| Device <-> Cloud | **MQTT 5.0** | Device auth, binding, status reporting, command dispatch, obtaining RTC params | Always connected after device powers on |
+| Device <-> Sentino IoT Platform | **MQTT 5.0** | Device auth, binding, status reporting, command dispatch, obtaining RTC params | Always connected after device powers on |
 | App <-> Device | **BLE** (Bluetooth Low Energy) | First-time provisioning to transfer binding info (WiFi credentials or user ID) | First-time provisioning only |
-| App <-> Cloud | **HTTPS** (REST API) | User login, device management, agent management | While App is running |
+| App <-> Sentino IoT Platform | **HTTPS** (REST API) | User login, device management, agent management | While App is running |
 | Device <-> Agora | **RTC** (UDP) | Real-time audio transmission | During voice conversations only |
+| Sentino IoT Platform <-> Agora | **HTTPS** | Create / stop AI Agent | At conversation start / end |
+| Agora <-> Sentino Agent Platform | **HTTPS** + **HTTP Callback** + **SSE** | Agent management + ASR text callback + LLM/TTS streaming back | During voice conversations |
+| Sentino Agent Platform <-> LLM/TTS | **HTTPS** | AI inference, speech synthesis | During voice conversations |
 
 ---
 
@@ -149,7 +173,7 @@ An **Agent** is the configuration unit for an AI character, defining the AI's be
 
 A device determines which AI character to use for conversations by "binding an agent."
 
-### 3.5 Accounts & Device Ownership
+### 3.7 Accounts & Device Ownership
 
 Each user has an **account** in Sentino. Devices are associated with this account during binding.
 
@@ -236,7 +260,7 @@ graph LR
 | **Report-Reply** | Device initiates | Device -> `report` -> cloud processes -> `report_response` -> device | Device binding, AI access request, property reporting |
 | **Issue-Reply** | Cloud initiates | Cloud -> `issue` -> device processes -> `issue_response` -> cloud | OTA update, property setting, device reset |
 
-All messages are in JSON format, differentiated by the `code` field (e.g., `bind`, `info`, `ota`, etc.). For detailed protocol definitions, see [MQTT Protocol Reference](./ref-mqtt.md).
+All messages are in JSON format, differentiated by the `code` field (e.g., `bind`, `info`, `ota`, etc.). For detailed protocol definitions, see [MQTT Protocol Reference](reference/ref-mqtt.md).
 
 ---
 
@@ -275,7 +299,26 @@ sequenceDiagram
 
 ---
 
-## 8. Glossary
+## 8. Two Product Paths
+
+The Sentino ecosystem offers two paths to Agora's voice AI, sharing the same Agora Conversational AI Engine and SD-RTN, but differing in terminal, signaling channel, and Agent creator:
+
+| Comparison | IoT Device Path (this doc's focus) | Sentino Agent Platform Web Path |
+|--------|-------------|-------------------|
+| **Terminal** | Embedded hardware (dolls, speakers, etc.) | Web browser |
+| **Audio Carrier** | Agora RTC C SDK (RTOS) | Agora RTC Web SDK (browser) |
+| **Signaling** | MQTT 5.0 | HTTPS REST API |
+| **Agent Creator** | Sentino IoT Platform | Sentino Agent Platform |
+| **LLM/TTS Caller** | Sentino Agent Platform (Agora calls back via HTTP) | Sentino Agent Platform (same) |
+| **Workflow** | Function Calling, memory retrieval, orchestration | Function Calling, memory retrieval, orchestration |
+| **IoT Exclusive** | **Device Control** — Function Calling over RTC dispatches commands to hardware (expressions, actions, LEDs, volume, etc.) | — |
+| **Use Cases** | Consumer electronics (dolls, story machines, education robots) | Enterprise & consumer AI Agent apps (CS, meeting assistants, etc.) |
+
+> Both paths share the same Sentino Agent Platform workflow engine. Agora handles audio transport and ASR; Sentino Agent Platform handles LLM inference and TTS (Agora does not call LLM/TTS directly).
+
+---
+
+## 9. Glossary
 
 | Term (CN) | English | Description |
 |---|---|---|
@@ -302,4 +345,4 @@ sequenceDiagram
 
 ---
 
-**Next Steps**: [Quick Start — Device](./quickstart-device.md) | [MQTT Protocol Reference](./ref-mqtt.md)
+**Next Steps**: [Quick Start — Device](tutorials/quickstart-device.md) | [MQTT Protocol Reference](reference/ref-mqtt.md)
