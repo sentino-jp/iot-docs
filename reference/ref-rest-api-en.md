@@ -180,6 +180,7 @@ Grouped by business area — click to jump to the corresponding section.
 | [5.9](#59-issue-device-properties) | Issue device properties (control hardware) | `POST /business-app/v1/device/command/propsIssue` |
 | [5.10](#510-device-network-check) | Device network check | `POST /business-app/v1/device/command/checkSignal` |
 | [5.11](#511-get-device-thing-model-dps) | Get device Thing Model DPs | `POST /business-app/v1/device/getDpInfos/{deviceId}` |
+| [5.12](#512-unbind-device-alias-unbindfromasset) | Unbind device (alias) | `POST /business-app/v1/device/unbindFromAsset` |
 
 ### Agent Management
 
@@ -969,6 +970,8 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/ota/checkUpgrade/$DEVIC
 
 Unbind a device, with the option to clear its data.
 
+> The server also accepts the equivalent alias [§5.12 unbindFromAsset](#512-unbind-device-alias-unbindfromasset). Both work; this section's path is the recommended one.
+
 ```
 POST /business-app/v1/device/bind/unbind
 ```
@@ -1145,6 +1148,25 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
   ]
 }
 ```
+
+---
+
+### 5.12 Unbind Device (alias: unbindFromAsset)
+
+Equivalent alias of [§5.6](#56-unbind-device). The server accepts both paths with identical business effect: unbind a device.
+
+```
+POST /business-app/v1/device/unbindFromAsset
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `deviceId` | string | Yes | Device ID |
+| `isCleanData` | int | Yes | `1` = clear data, `0` = do not clear |
+
+> Both paths exist for historical reasons. New code should prefer [§5.6 `bind/unbind`](#56-unbind-device) (consistent with the bind / unbind business naming); existing code already using `unbindFromAsset` may keep it.
 
 ---
 

@@ -180,6 +180,7 @@ Authorization: Bearer {access_token}
 | [5.9](#59-下发设备属性) | 下发设备属性（控制硬件） | `POST /business-app/v1/device/command/propsIssue` |
 | [5.10](#510-设备网络检测) | 设备网络检测 | `POST /business-app/v1/device/command/checkSignal` |
 | [5.11](#511-获取设备物模型-dp-点) | 获取设备物模型 DP 点 | `POST /business-app/v1/device/getDpInfos/{deviceId}` |
+| [5.12](#512-设备解绑别名unbindfromasset) | 设备解绑别名 | `POST /business-app/v1/device/unbindFromAsset` |
 
 ### 智能体管理
 
@@ -969,6 +970,8 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/ota/checkUpgrade/$DEVIC
 
 解绑设备，可选择是否清除数据。
 
+> 服务端同时支持等价别名 [§5.12 unbindFromAsset](#512-设备解绑别名unbindfromasset)，二者均生效。本节路径为推荐用法。
+
 ```
 POST /business-app/v1/device/bind/unbind
 ```
@@ -1145,6 +1148,25 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
   ]
 }
 ```
+
+---
+
+### 5.12 设备解绑（别名 unbindFromAsset）
+
+[§5.6](#56-设备解绑) 的等价别名路径。服务端同时接受两条路径，业务效果相同：解除设备绑定。
+
+```
+POST /business-app/v1/device/unbindFromAsset
+```
+
+**Body 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `deviceId` | string | 是 | 设备 ID |
+| `isCleanData` | int | 是 | `1`=清除数据，`0`=不清除 |
+
+> 历史原因服务端同时保留两条路径。新代码推荐用 [§5.6 `bind/unbind`](#56-设备解绑)（与「绑定/解绑」业务命名一致）；存量代码若已用 `unbindFromAsset`，可保持。
 
 ---
 
