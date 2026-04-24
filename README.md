@@ -46,7 +46,8 @@ Sentino IoT 是面向 AI 语音交互设备的物联网平台。设备配网 →
 | REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | 参数由云端动态下发 |
 
-测试三元组（UUID / KEY / MAC）和 App 凭证（`app_id` / `channel_identifier` / `package_name`）请联系 Sentino 团队为你的应用分配。
+> [!IMPORTANT]
+> 测试三元组（UUID / KEY / MAC）和 App 凭证（`app_id` / `channel_identifier` / `package_name`）**必须**由 Sentino 团队为你的应用分配。文档示例值仅供参考，**生产请勿直接复用**。
 
 ---
 

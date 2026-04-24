@@ -46,7 +46,8 @@ Start with [Architecture & Concepts](./architecture-en.md) (overall architecture
 | REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | Parameters delivered by the cloud at runtime |
 
-Test triplets (UUID / KEY / MAC) and App credentials (`app_id` / `channel_identifier` / `package_name`) must be issued by the Sentino team for your application.
+> [!IMPORTANT]
+> Test triplets (UUID / KEY / MAC) and App credentials (`app_id` / `channel_identifier` / `package_name`) **must** be issued by the Sentino team for your application. Example values in this documentation are for reference only — **do not reuse them in production**.
 
 ---
 
