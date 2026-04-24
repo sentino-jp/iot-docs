@@ -16,7 +16,7 @@ Sentino IoT is an IoT platform **designed for AI voice-interactive devices**. Th
 
 > Enabling an embedded device (such as a doll, speaker, or robot) to conduct **real-time voice conversations** with cloud-based AI.
 
-> **Positioning**: Sentino IoT follows the **Tuya model** (terminal-direct)—your App / device calls Sentino's cloud directly; **there is no customer-owned backend** in between. This is not the AWS IoT model (developer backend integration). This documentation covers only the "thing" layer (device access, provisioning, MQTT, OTA, agent binding). Customizing AI agent behavior (LLM/TTS orchestration, memory, workflows, custom tools) belongs to the Sentino Agent Platform — please contact the Sentino team for those docs.
+> **Positioning**: Sentino IoT is an end-to-end IoT solution — your App / device calls Sentino's cloud directly; **no customer-owned backend** is required. This documentation covers only the "thing" layer (device access, provisioning, MQTT, OTA, agent binding). Customizing AI agent behavior (LLM/TTS orchestration, memory, workflows, custom tools) belongs to the Sentino Agent Platform — please contact the Sentino team for those docs.
 
 The platform provides all the infrastructure needed to achieve this goal:
 
