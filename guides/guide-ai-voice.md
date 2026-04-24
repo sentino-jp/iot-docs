@@ -2,7 +2,7 @@
 
 > **TL;DR**：设备通过 MQTT 获取 Agora RTC 参数，加入频道即可与云端 AI 进行实时语音对话。本文档覆盖完整的对话生命周期、Agora SDK 集成、NFC 切换角色（可选）、异常处理和最佳实践。
 
-> **前置知识**：建议先阅读 [架构与概念](./architecture.md) 和 [MQTT 协议参考](./ref-mqtt.md)。
+> **前置知识**：建议先阅读 [架构与概念](../architecture.md) 和 [MQTT 协议参考](../reference/ref-mqtt.md)。
 
 ---
 
@@ -121,6 +121,8 @@ config.pcm_channel_num = 1;         // 单声道
 // 3. 加入频道 — AI Agent 已在频道内等待
 agora_rtc_join_channel(channelName, uid, rtcToken, &config);
 ```
+
+> **⚠ uid 必须使用云端返回值**：`rtcToken` 由云端基于特定 `uid`（如 `25532`）签发，设备必须用云端回复中的 `uid` 加入频道。硬编码或自定义 `uid` 会导致 Agora 返回 `Invalid token (CCGA code=9)`。
 
 **音频参数要求**：
 
@@ -337,6 +339,14 @@ void stop_voice_session(void) {
 
 > **建议**：如果设备需要频繁发起对话，可以只初始化一次 Agora SDK（`agora_rtc_init`），每次对话只调用 `join_channel` / `leave_channel`，避免重复初始化的开销。
 
+### 7.4 集成注意事项
+
+| 注意点 | 说明 |
+|---|---|
+| **datastream_queue 必须先初始化** | Agora RTC 收到 AI Agent 的 stream message（如表情/动作 Function Call）会推送到 `datastream_queue`。如果队列在 `agora_rtc_init` 之前未创建（NULL），`xQueueGenericSend` 会触发 assert 导致设备重启 |
+| **uid 不可硬编码** | 见 §3.2 的告警 |
+| **OPUS / 16kHz / 单声道** | 任一项不匹配都会导致音频静默或无法识别，参数清单见 §3.2 |
+
 ---
 
 ## 8. 最佳实践
@@ -351,4 +361,4 @@ void stop_voice_session(void) {
 
 ---
 
-**相关文档**：[架构与概念](./architecture.md) | [MQTT 协议参考](./ref-mqtt.md) | [设备端集成指南](./guide-device.md)
+**相关文档**：[架构与概念](../architecture.md) | [MQTT 协议参考](../reference/ref-mqtt.md) | [设备端集成指南](./guide-device.md)

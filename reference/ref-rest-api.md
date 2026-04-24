@@ -105,6 +105,54 @@ Authorization: Bearer {access_token}
 
 ---
 
+## 接口速查表
+
+按业务分组，点击跳转到对应小节。
+
+### 用户认证
+
+| § | 接口 | Method + Path |
+|---|---|---|
+| [3.1](#31-用户登录授权) | 用户登录（注册/授权合一） | `POST /auth/oauth/token` |
+
+### 配网
+
+| § | 接口 | Method + Path |
+|---|---|---|
+| [4.1](#41-获取产品信息) | 获取产品信息（查询配网模式） | `POST /business-app/v1/product/getByProductId` |
+| [4.2](#42-配网数据加密) | 配网数据加密 | `POST /business-app/v1/distributionNet/dataEncrypt` |
+| [4.3](#43-获取数据中心列表) | 获取数据中心列表 | `POST /business-app/v1/common/getDataCenterList` |
+| [4.4](#44-设备绑定状态查询) | 设备绑定状态查询（轮询） | `POST /business-app/v1/device/bind/checkBindResult/{uuid}` |
+
+### 设备管理
+
+| § | 接口 | Method + Path |
+|---|---|---|
+| [5.1](#51-获取账户-id) | 获取账户 ID（资产树） | `POST /business-app/v1/asset/assetTree` |
+| [5.2](#52-获取设备信息) | 获取设备信息 | `POST /business-app/v1/device/getSimpleDeviceInfo` |
+| [5.3](#53-获取产品品类) | 获取产品品类 | `POST /business-app/v1/category/top` |
+| [5.4](#54-获取设备列表) | 获取设备列表 | `POST /business-app/v1/device/getHomeDeviceAndGroupList` |
+| [5.5](#55-ota-升级检查) | OTA 升级检查 | `POST /business-app/v1/ota/checkUpgrade/{deviceId}/{type}` |
+| [5.6](#56-设备解绑) | 设备解绑 | `POST /business-app/v1/device/bind/unbind` |
+
+### 智能体管理
+
+| § | 接口 | Method + Path |
+|---|---|---|
+| [6.1](#61-获取推荐智能体列表) | 推荐智能体列表 | `POST /business-app/v1/agents/recommend/agents-list` |
+| [6.2](#62-获取智能体详情) | 智能体详情 | `POST /business-app/v1/agents/detail` |
+| [6.3](#63-获取自定义智能体列表) | 自定义智能体列表 | `POST /business-app/v1/agents/customize/agents-list` |
+| [6.4](#64-创建自定义智能体) | 创建自定义智能体 | `POST /business-app/v1/agents/customize/create` |
+| [6.5](#65-删除自定义智能体) | 删除自定义智能体 | `POST /business-app/v1/agents/customize/deleteById` |
+| [6.6](#66-获取推荐-sentino-智能体列表) | Sentino 智能体列表 | `POST /business-app/v1/sentino-agents/recommend/agents-list` |
+| [6.7](#67-获取-sentino-智能体详情) | Sentino 智能体详情 | `POST /business-app/v1/sentino-agents/detail` |
+| [6.8](#68-获取用户已绑定智能体列表) | 已绑定智能体列表 | `POST /business-app/v1/user-agents/list` |
+| [6.9](#69-绑定智能体到设备) | 绑定智能体到设备 | `POST /business-app/v1/agents/device/bind-agent` |
+| [6.10](#610-nfc-卡片列表) | NFC 卡片列表 | `POST /business-app/v1/agents/nfc/list` |
+| [6.11](#611-nfc-卡片绑定智能体) | NFC 卡片绑定智能体 | `POST /business-app/v1/agents/nfc/bind-agent` |
+
+---
+
 ## 3. 用户认证接口
 
 ### 3.1 用户登录（授权）
@@ -1073,33 +1121,8 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" 
 
 ---
 
-## 8. 接口速查表
-
-| # | 接口 | 路径 | 用途 |
-|---|---|---|---|
-| 1 | 用户登录 | `POST /auth/oauth/token` | 注册/登录获取 Token |
-| 2 | 获取产品信息 | `POST /business-app/v1/product/getByProductId` | 查询产品配网模式 |
-| 3 | 配网数据加密 | `POST /business-app/v1/distributionNet/dataEncrypt` | 加密配网数据 |
-| 4 | 获取数据中心列表 | `POST /business-app/v1/common/getDataCenterList` | 查询数据中心 |
-| 5 | 绑定状态查询 | `POST /business-app/v1/device/bind/checkBindResult/{uuid}` | 轮询配网结果 |
-| 6 | 获取账户 ID | `POST /business-app/v1/asset/assetTree` | 获取用户账户 ID |
-| 7 | 获取设备信息 | `POST /business-app/v1/device/getSimpleDeviceInfo` | 查询设备状态 |
-| 8 | 获取产品品类 | `POST /business-app/v1/category/top` | 品类列表（可选） |
-| 9 | 获取设备列表 | `POST /business-app/v1/device/getHomeDeviceAndGroupList` | 用户全部设备 |
-| 10 | OTA 检查 | `POST /business-app/v1/ota/checkUpgrade/{deviceId}/{type}` | 检查固件升级 |
-| 11 | 设备解绑 | `POST /business-app/v1/device/bind/unbind` | 解绑设备 |
-| 12 | 推荐智能体列表 | `POST /business-app/v1/agents/recommend/agents-list` | 官方 AI 角色 |
-| 13 | 智能体详情 | `POST /business-app/v1/agents/detail` | 角色详细配置 |
-| 14 | 自定义智能体列表 | `POST /business-app/v1/agents/customize/agents-list` | 用户自定义角色 |
-| 15 | 创建自定义智能体 | `POST /business-app/v1/agents/customize/create` | 创建自定义角色 |
-| 16 | 删除自定义智能体 | `POST /business-app/v1/agents/customize/deleteById` | 删除自定义角色 |
-| 17 | Sentino 智能体列表 | `POST /business-app/v1/sentino-agents/recommend/agents-list` | Sentino 角色 |
-| 18 | Sentino 智能体详情 | `POST /business-app/v1/sentino-agents/detail` | Sentino 角色配置 |
-| 19 | 已绑定智能体列表 | `POST /business-app/v1/user-agents/list` | 用户已绑定角色 |
-| 20 | 绑定智能体 | `POST /business-app/v1/agents/device/bind-agent` | 绑定 AI 角色到设备 |
-| 21 | NFC 卡片列表 | `POST /business-app/v1/agents/nfc/list` | 底座 NFC 卡片 |
-| 22 | NFC 卡片绑定智能体 | `POST /business-app/v1/agents/nfc/bind-agent` | NFC 绑定角色 |
+> 接口速查表已前移到本文顶部（§2 之后），按业务分组并支持锚点跳转。
 
 ---
 
-**相关文档**：[App 端集成指南](./guide-app.md) | [快速入门 — App 端](./quickstart-app.md) | [架构与概念](./architecture.md)
+**相关文档**：[App 端集成指南](../guides/guide-app.md) | [快速入门 — App 端](../tutorials/quickstart-app.md) | [架构与概念](../architecture.md)
