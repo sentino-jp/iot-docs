@@ -46,7 +46,7 @@ POST /auth/oauth/token
 **请求**：
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
+curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \

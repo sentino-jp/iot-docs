@@ -16,7 +16,7 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 
 | Item | Value |
 |---|---|
-| REST API base URL | `https://api-iot.sentino.jp` |
+| REST API base URL | `https://api-iot.sentino.jp/api` |
 | app_id | `krkfvb4s5e91hq` |
 | Authorization (for login) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 
@@ -27,7 +27,7 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 Sentino uses UID-based login — if the UID does not exist, an account is automatically created.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
+curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
@@ -67,7 +67,7 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
 # Or extract automatically with jq
-TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
+TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
@@ -90,7 +90,7 @@ echo "Token: $TOKEN"
 Binding a device requires specifying an `assetId` (account ID). Call the following endpoint to obtain it, and use the `assetId` of the root node directly.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -H "timezone: Asia/Shanghai" \
@@ -129,7 +129,7 @@ Take note of the root node's `id` (the account ID, i.e. assetId); it will be use
 Query the product's provisioning mode and basic configuration by product ID.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
@@ -163,7 +163,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProduct
 Query a device's basic info and binding status by device UUID and product ID.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDeviceInfo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}' | jq .
@@ -195,7 +195,7 @@ A `bindStatus` of `0` indicates the device is unbound and ready for provisioning
 Get the list of officially recommended agents (AI characters).
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/agents-list" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}" | jq .
@@ -226,7 +226,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/age
 Pick an agent and bind it to the device. After binding, the device will use this agent when initiating an AI conversation.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agent" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{

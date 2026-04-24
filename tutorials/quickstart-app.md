@@ -16,7 +16,7 @@
 
 | 项目 | 值 |
 |---|---|
-| REST API 基础 URL | `https://api-iot.sentino.jp` |
+| REST API 基础 URL | `https://api-iot.sentino.jp/api` |
 | app_id | `krkfvb4s5e91hq` |
 | Authorization (登录用) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 
@@ -27,7 +27,7 @@
 Sentino 使用 UID 方式登录 — 如果 UID 不存在则自动注册。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
+curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
@@ -67,7 +67,7 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
 # 或者用 jq 自动提取
-TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
+TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
@@ -90,7 +90,7 @@ echo "Token: $TOKEN"
 绑定设备时需要指定 `assetId`（账户 ID）。调用以下接口获取，直接使用根节点的 `assetId`。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -H "timezone: Asia/Shanghai" \
@@ -129,7 +129,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
 通过产品 ID 查询产品的配网模式和基本配置。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
@@ -163,7 +163,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProduct
 通过设备 UUID 和产品 ID 查询设备基本信息和绑定状态。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDeviceInfo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}' | jq .
@@ -195,7 +195,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDevi
 获取官方推荐的智能体（AI 角色）列表。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/agents-list" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}" | jq .
@@ -226,7 +226,7 @@ curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/age
 选择一个智能体，将其绑定到设备。绑定后设备发起 AI 对话时将使用该智能体。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agent" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{

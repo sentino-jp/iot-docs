@@ -68,7 +68,7 @@
 | 项目 | 测试环境 |
 |---|---|
 | MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0) |
-| REST API | `https://api-iot.sentino.jp` |
+| REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | 参数由云端动态下发 |
 
 ---

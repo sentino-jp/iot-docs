@@ -8,7 +8,7 @@
 
 | Item | Value |
 |---|---|
-| Base URL | `https://api-iot.sentino.jp` |
+| Base URL | `https://api-iot.sentino.jp/api` |
 | Authentication | Bearer Token (the login endpoint uses Basic Auth) |
 
 > **Reference implementation**: Every endpoint has a corresponding Dart implementation, organized by business area into 4 repository files:
@@ -216,6 +216,8 @@ Sentino supports two authentication modes simultaneously. Pick one based on your
 | **Password Mode** (consumer-facing) | `password` | Use the Sentino consumer account system directly (email + password + verification code) | §3.1 + §3.2 ~ §3.12 |
 
 > The server recognizes both modes and routes by the `grant_type` field. The white-label Flutter App template (`sentino-app-sample`) uses Password Mode by default.
+>
+> **Tokens issued by either mode are fully equivalent** — subsequent business endpoints, validity period, and response fields (including `appMqttPassword`, `tenantId`, `authenticationIdentity`, etc.) are identical. Pick a `grant_type` based on your scenario; functionality is unaffected.
 
 ---
 
@@ -259,7 +261,7 @@ POST /auth/oauth/token
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=$AREA_CODE&app_id=$APP_ID" \
+curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token?grant_type=uid&area_code=$AREA_CODE&app_id=$APP_ID" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic $CLIENT_ID" \
   -H "client_id: $CLIENT_ID" \
@@ -290,7 +292,7 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/auth/oauth/token" \
+curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic $CLIENT_ID" \
   -H "client_id: $CLIENT_ID" \
@@ -513,7 +515,7 @@ POST /business-app/v1/product/getByProductId
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/product/getByProductId?productId=$PRODUCT_ID" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=$PRODUCT_ID" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -588,7 +590,7 @@ POST /business-app/v1/distributionNet/dataEncrypt
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/distributionNet/dataEncrypt" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/distributionNet/dataEncrypt" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d @- <<EOF
@@ -624,7 +626,7 @@ POST /business-app/v1/common/getDataCenterList
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/common/getDataCenterList" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/common/getDataCenterList" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -667,7 +669,7 @@ POST /business-app/v1/device/bind/checkBindResult/{uuid}
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindResult/$UUID" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/bind/checkBindResult/$UUID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -762,7 +764,7 @@ POST /business-app/v1/asset/assetTree
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/asset/assetTree" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -H "timezone: $TIMEZONE" \
@@ -813,7 +815,7 @@ POST /business-app/v1/device/getSimpleDeviceInfo
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/getSimpleDeviceInfo" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"productId\": \"$PRODUCT_ID\", \"uuid\": \"$UUID\"}"
@@ -848,7 +850,7 @@ POST /business-app/v1/category/top
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/category/top" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/category/top" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}"
@@ -888,7 +890,7 @@ POST /business-app/v1/device/getHomeDeviceAndGroupList
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/getHomeDeviceAndGroupList" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDeviceAndGroupList" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"assetIds\": [\"$ASSET_ID\"]}"
@@ -943,7 +945,7 @@ POST /business-app/v1/ota/checkUpgrade/{deviceId}/{firmwareType}
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/ota/checkUpgrade/$DEVICE_ID/module" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/ota/checkUpgrade/$DEVICE_ID/module" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -986,7 +988,7 @@ POST /business-app/v1/device/bind/unbind
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/unbind" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/bind/unbind" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"deviceId\": \"$DEVICE_ID\", \"isCleanData\": 1}"
@@ -1077,7 +1079,7 @@ Content-Type: application/json
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/command/propsIssue" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/command/propsIssue" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"deviceId\": \"$DEVICE_ID\", \"data\": {\"volume\": 50}}"
@@ -1183,7 +1185,7 @@ POST /business-app/v1/agents/recommend/agents-list
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/recommend/agents-list" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}"
@@ -1225,7 +1227,7 @@ POST /business-app/v1/agents/detail
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/detail?agentId=$AGENT_ID" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/detail?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -1260,7 +1262,7 @@ POST /business-app/v1/agents/customize/agents-list
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/agents-list" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}"
@@ -1309,7 +1311,7 @@ POST /business-app/v1/agents/customize/create
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/create" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/create" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -1351,7 +1353,7 @@ POST /business-app/v1/agents/customize/deleteById
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/customize/deleteById?agentId=$AGENT_ID" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/deleteById?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -1386,7 +1388,7 @@ POST /business-app/v1/sentino-agents/recommend/agents-list
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/recommend/agents-list" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -H "client_id: $CLIENT_ID" \
@@ -1430,7 +1432,7 @@ POST /business-app/v1/sentino-agents/detail
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/sentino-agents/detail?agentId=$AGENT_ID" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/detail?agentId=$AGENT_ID" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -1463,7 +1465,7 @@ POST /business-app/v1/user-agents/list
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/user-agents/list" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -1506,7 +1508,7 @@ POST /business-app/v1/agents/device/bind-agent
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/device/bind-agent" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"official\", \"deviceId\": \"$DEVICE_ID\"}"
@@ -1535,7 +1537,7 @@ POST /business-app/v1/agents/nfc/list
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/list" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}"
@@ -1577,7 +1579,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 **curl example**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" \
+curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"official\"}"

@@ -68,7 +68,7 @@ Pick a reading path based on your role:
 | Item | Test Environment |
 |---|---|
 | MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0) |
-| REST API | `https://api-iot.sentino.jp` |
+| REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | Parameters dynamically delivered by the cloud |
 
 ---
