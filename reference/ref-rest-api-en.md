@@ -1,6 +1,6 @@
 # REST API Reference
 
-> **TL;DR**: Complete reference for the Sentino IoT platform REST API. Covers authentication, provisioning, device management, and Agent management — 22 endpoints in total, each accompanied by a curl example.
+> **TL;DR**: Complete reference for the Sentino IoT platform REST API. Covers authentication, provisioning, device management, and Agent management — 40+ endpoints in total, each accompanied by a curl example.
 
 ---
 
@@ -10,6 +10,14 @@
 |---|---|
 | Base URL | `https://api-iot.sentino.jp` |
 | Authentication | Bearer Token (the login endpoint uses Basic Auth) |
+
+> **Reference implementation**: Every endpoint has a corresponding Dart implementation, organized by business area into 4 repository files:
+> - [`api_auth_repository.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/repositories/api/api_auth_repository.dart) — §3 Authentication / Account
+> - [`api_device_repository.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/repositories/api/api_device_repository.dart) — §4 Provisioning + §5 Device Management
+> - [`api_agent_repository.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/repositories/api/api_agent_repository.dart) — §6 Agent Management
+> - [`api_ota_repository.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/repositories/api/api_ota_repository.dart) — OTA
+>
+> Common header injection: [`lib/utils/api_client.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/api_client.dart); constants: [`lib/utils/app_config.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/utils/app_config.dart)
 
 ### 1.1 Environment Variable Setup
 
@@ -91,17 +99,39 @@ All endpoints (including login) must include the following request headers.
 | Header | Default | Description |
 |--------|--------|------|
 | `timezone` | `Asia/Shanghai` | User timezone |
-| `language` | `zh_CN` | User language |
+| `language` | `zh_CN` | User language (`zh_CN` / `en_US` / `ja_JP`) |
+
+**Client environment identification (injected on every request)**:
+
+| Header | Example | Description |
+|--------|---------|------|
+| `os_name` | `android` / `ios` / `windows` | Operating system type |
+| `version` | `1.0.0-2604131058` | App version (used by the server for compatibility checks) |
+| `devid` | androidId / IDFV | Unique device identifier |
+| `ua` | Base64-encoded | Format: `brand\|model\|os\|resolution\|deviceName` |
+| `request_id` | UUID v4 | Unique ID per request (for server-side log tracing) |
+
+> These 5 headers are injected automatically by the client SDK. If you implement your own HTTP client (instead of the Flutter template), construct them manually.
 
 ### 2.4 Common Response Format
 
 ```json
 {
+  "reqId": "a3f8b2c1-...",
+  "time": 1742536800,
   "code": 200,
   "message": "success",
   "data": {}
 }
 ```
+
+| Field | Type | Description |
+|------|------|------|
+| `reqId` | string | Trace ID assigned by the server for this request. Logging this value on the client is recommended for joint troubleshooting |
+| `time` | int | Server processing timestamp (seconds) |
+| `code` | int | Business code. `200` = success; for other values see [§7 Error Codes](#7-error-codes) |
+| `message` | string | Result description |
+| `data` | object/array/null | Business data; structure varies per endpoint |
 
 ---
 
@@ -109,11 +139,19 @@ All endpoints (including login) must include the following request headers.
 
 Grouped by business area — click to jump to the corresponding section.
 
-### User Authentication
+### User Authentication / Account
 
 | § | Endpoint | Method + Path |
 |---|---|---|
-| [3.1](#31-user-login-authorization) | User login (registration/authorization combined) | `POST /auth/oauth/token` |
+| [3.1](#31-user-login-authorization) | User login (UID Mode + Password Mode) | `POST /auth/oauth/token` |
+| [3.2](#32-send-registration-verification-code-password-mode) | Send registration verification code | `POST /business-app/v2/user/register/sendRegisterCode` |
+| [3.3](#33-register-password-mode) | Register (email + password) | `POST /business-app/v1/user/register/registryByUserName` |
+| [3.4](#34-recover-password) | Recover password (send code + reset) | `POST /business-app/v2/user/password/find/sendFindPasswordCode` etc. |
+| [3.5](#35-change-password) | Change password | `POST /business-app/v1/user/password/update/updatePassword` |
+| [3.6](#36-logout) | Logout | `POST /auth/oauth/logout` |
+| [3.7](#37-get-user-profile) | Get user profile | `POST /business-app/v1/user/profile` |
+| [3.8](#38-update-user-info) | Update user info | `POST /business-app/v1/user/updateInfo` |
+| [3.9](#39-upload-file) | Upload file (e.g. avatar) | `POST /business-app/v1/file/uploadFile` |
 
 ### Provisioning
 
@@ -123,17 +161,25 @@ Grouped by business area — click to jump to the corresponding section.
 | [4.2](#42-encrypt-provisioning-data) | Encrypt provisioning data | `POST /business-app/v1/distributionNet/dataEncrypt` |
 | [4.3](#43-get-data-center-list) | Get data center list | `POST /business-app/v1/common/getDataCenterList` |
 | [4.4](#44-query-device-binding-status) | Query device binding status (polling) | `POST /business-app/v1/device/bind/checkBindResult/{uuid}` |
+| [4.5](#45-4g-binding-code-provisioning) | 4G binding code provisioning | `POST /business-app/v1/device/bind/bindDeviceBy4gCode` |
+| [4.6](#46-barcode-provisioning) | Barcode provisioning | `POST /business-app/v1/device/bind/bindDeviceFromBarcode` |
+| [4.7](#47-direct-bind-known-uuid) | Direct bind (known UUID) | `POST /business-app/v1/device/bind/bindDevice` |
 
 ### Device Management
 
 | § | Endpoint | Method + Path |
 |---|---|---|
 | [5.1](#51-get-account-id) | Get account ID (asset tree) | `POST /business-app/v1/asset/assetTree` |
-| [5.2](#52-get-device-info) | Get device info | `POST /business-app/v1/device/getSimpleDeviceInfo` |
+| [5.2](#52-get-device-info) | Get device info (by UUID/PID) | `POST /business-app/v1/device/getSimpleDeviceInfo` |
 | [5.3](#53-get-product-categories) | Get product categories | `POST /business-app/v1/category/top` |
 | [5.4](#54-get-device-list) | Get device list | `POST /business-app/v1/device/getHomeDeviceAndGroupList` |
 | [5.5](#55-ota-upgrade-check) | OTA upgrade check | `POST /business-app/v1/ota/checkUpgrade/{deviceId}/{type}` |
 | [5.6](#56-unbind-device) | Unbind device | `POST /business-app/v1/device/bind/unbind` |
+| [5.7](#57-get-device-detail) | Get device detail (by deviceId) | `POST /business-app/v1/device/getByDeviceId/{deviceId}` |
+| [5.8](#58-rename-device) | Rename device | `POST /business-app/v1/device/initDevice` |
+| [5.9](#59-issue-device-properties) | Issue device properties (control hardware) | `POST /business-app/v1/device/command/propsIssue` |
+| [5.10](#510-device-network-check) | Device network check | `POST /business-app/v1/device/command/checkSignal` |
+| [5.11](#511-get-device-thing-model-dps) | Get device Thing Model DPs | `POST /business-app/v1/device/getDpInfos/{deviceId}` |
 
 ### Agent Management
 
@@ -150,14 +196,27 @@ Grouped by business area — click to jump to the corresponding section.
 | [6.9](#69-bind-agent-to-device) | Bind Agent to device | `POST /business-app/v1/agents/device/bind-agent` |
 | [6.10](#610-nfc-card-list) | NFC card list | `POST /business-app/v1/agents/nfc/list` |
 | [6.11](#611-bind-agent-to-nfc-card) | Bind Agent to NFC card | `POST /business-app/v1/agents/nfc/bind-agent` |
+| [6.12](#612-update-customized-agent) | Update customized Agent | `POST /business-app/v1/agents/customize/update` |
+| [6.13](#613-unbind-agent-device) | Unbind Agent (device) | `POST /business-app/v1/agents/device/unbind-agent` |
+| [6.14](#614-get-agent-bound-to-device) | Get Agent bound to device | `POST /business-app/v1/agents/device/getAgentBaseByDeviceId` |
+| [6.15](#615-helper-endpoints-language--voice--llm-lists) | Helper lists (language / voice / LLM) | `POST /business-app/v1/agents/customize/{language,voice,llm}-list` |
 
 ---
 
 ## 3. User Authentication Endpoints
 
-### 3.1 User Login (Authorization)
+Sentino supports two authentication modes simultaneously. Pick one based on your integration scenario:
 
-Registration and login are combined; authorization uses the UID method. If the UID does not exist, the user is automatically registered.
+| Mode | grant_type | Use case | Related endpoints |
+|---|---|---|---|
+| **UID Mode** (B2B2C) | `uid` | The brand already has its own user system; pass `user_id` through to Sentino as `uid`. Registration and login are combined | §3.1 only |
+| **Password Mode** (consumer-facing) | `password` | Use the Sentino consumer account system directly (email + password + verification code) | §3.1 + §3.2 ~ §3.12 |
+
+> The server recognizes both modes and routes by the `grant_type` field. The white-label Flutter App template (`sentino-app-sample`) uses Password Mode by default.
+
+---
+
+### 3.1 User Login (Authorization)
 
 ```
 POST /auth/oauth/token
@@ -172,6 +231,8 @@ POST /auth/oauth/token
 | Common headers | All common headers in §2.3 must be included (`client_id`, `app_id`, etc.) |
 
 > **Note**: The login endpoint also requires the common request headers; otherwise the issued token will fail validation on subsequent business endpoints.
+
+#### Mode A: UID (registration + login combined)
 
 **Query parameters**:
 
@@ -209,7 +270,38 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
   -d "grant_type=uid&uid=$UID&password=test123456&area_code=$AREA_CODE&user_country_key=$USER_COUNTRY_KEY"
 ```
 
-**Response**:
+#### Mode B: Password (email + password)
+
+**Body parameters** (application/x-www-form-urlencoded):
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `grant_type` | string | Yes | Fixed value: `password` |
+| `username` | string | Yes | Email address |
+| `password` | string | Yes | Password (≥6 characters) |
+| `areaCode` | string | Yes | Area code, default `86` |
+| `countryKey` | string | Yes | Country code, default `CN` |
+
+> Before using Password Mode, a new user must first complete registration via §3.2 + §3.4.
+
+**curl example**:
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/auth/oauth/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic $CLIENT_ID" \
+  -H "client_id: $CLIENT_ID" \
+  -H "app_id: $APP_ID" \
+  -H "channel_identifier: $CHANNEL_IDENTIFIER" \
+  -H "package_name: $PACKAGE_NAME" \
+  -H "encrypt_type: $ENCRYPT_TYPE" \
+  -H "timezone: $TIMEZONE" \
+  -H "language: $LANGUAGE" \
+  -H "data_center_code: $DATA_CENTER_CODE" \
+  -d "grant_type=password&username=user@example.com&password=test123456&areaCode=86&countryKey=CN"
+```
+
+#### Response (same for both modes)
 
 ```json
 {
@@ -228,6 +320,172 @@ curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_co
   }
 }
 ```
+
+---
+
+### 3.2 Send Registration Verification Code (Password Mode)
+
+```
+POST /business-app/v2/user/register/sendRegisterCode
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `countryCode` | string | Yes | Country code, e.g. `86` |
+| `input` | string | Yes | Email address or phone number (auto-detected) |
+
+**Response `data`**:
+
+| Field | Type | Description |
+|---|---|---|
+| `sendTo` | string | Target the code was sent to (masked email/phone) |
+| `verifyCodeLength` | int | Verification code length (used to render the input field dynamically) |
+| `intervalSeconds` | int | Resend interval (seconds) |
+| `expireSeconds` | int | Code expiration (seconds) |
+
+---
+
+### 3.3 Register (Password Mode)
+
+```
+POST /business-app/v1/user/register/registryByUserName
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `input` | string | Yes | Email address |
+| `password` | string | Yes | Password (≥6 characters) |
+| `verifyCode` | string | Yes | Verification code received in §3.2 |
+| `countryCode` | string | Yes | Area code, default `86` |
+| `countryKey` | string | Yes | Country code, default `CN` |
+
+**Response**: `data: true` indicates successful registration; then call §3.1 Mode B to log in.
+
+---
+
+### 3.4 Recover Password
+
+Send password recovery verification code:
+
+```
+POST /business-app/v2/user/password/find/sendFindPasswordCode
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `input` | string | Yes | Email address |
+| `passwordFindType` | string | Yes | `email_code` or `sms_code` |
+
+Reset password:
+
+```
+POST /business-app/v1/user/password/find/resetPassword
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `input` | string | Yes | Email address |
+| `password` | string | Yes | New password |
+| `passwordFindType` | string | Yes | Same as the one used when sending the code |
+| `verifyCode` | string | Yes | Verification code |
+
+---
+
+### 3.5 Change Password
+
+```
+POST /business-app/v1/user/password/update/updatePassword
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `oldPassword` | string | Yes | Old password |
+| `password` | string | Yes | New password |
+| `passwordUpdateType` | string | Yes | Fixed value: `password` |
+
+> After a successful change, automatically logging out (clearing the local token) and redirecting to the login page is recommended.
+
+---
+
+### 3.6 Logout
+
+```
+POST /auth/oauth/logout
+```
+
+No request parameters; must include `Authorization: Bearer $TOKEN`. Response: `data: null`.
+
+---
+
+### 3.7 Get User Profile
+
+```
+POST /business-app/v1/user/profile
+```
+
+No request parameters.
+
+**Response `data`** (User object):
+
+| Field | Type | Description |
+|---|---|---|
+| `id` / `userId` / `memberId` | string | User ID (the same value under three aliases) |
+| `nickname` | string? | Nickname |
+| `userName` | string? | Username |
+| `email` | string? | Email |
+| `phone` | string? | Phone number |
+| `avatarUrl` | string? | Avatar URL |
+| `areaCode` | string? | Area code |
+| `userType` | int | User type |
+| `tz` | string? | Timezone |
+| `tempUnit` | string? | Temperature unit |
+
+---
+
+### 3.8 Update User Info
+
+```
+POST /business-app/v1/user/updateInfo
+Content-Type: application/json
+```
+
+**Body parameters**: dynamic — pass any updatable field from the User model.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `nickname` | string | No | Nickname |
+| `avatarUrl` | string | No | Avatar URL |
+| Other fields | any | No | Any updatable field from the User model |
+
+---
+
+### 3.9 Upload File
+
+```
+POST /business-app/v1/file/uploadFile
+Content-Type: multipart/form-data
+```
+
+**Form parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `file` | File | Yes | File (e.g. avatar image) |
+
+**Response `data`**: `string` (file URL). Commonly used by §3.8 to update the avatar.
 
 ---
 
@@ -427,6 +685,64 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/checkBindRe
 | Other | Binding not completed or failed |
 
 **Usage**: After provisioning data has been sent, poll once every 10 seconds for up to 120 seconds (12 attempts).
+
+---
+
+### 4.5 4G Binding Code Provisioning
+
+After a 4G device boots, it generates a 5-digit "binding code" that the user enters in the App to bind the device (no BLE involved).
+
+```
+POST /business-app/v1/device/bind/bindDeviceBy4gCode
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `assetId` | string | Yes | Asset ID (account ID) |
+| `bindCode` | string | Yes | 5-digit binding code |
+
+**Response**: `data: null`; `code: 200` indicates a successful bind.
+
+---
+
+### 4.6 Barcode Provisioning
+
+Bind the device by scanning the barcode printed on its housing (works for both 4G and WiFi devices).
+
+```
+POST /business-app/v1/device/bind/bindDeviceFromBarcode
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `assetId` | string | Yes | Asset ID |
+| `barcode` | string | Yes | Barcode printed on the device housing |
+
+---
+
+### 4.7 Direct Bind (Known UUID)
+
+Bypass the BLE provisioning flow and bind directly when the device UUID is already known.
+
+```
+POST /business-app/v1/device/bind/bindDevice
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `assetId` | string | Yes | Asset ID |
+| `deviceUuid` | string | Yes | Device UUID |
+
+> Only used in test/debug scenarios. Production Apps typically do not expose this entry point.
 
 ---
 
@@ -678,6 +994,153 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/bind/unbind" \
   "code": 200,
   "message": "success",
   "data": true
+}
+```
+
+---
+
+### 5.7 Get Device Detail
+
+Retrieve full device information by device ID (different from §5.2 which queries by UUID/PID — this endpoint requires the device to already be bound).
+
+```
+POST /business-app/v1/device/getByDeviceId/{deviceId}
+```
+
+**Path parameters**: `deviceId` — device ID
+
+**Response `data`** (Device object, fields same as §5.4):
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": "dev_001",
+    "uuid": "ct01CykKfw5SMybt",
+    "productId": "zuNuadqzsxEh75",
+    "name": "智能音箱",
+    "imageUrl": "https://cdn.example.com/device/speaker.png",
+    "onlineStatus": 1,
+    "firmwareVersion": "1.2.3",
+    "mac": "AA:BB:CC:DD:EE:FF",
+    "ip": "192.168.1.100",
+    "networkType": "WiFi",
+    "timeZone": "Asia/Shanghai"
+  }
+}
+```
+
+---
+
+### 5.8 Rename Device
+
+Set or modify the device's display name (the endpoint is named `initDevice`, but Apps typically use it as "rename").
+
+```
+POST /business-app/v1/device/initDevice
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `assetId` | string | Yes | Asset ID |
+| `deviceUuid` | string | Yes | Device UUID |
+| `deviceName` | string | Yes | New name |
+
+**Response**: `data: null`; `code: 200` indicates success.
+
+---
+
+### 5.9 Issue Device Properties
+
+The App controls device hardware by writing property key/value pairs into the device. The exact property keys (such as `volume`, `led_color`) are defined by the device's Thing Model.
+
+```
+POST /business-app/v1/device/command/propsIssue
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `deviceId` | string | Yes | Device ID |
+| `data` | object | Yes | Property key/value pairs, e.g. `{"volume": 50}` |
+
+**curl example**:
+
+```bash
+curl -X POST "https://api-iot.sentino.jp/business-app/v1/device/command/propsIssue" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d "{\"deviceId\": \"$DEVICE_ID\", \"data\": {\"volume\": 50}}"
+```
+
+> The synchronous execution result is delivered to the App via real-time MQTT messages (please contact the Sentino team for the protocol specification).
+
+---
+
+### 5.10 Device Network Check
+
+Trigger the device to report its current WiFi/4G signal strength.
+
+```
+POST /business-app/v1/device/command/checkSignal
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `deviceId` | string | Yes | Device ID |
+
+> The endpoint itself only triggers the check; the result is delivered to the App via real-time MQTT messages (with `signal` 1=good / 2=medium / 3=poor and `signalValue` 0-100). Please contact the Sentino team for the protocol specification.
+
+---
+
+### 5.11 Get Device Thing Model DPs
+
+Retrieve the device's Thing Model data points (DPs); the App uses this list to render the device control panel.
+
+```
+POST /business-app/v1/device/getDpInfos/{deviceId}
+```
+
+**Path parameters**: `deviceId` — device ID
+
+**Response `data`** (DeviceDpInfoVO array):
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | DP ID |
+| `key` | string | Property identifier (`volume_set`, etc. — used as the key when issuing) |
+| `name` | string | Display name |
+| `type` | string | Value type (`value` / `bool` / `enum` / `string`) |
+| `value` | dynamic | Current value |
+| `specs` | string | Model spec JSON (contains min/max/step/enum, etc.) |
+| `dpBusiId` | string | Property business ID |
+| `imageUrl` | string? | DP icon |
+| `valueCastType` | int | `0` = raw value, `1` = percentage |
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "id": "dp_001",
+      "key": "volume_set",
+      "name": "音量设置",
+      "type": "value",
+      "value": 5,
+      "specs": "{\"min\":0,\"max\":10,\"step\":1}",
+      "dpBusiId": "busi_001",
+      "imageUrl": null,
+      "valueCastType": 0
+    }
+  ]
 }
 ```
 
@@ -1108,16 +1571,142 @@ curl -X POST "https://api-iot.sentino.jp/business-app/v1/agents/nfc/bind-agent" 
 
 ---
 
+### 6.12 Update Customized Agent
+
+```
+POST /business-app/v1/agents/customize/update
+Content-Type: application/json
+```
+
+**Body parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | string | Yes | Agent ID |
+| `name` | string | No | Name |
+| `description` | string | No | Description |
+| `avatarUrl` | string | No | Avatar URL |
+| `langId` | string | No | Language ID (see §6.15) |
+| `llmModelId` | string | No | Model ID (see §6.15) |
+| `ttsVoiceId` | string | No | Voice ID (see §6.15) |
+
+**Response**: `data: null`; `code: 200` indicates success.
+
+---
+
+### 6.13 Unbind Agent (Device)
+
+```
+POST /business-app/v1/agents/device/unbind-agent
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `deviceId` | string | Yes | Device ID |
+
+**Response**: `data: null`. After unbinding, the device enters an "Agent-less" state and must be re-bound via §6.9 before it can converse again.
+
+---
+
+### 6.14 Get Agent Bound to Device
+
+Commonly used by the App to render the device panel — query the basic info of the Agent currently bound to the device.
+
+```
+POST /business-app/v1/agents/device/getAgentBaseByDeviceId
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `deviceId` | string | Yes | Device ID |
+
+**Response `data`**: Agent object (fields same as §6.2). If the device is not bound, returns `data: null`.
+
+---
+
+### 6.15 Helper Endpoints (Language / Voice / LLM Lists)
+
+Used to populate dropdowns when creating/updating customized Agents (§6.4 / §6.12).
+
+#### 6.15.1 Get Language List
+
+```
+POST /business-app/v1/agents/customize/language-list
+```
+
+**Response `data`**:
+
+```json
+[
+  {"id": "lang_zh", "name": "中文"},
+  {"id": "lang_en", "name": "English"},
+  {"id": "lang_ja", "name": "日本語"}
+]
+```
+
+#### 6.15.2 Get Voice List
+
+```
+POST /business-app/v1/agents/customize/voice-list
+```
+
+**Response `data`**:
+
+```json
+[
+  {"id": "voice_001", "name": "甜美女声"},
+  {"id": "voice_002", "name": "磁性男声"}
+]
+```
+
+#### 6.15.3 Get LLM Model List
+
+```
+POST /business-app/v1/agents/customize/llm-list
+```
+
+**Response `data`**:
+
+```json
+[
+  {"id": "model_gpt4", "name": "GPT-4"},
+  {"id": "model_gpt35", "name": "GPT-3.5"}
+]
+```
+
+---
+
 ## 7. Error Codes
 
-| Code | Description |
+Errors fall into two layers: HTTP status codes (transport layer) and business codes (the `code` field in the response body). **HTTP 200 does not mean success** — you must also check that the business code `code === 200`.
+
+### 7.1 HTTP Status Codes
+
+| HTTP status | Description |
 |---|---|
-| 200 | Success |
-| 400 | Bad request parameters |
-| 401 | Unauthorized (token invalid or expired) |
-| 403 | Forbidden |
-| 404 | Resource not found |
-| 500 | Internal server error |
+| `200` | Request delivered successfully; still need to check the business code |
+| `400` | Malformed request (missing required field, JSON parse failure, etc.) |
+| `401` | Invalid token (Authorization header missing or malformed) |
+| `403` | Forbidden (insufficient permission) |
+| `404` | Endpoint not found (wrong path) |
+| `429` | Rate limit (not yet enabled; will take effect in the future) |
+| `500` | Internal server error |
+
+### 7.2 Business Codes
+
+| code | Meaning | Recommended client handling |
+|------|---------|---------|
+| `200` | Success | Process `data` normally |
+| `11013` | Token invalid | Clear the cached `access_token` locally and redirect to the login page |
+
+> The business code list will expand as the platform evolves. When you encounter a non-200 business code that is not listed here:
+> 1. Log the full `code`, `message`, and `reqId`;
+> 2. Show the user a "Service unavailable, please try again later" message in the UI;
+> 3. Report it back to the Sentino team to add it to this table.
 
 ---
 
