@@ -1,6 +1,9 @@
 # Sentino IoT Developer Documentation Hub
 
-English (current) · [简体中文](./README.md)
+<p align="center">
+  <strong>English</strong> &nbsp;·&nbsp;
+  <a href="./README.md">简体中文</a>
+</p>
 
 Welcome to the Sentino IoT developer documentation. Sentino IoT is an IoT platform purpose-built for AI voice-interaction devices, providing an end-to-end solution from device provisioning and cloud communication to real-time AI voice conversation.
 
