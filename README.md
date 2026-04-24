@@ -4,16 +4,16 @@
 
 欢迎使用 Sentino IoT 开发者文档。Sentino IoT 是面向 AI 语音交互设备的物联网平台，提供从设备配网、云端通信到 AI 实时语音对话的完整方案。
 
-> **平台定位**：Sentino IoT 是 **Tuya 模式**（你的 App / 设备直接调 Sentino 云，没有客户后端这一层），不是 AWS IoT 模式。本文档只覆盖「物」的部分；自定义 Agent 行为（LLM/TTS 编排、记忆、工作流、自定义工具）属于 Sentino Agent 平台范畴，请联系 Sentino 团队获取相关文档。
+> **平台定位**：Sentino IoT 是端到端 IoT 方案——你的 App / 设备直接调 Sentino 云，无需客户自建后端。本文档只覆盖「物」的部分；自定义 Agent 行为（LLM/TTS 编排、记忆、工作流、自定义工具）属于 Sentino Agent 平台范畴，请联系 Sentino 团队获取相关文档。
 
 ---
 
 ## 相关开源仓库
 
-| 仓库 | 内容 | 用法 |
-|---|---|---|
-| [sentino-jp/sentino-iot-sample](https://github.com/sentino-jp/sentino-iot-sample) | BK7258 固件示例工程（基于声网 RTSA Lite + ConvoAI）+ Web BLE 配网工具 | 拿模板编译/烧录/跑实物，详见仓内 `device/BUILD_GUIDE.md` |
-| [sentino-jp/sentino-app-sample](https://github.com/sentino-jp/sentino-app-sample) | 基于 Flutter 3.x 的跨平台 IoT App 模板（Android / iOS / Windows / Web） | 拿白标模板改 UI 与品牌即可发布；协议字段定义以本仓 `ref-rest-api.md` 为准 |
+| 仓库 | 内容 | 活跃度 | 用法 |
+|---|---|---|---|
+| [sentino-jp/sentino-iot-sample](https://github.com/sentino-jp/sentino-iot-sample) | BK7258 固件示例工程（基于声网 RTSA Lite + ConvoAI）+ Web BLE 配网工具 | ![last commit](https://img.shields.io/github/last-commit/sentino-jp/sentino-iot-sample) | 拿模板编译/烧录/跑实物，详见仓内 `device/BUILD_GUIDE.md` |
+| [sentino-jp/sentino-app-sample](https://github.com/sentino-jp/sentino-app-sample) | 基于 Flutter 3.x 的跨平台 IoT App 模板（Android / iOS / Windows / Web） | ![last commit](https://img.shields.io/github/last-commit/sentino-jp/sentino-app-sample) | 拿白标模板改 UI 与品牌即可发布；协议字段定义以本仓 `ref-rest-api.md` 为准 |
 
 ---
 
@@ -23,11 +23,12 @@
 
 | 你的角色 | 推荐阅读顺序 |
 |---|---|
-| **嵌入式固件工程师** | [架构与概念](./architecture.md) → [快速入门(设备端)](tutorials/quickstart-device.md) → [设备端集成指南](guides/guide-device.md) → [AI 语音对话集成指南](guides/guide-ai-voice.md) → [MQTT 协议参考](reference/ref-mqtt.md) / [BLE 协议参考](reference/ref-ble.md) → 拿 [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample) 跑实物 |
+| **嵌入式固件工程师**（基础） | [架构与概念](./architecture.md) → [快速入门(设备端)](tutorials/quickstart-device.md) → [设备端集成指南](guides/guide-device.md) → [AI 语音对话集成指南](guides/guide-ai-voice.md) |
+| **嵌入式固件工程师**（参考 + 实物） | [MQTT 协议参考](reference/ref-mqtt.md) / [BLE 协议参考](reference/ref-ble.md) → fork [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample) 编译烧录 |
 | **App 开发者（拿白标 Flutter 模板改）** | [架构与概念](./architecture.md) → 直接 fork [`sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample)，跟其 `doc/quick-start.md` 跑起来 → 字段细节回到本仓 [REST API 参考](reference/ref-rest-api.md) |
 | **App 开发者（从零写 App）** | [架构与概念](./architecture.md) → [快速入门(App端)](tutorials/quickstart-app.md) → [App 端集成指南](guides/guide-app.md) → [REST API 参考](reference/ref-rest-api.md) |
 | **产品 / 项目经理** | [架构与概念](./architecture.md) → [AI 玩偶接入方案](solutions/solution-ai-toy.md) |
-| **合作伙伴技术负责人** | [架构与概念](./architecture.md) → [AI 玩偶接入方案](solutions/solution-ai-toy.md) → [快速入门(设备端)](tutorials/quickstart-device.md) |
+| **合作伙伴技术负责人** | [架构与概念](./architecture.md) → [AI 玩偶接入方案](solutions/solution-ai-toy.md) → 浏览[相关开源仓库](#相关开源仓库)看 sample 厚度 |
 
 ---
 
@@ -72,6 +73,18 @@
 | MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0，明文，仅供 quickstart 验证使用；生产环境请走 TLS 端口 `8883`) |
 | REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | 参数由云端动态下发 |
+| 测试三元组 (UUID / KEY / MAC) | 联系 Sentino 团队为你的应用分配 |
+| 测试 App 凭证 (`app_id` / `channel_identifier` / `package_name`) | 同上；本文档示例值仅供参考，生产请用 Sentino 为你分配的实际值 |
+
+---
+
+## 反馈与联系
+
+| 渠道 | 用途 |
+|---|---|
+| GitHub issue | 文档错误、字段不一致、断链等技术问题：[sentino-jp/iot-docs/issues](https://github.com/sentino-jp/iot-docs/issues) |
+| 商务对接 | 平台接入、定价、定制化方案：联系 Sentino 团队 |
+| Sentino Agent 平台 | 自定义 LLM/TTS/工作流/记忆等能力：见顶部「平台定位」说明 |
 
 ---
 
