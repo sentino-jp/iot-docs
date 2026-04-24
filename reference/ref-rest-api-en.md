@@ -185,21 +185,14 @@ Grouped by business area — click to jump to the corresponding section.
 
 | § | Endpoint | Method + Path |
 |---|---|---|
-| [6.1](#61-get-recommended-agent-list) | Recommended Agent list | `POST /business-app/v1/agents/recommend/agents-list` |
-| [6.2](#62-get-agent-detail) | Agent detail | `POST /business-app/v1/agents/detail` |
-| [6.3](#63-get-customized-agent-list) | Customized Agent list | `POST /business-app/v1/agents/customize/agents-list` |
-| [6.4](#64-create-customized-agent) | Create customized Agent | `POST /business-app/v1/agents/customize/create` |
-| [6.5](#65-delete-customized-agent) | Delete customized Agent | `POST /business-app/v1/agents/customize/deleteById` |
 | [6.6](#66-get-recommended-sentino-agent-list) | Sentino Agent list | `POST /business-app/v1/sentino-agents/recommend/agents-list` |
 | [6.7](#67-get-sentino-agent-detail) | Sentino Agent detail | `POST /business-app/v1/sentino-agents/detail` |
 | [6.8](#68-get-user-bound-agent-list) | Bound Agent list | `POST /business-app/v1/user-agents/list` |
 | [6.9](#69-bind-agent-to-device) | Bind Agent to device | `POST /business-app/v1/agents/device/bind-agent` |
 | [6.10](#610-nfc-card-list) | NFC card list | `POST /business-app/v1/agents/nfc/list` |
 | [6.11](#611-bind-agent-to-nfc-card) | Bind Agent to NFC card | `POST /business-app/v1/agents/nfc/bind-agent` |
-| [6.12](#612-update-customized-agent) | Update customized Agent | `POST /business-app/v1/agents/customize/update` |
 | [6.13](#613-unbind-agent-device) | Unbind Agent (device) | `POST /business-app/v1/agents/device/unbind-agent` |
 | [6.14](#614-get-agent-bound-to-device) | Get Agent bound to device | `POST /business-app/v1/agents/device/getAgentBaseByDeviceId` |
-| [6.15](#615-helper-endpoints-language--voice--llm-lists) | Helper lists (language / voice / LLM) | `POST /business-app/v1/agents/customize/{language,voice,llm}-list` |
 | [6.16](#616-get-conversation-history) | Get conversation history | `POST /business-app/v1/agents/conversation/history` |
 | [6.17](#617-clear-conversation-history) | Clear conversation history | `POST /business-app/v1/agents/conversation/history/clean` |
 
@@ -1276,201 +1269,13 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 
 ## 6. Agent Management Endpoints
 
-### 6.1 Get Recommended Agent List
+> **Agent sources**: this section covers three Agent classes—
+> - **Sentino** (`agentType=sentino`): official Agent templates maintained by the Sentino platform — **current recommendation** (§6.6 / §6.7)
+> - **Customize** (`agentType=customize`): user-defined Agents — see [ref-rest-api-legacy-en.md §8](./ref-rest-api-legacy-en.md#8-customize-agents)
+> - A third class, `agentType=official`, is served by legacy endpoints relocated to [ref-rest-api-legacy-en.md §9](./ref-rest-api-legacy-en.md#9-legacy-endpoints). Do not use them in new integrations.
 
-Retrieve the list of officially recommended Agent templates.
+> Main numbering resumes at §6.6 (§6.1 / §6.2 / §6.3 / §6.4 / §6.5 / §6.12 / §6.15 have been moved out to [ref-rest-api-legacy-en.md](./ref-rest-api-legacy-en.md)).
 
-```
-POST /business-app/v1/agents/recommend/agents-list
-```
-
-**curl example**:
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d "{}"
-```
-
-**Response**:
-
-```json
-{
-  "code": 200,
-  "data": [
-    {
-      "agentId": "1980570366486159361",
-      "avatar": "https://...",
-      "name": "小助手",
-      "description": "我是你的智能助手",
-      "tags": ["助手", "智能"]
-    }
-  ]
-}
-```
-
----
-
-### 6.2 Get Agent Detail
-
-Retrieve the detailed configuration of a specified Agent.
-
-```
-POST /business-app/v1/agents/detail
-```
-
-**Query parameters**:
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `agentId` | string | Yes | Agent ID |
-
-**curl example**:
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/detail?agentId=$AGENT_ID" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-**Response**:
-
-```json
-{
-  "code": 200,
-  "data": {
-    "agentId": "1980570366486159361",
-    "avatar": "https://...",
-    "name": "小助手",
-    "description": "我是你的智能助手",
-    "tags": ["助手", "智能"],
-    "llmModel": "GPT-4",
-    "ttsVoice": "女声-温柔"
-  }
-}
-```
-
----
-
-### 6.3 Get Customized Agent List
-
-Retrieve the list of Agent templates customized by the user.
-
-```
-POST /business-app/v1/agents/customize/agents-list
-```
-
-**curl example**:
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/agents-list" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d "{}"
-```
-
-**Response**:
-
-```json
-{
-  "code": 200,
-  "data": [
-    {
-      "agentId": "2000436153759151101",
-      "name": "樱木花道",
-      "avatar": "https://...",
-      "description": "我是樱木花道，热爱篮球的少年",
-      "langId": "1947925380891516929",
-      "llmModelId": "1980896877851869185",
-      "ttsVoiceId": "1947925380891516931"
-    }
-  ]
-}
-```
-
----
-
-### 6.4 Create Customized Agent
-
-Create a customized Agent template.
-
-```
-POST /business-app/v1/agents/customize/create
-```
-
-**Body parameters**:
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `name` | string | Yes | Agent name |
-| `description` | string | Yes | Agent description (character persona) |
-| `avatarUrl` | string | Yes | Avatar URL |
-| `llmModelId` | string | Yes | LLM model ID |
-| `ttsVoiceId` | string | Yes | TTS voice ID |
-| `langId` | string | Yes | Language ID |
-
-**curl example**:
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/create" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "name": "樱木花道",
-    "description": "我是樱木花道，热爱篮球的少年",
-    "avatarUrl": "https://example.com/avatar.jpg",
-    "llmModelId": "1980896877851869185",
-    "ttsVoiceId": "1947925380891516931",
-    "langId": "1947925380891516929"
-  }'
-```
-
-**Response**:
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": true
-}
-```
-
----
-
-### 6.5 Delete Customized Agent
-
-Delete a specified customized Agent template.
-
-```
-POST /business-app/v1/agents/customize/deleteById
-```
-
-**Query parameters**:
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `agentId` | string | Yes | Agent ID |
-
-**curl example**:
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/deleteById?agentId=$AGENT_ID" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-**Response**:
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": true
-}
-```
-
----
 
 ### 6.6 Get Recommended Sentino Agent List
 
@@ -1579,8 +1384,8 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   "code": 200,
   "data": [
     {
-      "agentId": "1980570366486159361",
-      "agentType": "official",
+      "agentId": "2046112542823174144",
+      "agentType": "sentino",
       "name": "小助手",
       "description": "我是你的智能助手",
       "avatarUrl": "https://...",
@@ -1599,7 +1404,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
 | Field | Type | Description |
 |---|---|---|
 | `agentId` | string | Agent ID |
-| `agentType` | string | Type: `official` / `sentino` / `customize` |
+| `agentType` | string | Type: `sentino` (recommended) / `customize` (user-defined, see [legacy doc](./ref-rest-api-legacy-en.md)) / `official` (legacy, see [legacy doc](./ref-rest-api-legacy-en.md)) |
 | `name` | string | Display name |
 | `description` | string | Description |
 | `avatarUrl` | string? | Avatar URL |
@@ -1624,7 +1429,7 @@ POST /business-app/v1/agents/device/bind-agent
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `agentId` | string | Yes | Agent ID |
-| `agentType` | string | Yes | `official`=official, `customize`=customized, `sentino`=Sentino Agent |
+| `agentType` | string | Yes | `sentino` (recommended, from §6.6) / `customize` (user-defined, see [legacy doc](./ref-rest-api-legacy-en.md#81-get-customized-agent-list)) / `official` (legacy, see [legacy doc](./ref-rest-api-legacy-en.md#91-get-recommended-agent-list-legacy)) |
 | `deviceId` | string | Yes | Device ID |
 
 **curl example**:
@@ -1633,7 +1438,7 @@ POST /business-app/v1/agents/device/bind-agent
 curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"official\", \"deviceId\": \"$DEVICE_ID\"}"
+  -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"sentino\", \"deviceId\": \"$DEVICE_ID\"}"
 ```
 
 **Response**:
@@ -1674,7 +1479,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/list" \
     {
       "nfcUuid": "1111111111",
       "agentId": "1947925380891516929",
-      "agentType": "official"
+      "agentType": "sentino"
     }
   ]
 }
@@ -1696,7 +1501,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 |---|---|---|---|
 | `nfcUuid` | string | Yes | NFC card UUID |
 | `agentId` | string | Yes | Agent ID |
-| `agentType` | string | Yes | `official`=official, `customize`=customized |
+| `agentType` | string | Yes | `sentino` (recommended) / `customize` (user-defined) / `official` (legacy) |
 
 **curl example**:
 
@@ -1704,7 +1509,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"official\"}"
+  -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"sentino\"}"
 ```
 
 **Response**:
@@ -1719,28 +1524,6 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/bind-age
 
 ---
 
-### 6.12 Update Customized Agent
-
-```
-POST /business-app/v1/agents/customize/update
-Content-Type: application/json
-```
-
-**Body parameters**:
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `agentId` | string | Yes | Agent ID |
-| `name` | string | No | Name |
-| `description` | string | No | Description |
-| `avatarUrl` | string | No | Avatar URL |
-| `langId` | string | No | Language ID (see §6.15) |
-| `llmModelId` | string | No | Model ID (see §6.15) |
-| `ttsVoiceId` | string | No | Voice ID (see §6.15) |
-
-**Response**: `data: null`; `code: 200` indicates success.
-
----
 
 ### 6.13 Unbind Agent (Device)
 
@@ -1776,57 +1559,6 @@ POST /business-app/v1/agents/device/getAgentBaseByDeviceId
 
 ---
 
-### 6.15 Helper Endpoints (Language / Voice / LLM Lists)
-
-Used to populate dropdowns when creating/updating customized Agents (§6.4 / §6.12).
-
-#### 6.15.1 Get Language List
-
-```
-POST /business-app/v1/agents/customize/language-list
-```
-
-**Response `data`**:
-
-```json
-[
-  {"id": "lang_zh", "name": "中文"},
-  {"id": "lang_en", "name": "English"},
-  {"id": "lang_ja", "name": "日本語"}
-]
-```
-
-#### 6.15.2 Get Voice List
-
-```
-POST /business-app/v1/agents/customize/voice-list
-```
-
-**Response `data`**:
-
-```json
-[
-  {"id": "voice_001", "name": "甜美女声"},
-  {"id": "voice_002", "name": "磁性男声"}
-]
-```
-
-#### 6.15.3 Get LLM Model List
-
-```
-POST /business-app/v1/agents/customize/llm-list
-```
-
-**Response `data`**:
-
-```json
-[
-  {"id": "model_gpt4", "name": "GPT-4"},
-  {"id": "model_gpt35", "name": "GPT-3.5"}
-]
-```
-
----
 
 ### 6.16 Get Conversation History
 
@@ -1942,6 +1674,17 @@ When Password Mode (§3.1 Mode B) login fails, the server tracks consecutive fai
 ---
 
 > The endpoint quick reference has been moved to the top of this document (after §2), grouped by business area with anchor links.
+
+---
+
+## 8. Customize & Legacy Endpoints
+
+This main document covers only the mainstream integration path. Two ancillary classes of endpoints have been moved out to keep the main reference focused:
+
+| Class | Document | Purpose |
+|---|---|---|
+| `agentType=customize` (Customize Agents) | [§8 in ref-rest-api-legacy-en.md](./ref-rest-api-legacy-en.md#8-customize-agents) | User-created Agent templates |
+| `agentType=official` (Legacy path) | [§9 in ref-rest-api-legacy-en.md](./ref-rest-api-legacy-en.md#9-legacy-endpoints) | Early-path endpoints, backwards-compat only |
 
 ---
 

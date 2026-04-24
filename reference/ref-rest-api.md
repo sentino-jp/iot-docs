@@ -185,21 +185,14 @@ Authorization: Bearer {access_token}
 
 | § | 接口 | Method + Path |
 |---|---|---|
-| [6.1](#61-获取推荐智能体列表) | 推荐智能体列表 | `POST /business-app/v1/agents/recommend/agents-list` |
-| [6.2](#62-获取智能体详情) | 智能体详情 | `POST /business-app/v1/agents/detail` |
-| [6.3](#63-获取自定义智能体列表) | 自定义智能体列表 | `POST /business-app/v1/agents/customize/agents-list` |
-| [6.4](#64-创建自定义智能体) | 创建自定义智能体 | `POST /business-app/v1/agents/customize/create` |
-| [6.5](#65-删除自定义智能体) | 删除自定义智能体 | `POST /business-app/v1/agents/customize/deleteById` |
 | [6.6](#66-获取推荐-sentino-智能体列表) | Sentino 智能体列表 | `POST /business-app/v1/sentino-agents/recommend/agents-list` |
 | [6.7](#67-获取-sentino-智能体详情) | Sentino 智能体详情 | `POST /business-app/v1/sentino-agents/detail` |
 | [6.8](#68-获取用户已绑定智能体列表) | 已绑定智能体列表 | `POST /business-app/v1/user-agents/list` |
 | [6.9](#69-绑定智能体到设备) | 绑定智能体到设备 | `POST /business-app/v1/agents/device/bind-agent` |
 | [6.10](#610-nfc-卡片列表) | NFC 卡片列表 | `POST /business-app/v1/agents/nfc/list` |
 | [6.11](#611-nfc-卡片绑定智能体) | NFC 卡片绑定智能体 | `POST /business-app/v1/agents/nfc/bind-agent` |
-| [6.12](#612-更新自定义智能体) | 更新自定义智能体 | `POST /business-app/v1/agents/customize/update` |
 | [6.13](#613-解绑智能体设备) | 解绑智能体（设备） | `POST /business-app/v1/agents/device/unbind-agent` |
 | [6.14](#614-获取设备绑定的智能体) | 获取设备绑定的智能体 | `POST /business-app/v1/agents/device/getAgentBaseByDeviceId` |
-| [6.15](#615-辅助接口语言--音色--llm-列表) | 辅助列表（语言 / 音色 / LLM） | `POST /business-app/v1/agents/customize/{language,voice,llm}-list` |
 | [6.16](#616-获取对话历史) | 获取对话历史 | `POST /business-app/v1/agents/conversation/history` |
 | [6.17](#617-清空对话历史) | 清空对话历史 | `POST /business-app/v1/agents/conversation/history/clean` |
 
@@ -1276,201 +1269,13 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 
 ## 6. 智能体管理接口
 
-### 6.1 获取推荐智能体列表
+> **智能体来源**：本节涵盖三类智能体——
+> - **Sentino**（`agentType=sentino`）：Sentino 平台维护的官方智能体模板，**当前推荐**（§6.6 / §6.7）
+> - **Customize**（`agentType=customize`）：用户自定义智能体，详见 [ref-rest-api-legacy.md §8](./ref-rest-api-legacy.md#8-自定义智能体接口)
+> - 还存在一类 `agentType=official` 的 legacy 接口，见 [ref-rest-api-legacy.md §9](./ref-rest-api-legacy.md#9-遗留接口)，新接入请勿使用
 
-获取官方推荐的智能体模板列表。
+> 主体接口编号从 §6.6 开始（§6.1 / §6.2 / §6.3 / §6.4 / §6.5 / §6.12 / §6.15 已迁出至 [ref-rest-api-legacy.md](./ref-rest-api-legacy.md)）。
 
-```
-POST /business-app/v1/agents/recommend/agents-list
-```
-
-**curl 示例**：
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d "{}"
-```
-
-**响应**：
-
-```json
-{
-  "code": 200,
-  "data": [
-    {
-      "agentId": "1980570366486159361",
-      "avatar": "https://...",
-      "name": "小助手",
-      "description": "我是你的智能助手",
-      "tags": ["助手", "智能"]
-    }
-  ]
-}
-```
-
----
-
-### 6.2 获取智能体详情
-
-获取指定智能体的详细配置。
-
-```
-POST /business-app/v1/agents/detail
-```
-
-**Query 参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `agentId` | string | 是 | 智能体 ID |
-
-**curl 示例**：
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/detail?agentId=$AGENT_ID" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-**响应**：
-
-```json
-{
-  "code": 200,
-  "data": {
-    "agentId": "1980570366486159361",
-    "avatar": "https://...",
-    "name": "小助手",
-    "description": "我是你的智能助手",
-    "tags": ["助手", "智能"],
-    "llmModel": "GPT-4",
-    "ttsVoice": "女声-温柔"
-  }
-}
-```
-
----
-
-### 6.3 获取自定义智能体列表
-
-获取用户自定义的智能体模板列表。
-
-```
-POST /business-app/v1/agents/customize/agents-list
-```
-
-**curl 示例**：
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/agents-list" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d "{}"
-```
-
-**响应**：
-
-```json
-{
-  "code": 200,
-  "data": [
-    {
-      "agentId": "2000436153759151101",
-      "name": "樱木花道",
-      "avatar": "https://...",
-      "description": "我是樱木花道，热爱篮球的少年",
-      "langId": "1947925380891516929",
-      "llmModelId": "1980896877851869185",
-      "ttsVoiceId": "1947925380891516931"
-    }
-  ]
-}
-```
-
----
-
-### 6.4 创建自定义智能体
-
-创建自定义智能体模板。
-
-```
-POST /business-app/v1/agents/customize/create
-```
-
-**Body 参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `name` | string | 是 | 智能体名称 |
-| `description` | string | 是 | 智能体描述（角色设定） |
-| `avatarUrl` | string | 是 | 头像 URL |
-| `llmModelId` | string | 是 | 大模型 ID |
-| `ttsVoiceId` | string | 是 | TTS 音色 ID |
-| `langId` | string | 是 | 语言 ID |
-
-**curl 示例**：
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/create" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{
-    "name": "樱木花道",
-    "description": "我是樱木花道，热爱篮球的少年",
-    "avatarUrl": "https://example.com/avatar.jpg",
-    "llmModelId": "1980896877851869185",
-    "ttsVoiceId": "1947925380891516931",
-    "langId": "1947925380891516929"
-  }'
-```
-
-**响应**：
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": true
-}
-```
-
----
-
-### 6.5 删除自定义智能体
-
-删除指定的自定义智能体模板。
-
-```
-POST /business-app/v1/agents/customize/deleteById
-```
-
-**Query 参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `agentId` | string | 是 | 智能体 ID |
-
-**curl 示例**：
-
-```bash
-curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/customize/deleteById?agentId=$AGENT_ID" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-**响应**：
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": true
-}
-```
-
----
 
 ### 6.6 获取推荐 Sentino 智能体列表
 
@@ -1579,8 +1384,8 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   "code": 200,
   "data": [
     {
-      "agentId": "1980570366486159361",
-      "agentType": "official",
+      "agentId": "2046112542823174144",
+      "agentType": "sentino",
       "name": "小助手",
       "description": "我是你的智能助手",
       "avatarUrl": "https://...",
@@ -1599,7 +1404,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
 | 字段 | 类型 | 说明 |
 |---|---|---|
 | `agentId` | string | 智能体 ID |
-| `agentType` | string | 类型：`official` / `sentino` / `customize` |
+| `agentType` | string | 类型：`sentino`（推荐）/ `customize`（自定义，见 [legacy 文档](./ref-rest-api-legacy.md)）/ `official`（legacy，见 [legacy 文档](./ref-rest-api-legacy.md)） |
 | `name` | string | 显示名称 |
 | `description` | string | 描述 |
 | `avatarUrl` | string? | 头像 URL |
@@ -1624,7 +1429,7 @@ POST /business-app/v1/agents/device/bind-agent
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
 | `agentId` | string | 是 | 智能体 ID |
-| `agentType` | string | 是 | `official`=官方, `customize`=自定义, `sentino`=Sentino 智能体 |
+| `agentType` | string | 是 | `sentino`（推荐，来自 §6.6）/ `customize`（自定义，见 [legacy 文档](./ref-rest-api-legacy.md#81-获取自定义智能体列表)）/ `official`（legacy，见 [legacy 文档](./ref-rest-api-legacy.md#91-获取推荐智能体列表-legacy)） |
 | `deviceId` | string | 是 | 设备 ID |
 
 **curl 示例**：
@@ -1633,7 +1438,7 @@ POST /business-app/v1/agents/device/bind-agent
 curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"official\", \"deviceId\": \"$DEVICE_ID\"}"
+  -d "{\"agentId\": \"$AGENT_ID\", \"agentType\": \"sentino\", \"deviceId\": \"$DEVICE_ID\"}"
 ```
 
 **响应**：
@@ -1674,7 +1479,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/list" \
     {
       "nfcUuid": "1111111111",
       "agentId": "1947925380891516929",
-      "agentType": "official"
+      "agentType": "sentino"
     }
   ]
 }
@@ -1696,7 +1501,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 |---|---|---|---|
 | `nfcUuid` | string | 是 | NFC 卡片 UUID |
 | `agentId` | string | 是 | 智能体 ID |
-| `agentType` | string | 是 | `official`=官方, `customize`=自定义 |
+| `agentType` | string | 是 | `sentino`（推荐）/ `customize`（自定义）/ `official`（legacy） |
 
 **curl 示例**：
 
@@ -1704,7 +1509,7 @@ POST /business-app/v1/agents/nfc/bind-agent
 curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/bind-agent" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"official\"}"
+  -d "{\"nfcUuid\": \"$NFC_UUID\", \"agentId\": \"$AGENT_ID\", \"agentType\": \"sentino\"}"
 ```
 
 **响应**：
@@ -1719,28 +1524,6 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/nfc/bind-age
 
 ---
 
-### 6.12 更新自定义智能体
-
-```
-POST /business-app/v1/agents/customize/update
-Content-Type: application/json
-```
-
-**Body 参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `agentId` | string | 是 | 智能体 ID |
-| `name` | string | 否 | 名称 |
-| `description` | string | 否 | 描述 |
-| `avatarUrl` | string | 否 | 头像 URL |
-| `langId` | string | 否 | 语言 ID（见 §6.15） |
-| `llmModelId` | string | 否 | 模型 ID（见 §6.15） |
-| `ttsVoiceId` | string | 否 | 音色 ID（见 §6.15） |
-
-**响应**：`data: null`，`code: 200` 表示成功。
-
----
 
 ### 6.13 解绑智能体（设备）
 
@@ -1772,61 +1555,12 @@ POST /business-app/v1/agents/device/getAgentBaseByDeviceId
 |---|---|---|---|
 | `deviceId` | string | 是 | 设备 ID |
 
-**响应 data**：Agent 对象（字段同 §6.2）。如设备未绑定，返回 `data: null`。
+**响应 data**：Agent 对象（含 `agentId` / `agentType` / `name` / `description` / `avatarUrl` / `tagList`）。如设备未绑定，返回 `data: null`。
+
+> 返回 `agentType` 反映设备绑定的是 `sentino`（推荐）/ `customize`（自定义）/ `official`（legacy）哪类。
 
 ---
 
-### 6.15 辅助接口（语言 / 音色 / LLM 列表）
-
-创建/更新自定义智能体（§6.4 / §6.12）时用于填充下拉框。
-
-#### 6.15.1 获取语言列表
-
-```
-POST /business-app/v1/agents/customize/language-list
-```
-
-**响应 data**：
-
-```json
-[
-  {"id": "lang_zh", "name": "中文"},
-  {"id": "lang_en", "name": "English"},
-  {"id": "lang_ja", "name": "日本語"}
-]
-```
-
-#### 6.15.2 获取音色列表
-
-```
-POST /business-app/v1/agents/customize/voice-list
-```
-
-**响应 data**：
-
-```json
-[
-  {"id": "voice_001", "name": "甜美女声"},
-  {"id": "voice_002", "name": "磁性男声"}
-]
-```
-
-#### 6.15.3 获取 LLM 模型列表
-
-```
-POST /business-app/v1/agents/customize/llm-list
-```
-
-**响应 data**：
-
-```json
-[
-  {"id": "model_gpt4", "name": "GPT-4"},
-  {"id": "model_gpt35", "name": "GPT-3.5"}
-]
-```
-
----
 
 ### 6.16 获取对话历史
 
@@ -1942,6 +1676,17 @@ Password 模式（§3.1 模式 B）登录失败时，服务端按账号维度统
 ---
 
 > 接口速查表已前移到本文顶部（§2 之后），按业务分组并支持锚点跳转。
+
+---
+
+## 8. 自定义智能体与遗留接口
+
+本文档主体只覆盖主流接入路径。两类周边接口已迁出，便于主文档保持精简：
+
+| 类别 | 文档 | 用途 |
+|---|---|---|
+| `agentType=customize` 自定义智能体 | [§8 见 ref-rest-api-legacy.md](./ref-rest-api-legacy.md#8-自定义智能体接口) | 用户自创建 Agent 模板 |
+| `agentType=official` 遗留路径 | [§9 见 ref-rest-api-legacy.md](./ref-rest-api-legacy.md#9-遗留接口) | 早期路径，仅向后兼容 |
 
 ---
 
