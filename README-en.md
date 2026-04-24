@@ -1,6 +1,6 @@
 # Sentino IoT Developer Documentation Hub
 
-<p align="center">
+<p>
   <strong>English</strong> &nbsp;·&nbsp;
   <a href="./README.md">简体中文</a>
 </p>
