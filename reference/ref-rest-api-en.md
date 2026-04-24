@@ -180,7 +180,6 @@ Grouped by business area — click to jump to the corresponding section.
 | [5.9](#59-issue-device-properties) | Issue device properties (control hardware) | `POST /business-app/v1/device/command/propsIssue` |
 | [5.10](#510-device-network-check) | Device network check | `POST /business-app/v1/device/command/checkSignal` |
 | [5.11](#511-get-device-thing-model-dps) | Get device Thing Model DPs | `POST /business-app/v1/device/getDpInfos/{deviceId}` |
-| [5.12](#512-unbind-device-alias-unbindfromasset) | Unbind device (alias) | `POST /business-app/v1/device/unbindFromAsset` |
 
 ### Agent Management
 
@@ -315,16 +314,42 @@ curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token" \
   "data": {
     "access_token": "6ea8368a-127c-4203-b7e8-83fbeb9d0239",
     "token_type": "bearer",
-    "expires_in": 2591999,
     "refresh_token": "...",
+    "expires_in": 2591999,
+    "scope": "all",
     "userId": "cn2042488223219761152",
     "memberId": "cn2042488223219761152",
-    "tenantId": "1955088720032829440",
+    "username": "test_user_001",
     "nickname": "z3dwog17",
-    "username": "test_user_001"
+    "tenantId": "1955088720032829440",
+    "appId": "krkfvb4s5e91hq",
+    "clientId": "cetus-iot-app",
+    "areaCode": "86",
+    "authenticationIdentity": "...",
+    "appMqttPassword": "..."
   }
 }
 ```
+
+| Field | Type | Description |
+|---|---|---|
+| `access_token` | string | Bearer Token, used for subsequent business endpoints |
+| `token_type` | string | Fixed value `bearer` |
+| `refresh_token` | string | Used to refresh the token |
+| `expires_in` | int | Token validity (seconds, ~30 days) |
+| `scope` | string | OAuth scope, fixed value `all` |
+| `userId` | string | Numeric user ID (**also used for App-side MQTT channel authentication**) |
+| `memberId` | string | Same value as `userId` (alias) |
+| `username` | string | Username (UID Mode = the supplied uid; Password Mode = email) |
+| `nickname` | string | Nickname (auto-generated or user-set) |
+| `tenantId` | string | Tenant ID |
+| `appId` | string | Application ID (matches the `app_id` request header) |
+| `clientId` | string | OAuth client ID (plain text, not Base64) |
+| `areaCode` | string | Area code |
+| `authenticationIdentity` | string | Internal authentication identity |
+| `appMqttPassword` | string | **App-side MQTT channel password** (contact the Sentino team for the channel protocol) |
+
+> **Key fields**: `userId` and `appMqttPassword` are required credentials for the App to subscribe to real-time device messages.
 
 ---
 
@@ -443,20 +468,37 @@ POST /business-app/v1/user/profile
 
 No request parameters.
 
-**Response `data`** (User object):
+**Response `data`** (User object, 27 fields):
 
 | Field | Type | Description |
 |---|---|---|
-| `id` / `userId` / `memberId` | string | User ID (the same value under three aliases) |
-| `nickname` | string? | Nickname |
-| `userName` | string? | Username |
+| `id` | string | User ID (equivalent to `userId`) |
+| `userName` | string? | Username (UID Mode = uid, Password Mode = email) |
+| `nickname` | string? | Nickname (auto-generated at registration) |
 | `email` | string? | Email |
 | `phone` | string? | Phone number |
 | `avatarUrl` | string? | Avatar URL |
-| `areaCode` | string? | Area code |
+| `birthday` | string? | Birthday |
 | `userType` | int | User type |
+| `status` | int | Account status |
+| `isTest` | bool | Whether this is a test account |
+| `registryType` | int | Registration type (distinguishes UID / Password / third-party) |
+| `regThirdData` | string? | Third-party registration data (if any) |
+| `appId` | string | Application ID |
+| `appName` | string? | Application name |
+| `tenantId` | string | Tenant ID |
+| `dataCenterCode` | string | Data center code |
+| `areaCode` | string? | Area code |
+| `areaName` | string? | Area name |
+| `userCountryKey` | string? | User country code (e.g. `CN`) |
+| `countryKey` | string? | Country code (same as above) |
 | `tz` | string? | Timezone |
+| `zoneOffset` | int? | UTC offset in hours |
 | `tempUnit` | string? | Temperature unit |
+| `createTime` | int | Registration time (millisecond timestamp) |
+| `lastLoginTime` | int? | Last login time |
+| `lastActiveTime` | int? | Last active time |
+| `lastUnUpdateTime` | int? | Last "non-update" action time |
 
 ---
 
@@ -526,17 +568,16 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 {
   "code": 200,
   "data": {
-    "id": "sEF4ljjdH8mo",
-    "productName": "智能玩具",
+    "id": "OQm9yRoaLq1gbK",
+    "name": "智能玩具",
     "model": "ST-001",
     "imageUrl": "https://...",
+    "tenantId": "1955088720032829440",
+    "typeId": "...",
     "protocolType": "MQTT",
-    "distributionNetMode": "1",
-    "nodeType": 1,
-    "bindMode": 1,
-    "deviceShare": 1,
-    "deviceUpgrade": 1,
-    "status": 1
+    "protocolName": "MQTT 5.0",
+    "connectCloudType": 1,
+    "nodeType": 1
   }
 }
 ```
@@ -545,12 +586,18 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 
 | Field | Description |
 |---|---|
+| `id` | Product ID (matches the request parameter `productId`) |
+| `name` | Product display name |
+| `model` | Product model |
+| `imageUrl` | Product image URL |
+| `tenantId` | Tenant ID |
+| `typeId` | Product category ID |
 | `protocolType` | Communication protocol: `MQTT` / `BLE` |
-| `distributionNetMode` | Provisioning mode: `1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
+| `protocolName` | Protocol description |
+| `connectCloudType` | Cloud connectivity type |
 | `nodeType` | Node type: `1`=standard device, `2`=gateway, `3`=edge gateway, `4`=sub-device |
-| `bindMode` | Binding mode: `1`=strong bind, `2`=weak bind |
-| `deviceShare` | Whether device sharing is supported: `0`=no, `1`=yes |
-| `deviceUpgrade` | Whether OTA upgrade is supported: `0`=no, `1`=yes |
+
+> The server may return additional fields such as `distributionNetMode` / `bindMode` / `deviceShare` / `deviceUpgrade` / `status` depending on the product type; refer to the actual response.
 
 ---
 
@@ -795,6 +842,19 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree" \
 
 > **Note**: The `data` field of the response is an array. Use the `id` and `name` fields (not `assetId` / `assetName`); the child-node field is `childrens`. During provisioning, use the root node's `id` as the `assetId`.
 
+**Field reference**:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | Asset node ID (i.e. `assetId`) |
+| `parentId` | string | Parent node ID; root node is `"0"` |
+| `name` | string | Asset name (default "My Home") |
+| `childrens` | array | Child asset list (note the multiple-s spelling) |
+| `sortNumber` | int | Sort weight |
+| `isLock` | bool | Whether the node is locked |
+| `isShare` | bool | Whether the asset is a shared asset |
+| `memberRole` | int | Current user's role in this asset |
+
 ---
 
 ### 5.2 Get Device Info
@@ -821,21 +881,46 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDev
   -d "{\"productId\": \"$PRODUCT_ID\", \"uuid\": \"$UUID\"}"
 ```
 
-**Response**:
+**Response** (13 fields):
 
 ```json
 {
   "code": 200,
   "data": {
+    "id": "dev_001",
     "uuid": "ct01wfjSNqGAqUUK",
     "productId": "sEF4ljjdH8mo",
-    "deviceName": "智能设备",
+    "name": "智能音箱",
+    "imageUrl": "https://cdn.example.com/device/speaker.png",
+    "barcode": "SN123456789",
     "protocolType": "MQTT",
-    "configMode": "BLE",
-    "bindStatus": 0
+    "nodeType": 1,
+    "distributionNetMode": "1",
+    "distributionNetModes": ["1", "3"],
+    "bindStatus": 0,
+    "isIpc": false,
+    "isLowPower": false
   }
 }
 ```
+
+**Field reference**:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | Device ID (assigned by the cloud after binding, not the UUID) |
+| `uuid` | string | Device UUID |
+| `productId` | string | Owning product ID |
+| `name` | string | Device display name |
+| `imageUrl` | string? | Product image URL (inherited from the product) |
+| `barcode` | string? | Device barcode |
+| `protocolType` | string | Communication protocol |
+| `nodeType` | int | Node type (1=standard device / 2=gateway / 4=sub-device) |
+| `distributionNetMode` | string | Current provisioning mode |
+| `distributionNetModes` | array | All provisioning modes the device supports |
+| `bindStatus` | int | Binding status: `0`=unbound, ready to provision / non-zero = already bound |
+| `isIpc` | bool | Whether this is a camera-class device |
+| `isLowPower` | bool | Whether this is a low-power device |
 
 ---
 
@@ -904,11 +989,24 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
   "data": {
     "deviceList": [
       {
-        "deviceId": "2008424975449309184",
+        "id": "2008424975449309184",
         "uuid": "ct01wfjSNqGAqUUK",
-        "deviceName": "智能设备",
-        "online": true,
-        "productId": "sEF4ljjdH8mo"
+        "name": "智能音箱",
+        "productId": "sEF4ljjdH8mo",
+        "productName": "智能玩具",
+        "imageUrl": "https://...",
+        "onlineStatus": 1,
+        "firmwareVersion": "1.2.3",
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "ip": "192.168.1.100",
+        "networkType": "WiFi",
+        "timeZone": "Asia/Shanghai",
+        "assetId": "2042488223647580161",
+        "assetName": "My Home",
+        "barcode": "SN123456789",
+        "batteryLevel": 85,
+        "propertiesInfoDTO": {"volume": 50},
+        "...": "+ ~89 fields total"
       }
     ],
     "sortIdList": ["2008424975449309184"],
@@ -918,12 +1016,32 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
 }
 ```
 
+**Outer fields**:
+
 | Field | Description |
 |---|---|
-| `deviceList` | List of device information |
+| `deviceList` | List of device objects (each ~89 fields) |
 | `sortIdList` | User-defined ordering |
 | `shareGroupList` | Groups shared with the user |
 | `shareList` | Devices shared with the user |
+
+**Device object core fields** (grouped by 9 categories; for the full field definition see [`sentino-app-sample/lib/models/device.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/models)):
+
+| Category | Fields | Description |
+|---|---|---|
+| **Identity** | `id`, `uuid`, `productId`, `productName`, `barcode` | Same semantics as §5.2 |
+| **Display** | `name`, `imageUrl`, `typeName`, `typeImage`, `model` | App UI rendering |
+| **Status** | `onlineStatus` (`1`=online/`0`=offline), `tcpOnlineStatus`, `batteryLevel` (0-100), `chargeIng`, `sleepState` | Real-time status |
+| **Network** | `networkType` (`WiFi`/`4G`), `ip`, `mac`, `internetType`, `currentSsid`, `signalStrength` | Connectivity info |
+| **Ownership** | `assetId`, `assetName`, `rootAssetId`, `tenantId` | Asset relationships |
+| **Capability** | `protocolType`, `protocolName`, `firmwareVersion`, `mcuVersion`, `nodeType`, `distributionNetMode` | Protocol/version |
+| **Properties** | `propertiesInfoDTO` (Map), `dpAlias`, `stockDpInfoVOList`, `switchDpInfoVOList`, `shadowMap` | Thing Model property snapshot |
+| **Settings** | `timeZone`, `lat`, `lng`, `address`, `autoOta`, `notDisturbTime` | Device settings |
+| **Sharing** | `isShare`, `canShare`, `shareId`, `shareUserNickname`, `shareRuleType` | Sharing status |
+| **Gateway** | `isGroup`, `gateway`, `gatewayId`, `gatewayName`, `gatewayType`, `gatewayUuid`, `parentGatewayType`, `childNum` | Sub-device/gateway |
+| **Type Flags** | `isIpc`, `isIpf`, `isLowPower`, `isFlowCard`, `isMatter`, `isVirtual`, `isWebRtc` | Device sub-types |
+
+> The full field set (89 fields) is best looked up directly in the sample-app Device model; this table only lists the ~50 fields commonly used by the App UI. Other fields (callSwitch / clickWakeup / mainScreen / privacyMode / rcType / runSeconds / videoCallType, etc.) can be looked up as needed.
 
 ---
 
@@ -972,8 +1090,6 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/ota/checkUpgrade/$D
 
 Unbind a device, with the option to clear its data.
 
-> The server also accepts the equivalent alias [§5.12 unbindFromAsset](#512-unbind-device-alias-unbindfromasset). Both work; this section's path is the recommended one.
-
 ```
 POST /business-app/v1/device/bind/unbind
 ```
@@ -1016,7 +1132,7 @@ POST /business-app/v1/device/getByDeviceId/{deviceId}
 
 **Path parameters**: `deviceId` — device ID
 
-**Response `data`** (Device object, fields same as §5.4):
+**Response `data`**: identical to the Device object inside §5.4's deviceList (same Thing Model, ~89 fields). See [§5.4 Device object core fields](#54-get-device-list).
 
 ```json
 {
@@ -1032,10 +1148,13 @@ POST /business-app/v1/device/getByDeviceId/{deviceId}
     "mac": "AA:BB:CC:DD:EE:FF",
     "ip": "192.168.1.100",
     "networkType": "WiFi",
-    "timeZone": "Asia/Shanghai"
+    "timeZone": "Asia/Shanghai",
+    "...": "+ ~89 fields total, structure identical to §5.4 deviceList element"
   }
 }
 ```
+
+> **§5.4 vs §5.7**: §5.4 fetches all devices under the account in one call (filtered by assetId), while §5.7 looks up a single device by a known deviceId; the returned structure is identical.
 
 ---
 
@@ -1118,7 +1237,7 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 
 **Path parameters**: `deviceId` — device ID
 
-**Response `data`** (DeviceDpInfoVO array):
+**Response `data`** (DeviceDpInfoVO array, 11 fields):
 
 | Field | Type | Description |
 |---|---|---|
@@ -1128,7 +1247,9 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 | `type` | string | Value type (`value` / `bool` / `enum` / `string`) |
 | `value` | dynamic | Current value |
 | `specs` | string | Model spec JSON (contains min/max/step/enum, etc.) |
+| `dpJson` | string | Full DP definition JSON (standard Thing Model spec) |
 | `dpBusiId` | string | Property business ID |
+| `linkageDataType` | string? | Linkage data type (used for rule engine matching) |
 | `imageUrl` | string? | DP icon |
 | `valueCastType` | int | `0` = raw value, `1` = percentage |
 
@@ -1150,25 +1271,6 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
   ]
 }
 ```
-
----
-
-### 5.12 Unbind Device (alias: unbindFromAsset)
-
-Equivalent alias of [§5.6](#56-unbind-device). The server accepts both paths with identical business effect: unbind a device.
-
-```
-POST /business-app/v1/device/unbindFromAsset
-```
-
-**Body parameters**:
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `deviceId` | string | Yes | Device ID |
-| `isCleanData` | int | Yes | `1` = clear data, `0` = do not clear |
-
-> Both paths exist for historical reasons. New code should prefer [§5.6 `bind/unbind`](#56-unbind-device) (consistent with the bind / unbind business naming); existing code already using `unbindFromAsset` may keep it.
 
 ---
 
@@ -1470,7 +1572,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-**Response**:
+**Response** (10 fields per item):
 
 ```json
 {
@@ -1478,14 +1580,34 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   "data": [
     {
       "agentId": "1980570366486159361",
-      "avatar": "https://...",
+      "agentType": "official",
       "name": "小助手",
       "description": "我是你的智能助手",
-      "tags": ["助手"]
+      "avatarUrl": "https://...",
+      "status": 1,
+      "createBy": "cn2042488223219761152",
+      "createTime": 1742536800000,
+      "updateBy": "cn2042488223219761152",
+      "updateTime": 1742536800000
     }
   ]
 }
 ```
+
+**Field reference**:
+
+| Field | Type | Description |
+|---|---|---|
+| `agentId` | string | Agent ID |
+| `agentType` | string | Type: `official` / `sentino` / `customize` |
+| `name` | string | Display name |
+| `description` | string | Description |
+| `avatarUrl` | string? | Avatar URL |
+| `status` | int | Status |
+| `createBy` | string | Creator userId |
+| `createTime` | int | Creation time (millisecond timestamp) |
+| `updateBy` | string | Last modifier userId |
+| `updateTime` | int | Last modification time (millisecond timestamp) |
 
 ---
 
@@ -1778,15 +1900,44 @@ Errors fall into two layers: HTTP status codes (transport layer) and business co
 
 ### 7.2 Business Codes
 
-| code | Meaning | Recommended client handling |
-|------|---------|---------|
-| `200` | Success | Process `data` normally |
-| `11013` | Token invalid | Clear the cached `access_token` locally and redirect to the login page |
+| code | Meaning | Trigger Scenario | Recommended client handling |
+|------|---------|------------------|-----------------------------|
+| `200` | Success | Normal request | Process `data` |
+| `530` | Missing request parameter | Required field missing or in the wrong location (e.g. Body where Query was expected) | Check field placement/spelling against this document's endpoint signatures |
+| `11013` | Token invalid | Token expired or revoked by the server | Clear the local `access_token` and redirect to the login page |
+| `21010` | Wrong username or password | Password Mode login with wrong password (includes lockout info) | See "Lockout mechanism" below |
+| `74008` | Agent has not created a session | §6.16 conversation history — called before the device's first conversation | Not an error; show "No conversation history yet" in the UI |
 
 > The business code list will expand as the platform evolves. When you encounter a non-200 business code that is not listed here:
 > 1. Log the full `code`, `message`, and `reqId`;
 > 2. Show the user a "Service unavailable, please try again later" message in the UI;
 > 3. Report it back to the Sentino team to add it to this table.
+
+#### 21010 Lockout mechanism
+
+When Password Mode (§3.1 Mode B) login fails, the server tracks consecutive failures per account; **after 5 failures the account is temporarily locked**. The response `data` carries the details:
+
+```json
+{
+  "code": 21010,
+  "message": "Wrong username or password",
+  "data": {
+    "checkType": "lock",
+    "errorNum": 5,
+    "currentErrorNum": 1,
+    "residueErrorNum": 4
+  }
+}
+```
+
+| Field | Description |
+|---|---|
+| `checkType` | Lockout strategy type |
+| `errorNum` | Lockout threshold |
+| `currentErrorNum` | Number of failed attempts so far |
+| `residueErrorNum` | Remaining attempts; when it reaches 0 the account is temporarily locked |
+
+> **Recommended client behavior**: Surface `residueErrorNum` to the user ("N attempts remaining") to avoid unintentionally triggering a lockout through repeated retries.
 
 ---
 

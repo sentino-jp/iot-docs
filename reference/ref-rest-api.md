@@ -180,7 +180,6 @@ Authorization: Bearer {access_token}
 | [5.9](#59-下发设备属性) | 下发设备属性（控制硬件） | `POST /business-app/v1/device/command/propsIssue` |
 | [5.10](#510-设备网络检测) | 设备网络检测 | `POST /business-app/v1/device/command/checkSignal` |
 | [5.11](#511-获取设备物模型-dp-点) | 获取设备物模型 DP 点 | `POST /business-app/v1/device/getDpInfos/{deviceId}` |
-| [5.12](#512-设备解绑别名unbindfromasset) | 设备解绑别名 | `POST /business-app/v1/device/unbindFromAsset` |
 
 ### 智能体管理
 
@@ -315,16 +314,42 @@ curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token" \
   "data": {
     "access_token": "6ea8368a-127c-4203-b7e8-83fbeb9d0239",
     "token_type": "bearer",
-    "expires_in": 2591999,
     "refresh_token": "...",
+    "expires_in": 2591999,
+    "scope": "all",
     "userId": "cn2042488223219761152",
     "memberId": "cn2042488223219761152",
-    "tenantId": "1955088720032829440",
+    "username": "test_user_001",
     "nickname": "z3dwog17",
-    "username": "test_user_001"
+    "tenantId": "1955088720032829440",
+    "appId": "krkfvb4s5e91hq",
+    "clientId": "cetus-iot-app",
+    "areaCode": "86",
+    "authenticationIdentity": "...",
+    "appMqttPassword": "..."
   }
 }
 ```
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `access_token` | string | Bearer Token，后续业务接口使用 |
+| `token_type` | string | 固定值 `bearer` |
+| `refresh_token` | string | 用于刷新 token |
+| `expires_in` | int | token 有效期（秒，约 30 天） |
+| `scope` | string | OAuth scope，固定 `all` |
+| `userId` | string | 用户数字 ID（**也用于 App 端 MQTT 通道认证**） |
+| `memberId` | string | 与 userId 相同（别名） |
+| `username` | string | 用户名（UID 模式 = 传入的 uid；Password 模式 = 邮箱） |
+| `nickname` | string | 昵称（自动生成或用户设置） |
+| `tenantId` | string | 租户 ID |
+| `appId` | string | 应用 ID（与请求头 `app_id` 一致） |
+| `clientId` | string | OAuth 客户端 ID（明文，非 Base64） |
+| `areaCode` | string | 区号 |
+| `authenticationIdentity` | string | 内部认证标识 |
+| `appMqttPassword` | string | **App 端 MQTT 通道认证密码**（联系 Sentino 团队获取通道协议） |
+
+> **关键字段**：`userId` 和 `appMqttPassword` 是 App 端订阅设备实时消息的必需凭证。
 
 ---
 
@@ -443,20 +468,37 @@ POST /business-app/v1/user/profile
 
 无请求参数。
 
-**响应 data**（User 对象）：
+**响应 data**（User 对象，27 个字段）：
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
-| `id` / `userId` / `memberId` | string | 用户 ID（同一值 3 个别名） |
-| `nickname` | string? | 昵称 |
-| `userName` | string? | 用户名 |
+| `id` | string | 用户 ID（与 `userId` 等价） |
+| `userName` | string? | 用户名（UID 模式 = uid，password 模式 = 邮箱） |
+| `nickname` | string? | 昵称（注册时自动生成） |
 | `email` | string? | 邮箱 |
 | `phone` | string? | 手机号 |
 | `avatarUrl` | string? | 头像 URL |
-| `areaCode` | string? | 区号 |
+| `birthday` | string? | 生日 |
 | `userType` | int | 用户类型 |
+| `status` | int | 账号状态 |
+| `isTest` | bool | 是否测试账号 |
+| `registryType` | int | 注册类型（区分 UID / Password / 第三方） |
+| `regThirdData` | string? | 第三方注册数据（如有） |
+| `appId` | string | 应用 ID |
+| `appName` | string? | 应用名称 |
+| `tenantId` | string | 租户 ID |
+| `dataCenterCode` | string | 数据中心代码 |
+| `areaCode` | string? | 区号 |
+| `areaName` | string? | 区域名称 |
+| `userCountryKey` | string? | 用户国家代码（如 `CN`） |
+| `countryKey` | string? | 国家代码（同上） |
 | `tz` | string? | 时区 |
+| `zoneOffset` | int? | UTC 偏移小时数 |
 | `tempUnit` | string? | 温度单位 |
+| `createTime` | int | 注册时间（毫秒时间戳） |
+| `lastLoginTime` | int? | 上次登录时间 |
+| `lastActiveTime` | int? | 上次活跃时间 |
+| `lastUnUpdateTime` | int? | 上次"非更新"动作时间 |
 
 ---
 
@@ -526,17 +568,16 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 {
   "code": 200,
   "data": {
-    "id": "sEF4ljjdH8mo",
-    "productName": "智能玩具",
+    "id": "OQm9yRoaLq1gbK",
+    "name": "智能玩具",
     "model": "ST-001",
     "imageUrl": "https://...",
+    "tenantId": "1955088720032829440",
+    "typeId": "...",
     "protocolType": "MQTT",
-    "distributionNetMode": "1",
-    "nodeType": 1,
-    "bindMode": 1,
-    "deviceShare": 1,
-    "deviceUpgrade": 1,
-    "status": 1
+    "protocolName": "MQTT 5.0",
+    "connectCloudType": 1,
+    "nodeType": 1
   }
 }
 ```
@@ -545,12 +586,18 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 
 | 字段 | 说明 |
 |---|---|
+| `id` | 产品 ID（与请求参数 `productId` 一致） |
+| `name` | 产品显示名称 |
+| `model` | 产品型号 |
+| `imageUrl` | 产品图片 URL |
+| `tenantId` | 租户 ID |
+| `typeId` | 产品类目 ID |
 | `protocolType` | 通讯协议：`MQTT` / `BLE` |
-| `distributionNetMode` | 配网模式：`1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
+| `protocolName` | 协议描述 |
+| `connectCloudType` | 云端接入类型 |
 | `nodeType` | 节点类型：`1`=普通设备, `2`=网关, `3`=边缘网关, `4`=子设备 |
-| `bindMode` | 绑定模式：`1`=强绑, `2`=弱绑 |
-| `deviceShare` | 是否支持设备共享：`0`=否, `1`=是 |
-| `deviceUpgrade` | 是否支持 OTA 升级：`0`=否, `1`=是 |
+
+> 服务端可能根据产品类型扩展返回 `distributionNetMode` / `bindMode` / `deviceShare` / `deviceUpgrade` / `status` 等字段；以实际响应为准。
 
 ---
 
@@ -795,6 +842,19 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree" \
 
 > **注意**：响应 `data` 为数组格式，使用 `id` 和 `name` 字段（非 `assetId` / `assetName`），子节点字段为 `childrens`。配网时使用根节点的 `id` 作为 `assetId`。
 
+**字段说明**：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `id` | string | 资产节点 ID（即 `assetId`） |
+| `parentId` | string | 父节点 ID，根节点为 `"0"` |
+| `name` | string | 资产名称（默认 "My Home"） |
+| `childrens` | array | 子资产列表（注意拼写多个 s） |
+| `sortNumber` | int | 排序权重 |
+| `isLock` | bool | 是否被锁定 |
+| `isShare` | bool | 是否为共享资产 |
+| `memberRole` | int | 当前用户在此资产中的角色 |
+
 ---
 
 ### 5.2 获取设备信息
@@ -821,21 +881,46 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDev
   -d "{\"productId\": \"$PRODUCT_ID\", \"uuid\": \"$UUID\"}"
 ```
 
-**响应**：
+**响应**（13 个字段）：
 
 ```json
 {
   "code": 200,
   "data": {
+    "id": "dev_001",
     "uuid": "ct01wfjSNqGAqUUK",
     "productId": "sEF4ljjdH8mo",
-    "deviceName": "智能设备",
+    "name": "智能音箱",
+    "imageUrl": "https://cdn.example.com/device/speaker.png",
+    "barcode": "SN123456789",
     "protocolType": "MQTT",
-    "configMode": "BLE",
-    "bindStatus": 0
+    "nodeType": 1,
+    "distributionNetMode": "1",
+    "distributionNetModes": ["1", "3"],
+    "bindStatus": 0,
+    "isIpc": false,
+    "isLowPower": false
   }
 }
 ```
+
+**字段说明**：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `id` | string | 设备 ID（绑定后由云端分配，非 UUID） |
+| `uuid` | string | 设备 UUID |
+| `productId` | string | 所属产品 ID |
+| `name` | string | 设备显示名称 |
+| `imageUrl` | string? | 产品图片 URL（继承自产品） |
+| `barcode` | string? | 设备条形码 |
+| `protocolType` | string | 通讯协议 |
+| `nodeType` | int | 节点类型（1=普通设备 / 2=网关 / 4=子设备） |
+| `distributionNetMode` | string | 当前配网模式 |
+| `distributionNetModes` | array | 设备支持的所有配网模式 |
+| `bindStatus` | int | 绑定状态：`0`=未绑定可配网 / 非 0 = 已绑定 |
+| `isIpc` | bool | 是否摄像头类设备 |
+| `isLowPower` | bool | 是否低功耗设备 |
 
 ---
 
@@ -904,11 +989,24 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
   "data": {
     "deviceList": [
       {
-        "deviceId": "2008424975449309184",
+        "id": "2008424975449309184",
         "uuid": "ct01wfjSNqGAqUUK",
-        "deviceName": "智能设备",
-        "online": true,
-        "productId": "sEF4ljjdH8mo"
+        "name": "智能音箱",
+        "productId": "sEF4ljjdH8mo",
+        "productName": "智能玩具",
+        "imageUrl": "https://...",
+        "onlineStatus": 1,
+        "firmwareVersion": "1.2.3",
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "ip": "192.168.1.100",
+        "networkType": "WiFi",
+        "timeZone": "Asia/Shanghai",
+        "assetId": "2042488223647580161",
+        "assetName": "My Home",
+        "barcode": "SN123456789",
+        "batteryLevel": 85,
+        "propertiesInfoDTO": {"volume": 50},
+        "...": "等共 89 个字段"
       }
     ],
     "sortIdList": ["2008424975449309184"],
@@ -918,12 +1016,32 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
 }
 ```
 
+**外层字段**：
+
 | 字段 | 说明 |
 |---|---|
-| `deviceList` | 设备信息列表 |
+| `deviceList` | 设备对象列表（每项 ~89 字段） |
 | `sortIdList` | 用户自定义排序 |
 | `shareGroupList` | 被分享的群组 |
 | `shareList` | 被分享的设备 |
+
+**Device 对象核心字段**（按使用频率分组；完整字段定义见 [`sentino-app-sample/lib/models/device.dart`](https://github.com/sentino-jp/sentino-app-sample/blob/main/lib/models)）：
+
+| 类别 | 字段 | 说明 |
+|---|---|---|
+| **身份** | `id`, `uuid`, `productId`, `productName`, `barcode` | 与 §5.2 同语义 |
+| **显示** | `name`, `imageUrl`, `typeName`, `typeImage`, `model` | App UI 渲染 |
+| **状态** | `onlineStatus` (`1`=在线/`0`=离线), `tcpOnlineStatus`, `batteryLevel` (0-100), `chargeIng`, `sleepState` | 实时状态 |
+| **网络** | `networkType` (`WiFi`/`4G`), `ip`, `mac`, `internetType`, `currentSsid`, `signalStrength` | 联网信息 |
+| **归属** | `assetId`, `assetName`, `rootAssetId`, `tenantId` | 资产关系 |
+| **能力** | `protocolType`, `protocolName`, `firmwareVersion`, `mcuVersion`, `nodeType`, `distributionNetMode` | 协议/版本 |
+| **属性** | `propertiesInfoDTO` (Map), `dpAlias`, `stockDpInfoVOList`, `switchDpInfoVOList`, `shadowMap` | 物模型属性快照 |
+| **配置** | `timeZone`, `lat`, `lng`, `address`, `autoOta`, `notDisturbTime` | 设备设置 |
+| **共享** | `isShare`, `canShare`, `shareId`, `shareUserNickname`, `shareRuleType` | 分享状态 |
+| **网关** | `isGroup`, `gateway`, `gatewayId`, `gatewayName`, `gatewayType`, `gatewayUuid`, `parentGatewayType`, `childNum` | 子设备/网关 |
+| **类型标志** | `isIpc`, `isIpf`, `isLowPower`, `isFlowCard`, `isMatter`, `isVirtual`, `isWebRtc` | 设备子类型 |
+
+> 完整字段（89 个）请直接参考 sample-app 的 Device 模型；本表只列 App UI 常用的 ~50 个。其余字段（callSwitch / clickWakeup / mainScreen / privacyMode / rcType / runSeconds / videoCallType 等）按需查询。
 
 ---
 
@@ -972,8 +1090,6 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/ota/checkUpgrade/$D
 
 解绑设备，可选择是否清除数据。
 
-> 服务端同时支持等价别名 [§5.12 unbindFromAsset](#512-设备解绑别名unbindfromasset)，二者均生效。本节路径为推荐用法。
-
 ```
 POST /business-app/v1/device/bind/unbind
 ```
@@ -1016,7 +1132,7 @@ POST /business-app/v1/device/getByDeviceId/{deviceId}
 
 **路径参数**：`deviceId` — 设备 ID
 
-**响应 data**（Device 对象，字段同 §5.4）：
+**响应 data**：与 §5.4 设备列表里的 Device 对象完全相同（同一物模型，约 89 字段）。详见 [§5.4 Device 对象核心字段表](#54-获取设备列表)。
 
 ```json
 {
@@ -1032,10 +1148,13 @@ POST /business-app/v1/device/getByDeviceId/{deviceId}
     "mac": "AA:BB:CC:DD:EE:FF",
     "ip": "192.168.1.100",
     "networkType": "WiFi",
-    "timeZone": "Asia/Shanghai"
+    "timeZone": "Asia/Shanghai",
+    "...": "等共 ~89 个字段，结构同 §5.4 deviceList 元素"
   }
 }
 ```
+
+> **§5.4 vs §5.7 区别**：§5.4 一次拿账号下所有设备（按 assetId 过滤），§5.7 按已知 deviceId 单查；返回结构相同。
 
 ---
 
@@ -1118,7 +1237,7 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 
 **路径参数**：`deviceId` — 设备 ID
 
-**响应 data**（DeviceDpInfoVO 数组）：
+**响应 data**（DeviceDpInfoVO 数组，11 个字段）：
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
@@ -1128,7 +1247,9 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
 | `type` | string | 取值类型（`value` / `bool` / `enum` / `string`） |
 | `value` | dynamic | 当前值 |
 | `specs` | string | 模型规格 JSON（含 min/max/step/enum 等） |
+| `dpJson` | string | DP 点完整定义 JSON（标准物模型规格） |
 | `dpBusiId` | string | 属性业务 ID |
+| `linkageDataType` | string? | 联动数据类型（用于规则引擎匹配） |
 | `imageUrl` | string? | 功能点图标 |
 | `valueCastType` | int | `0` = 原始值，`1` = 百分比 |
 
@@ -1150,25 +1271,6 @@ POST /business-app/v1/device/getDpInfos/{deviceId}
   ]
 }
 ```
-
----
-
-### 5.12 设备解绑（别名 unbindFromAsset）
-
-[§5.6](#56-设备解绑) 的等价别名路径。服务端同时接受两条路径，业务效果相同：解除设备绑定。
-
-```
-POST /business-app/v1/device/unbindFromAsset
-```
-
-**Body 参数**：
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `deviceId` | string | 是 | 设备 ID |
-| `isCleanData` | int | 是 | `1`=清除数据，`0`=不清除 |
-
-> 历史原因服务端同时保留两条路径。新代码推荐用 [§5.6 `bind/unbind`](#56-设备解绑)（与「绑定/解绑」业务命名一致）；存量代码若已用 `unbindFromAsset`，可保持。
 
 ---
 
@@ -1470,7 +1572,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-**响应**：
+**响应**（每项 10 个字段）：
 
 ```json
 {
@@ -1478,14 +1580,34 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/user-agents/list" \
   "data": [
     {
       "agentId": "1980570366486159361",
-      "avatar": "https://...",
+      "agentType": "official",
       "name": "小助手",
       "description": "我是你的智能助手",
-      "tags": ["助手"]
+      "avatarUrl": "https://...",
+      "status": 1,
+      "createBy": "cn2042488223219761152",
+      "createTime": 1742536800000,
+      "updateBy": "cn2042488223219761152",
+      "updateTime": 1742536800000
     }
   ]
 }
 ```
+
+**字段说明**：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `agentId` | string | 智能体 ID |
+| `agentType` | string | 类型：`official` / `sentino` / `customize` |
+| `name` | string | 显示名称 |
+| `description` | string | 描述 |
+| `avatarUrl` | string? | 头像 URL |
+| `status` | int | 状态 |
+| `createBy` | string | 创建者 userId |
+| `createTime` | int | 创建时间（毫秒时间戳） |
+| `updateBy` | string | 最后修改者 userId |
+| `updateTime` | int | 最后修改时间（毫秒时间戳） |
 
 ---
 
@@ -1778,15 +1900,44 @@ POST /business-app/v1/agents/conversation/history/clean
 
 ### 7.2 业务码
 
-| code | 含义 | 客户端建议处理 |
-|------|------|---------------|
-| `200` | 成功 | 正常处理 `data` |
-| `11013` | Token 失效 | 清除本地缓存的 access_token，跳转登录页 |
+| code | 含义 | 触发场景 | 客户端建议处理 |
+|------|------|---------|---------------|
+| `200` | 成功 | 正常请求 | 处理 `data` |
+| `530` | 缺少请求参数 | 必填字段缺失或位置错（如 Body 应为 Query） | 检查字段位置/拼写，参考本文档接口签名 |
+| `11013` | Token 失效 | Token 过期或被服务端主动失效 | 清除本地 access_token，跳转登录页 |
+| `21010` | 用户名或密码错误 | Password 模式登录密码错（含锁定信息） | 见下方"锁定机制" |
+| `74008` | 智能体未创建会话 | §6.16 对话历史 — 设备首次对话前调用 | 不算错；UI 显示「暂无对话记录」 |
 
 > 业务码列表会随平台迭代扩展。遇到本表未列出的非 200 业务码：
 > 1. 把 `code`、`message`、`reqId` 完整记录到日志；
 > 2. UI 提示用户「服务异常，请稍后重试」；
 > 3. 反馈到 Sentino 团队补充本表。
+
+#### 21010 锁定机制
+
+Password 模式（§3.1 模式 B）登录失败时，服务端按账号维度统计连续错误次数，**5 次失败后账号被临时锁定**。响应 `data` 携带详细信息：
+
+```json
+{
+  "code": 21010,
+  "message": "用户名或密码错误",
+  "data": {
+    "checkType": "lock",
+    "errorNum": 5,
+    "currentErrorNum": 1,
+    "residueErrorNum": 4
+  }
+}
+```
+
+| 字段 | 说明 |
+|---|---|
+| `checkType` | 锁定策略类型 |
+| `errorNum` | 锁定阈值 |
+| `currentErrorNum` | 已尝试错误次数 |
+| `residueErrorNum` | 剩余可尝试次数；为 0 时账号被临时锁定 |
+
+> **客户端建议**：把 `residueErrorNum` 显示给用户（"还剩 N 次机会"），避免无意识连续重试触发锁定。
 
 ---
 
