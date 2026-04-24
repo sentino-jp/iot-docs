@@ -22,16 +22,11 @@ Welcome to the Sentino IoT developer documentation. Sentino IoT is an IoT platfo
 
 ## Reading Guide
 
-Pick a reading path based on your role:
+Pick a path by what you want to do (always start with [Architecture & Concepts](./architecture-en.md)):
 
-| Your Role | Recommended Reading Order |
-|---|---|
-| **Embedded Firmware Engineer** (basics) | [Architecture & Concepts](./architecture-en.md) -> [Quick Start (Device)](tutorials/quickstart-device-en.md) -> [Device Integration Guide](guides/guide-device-en.md) -> [AI Voice Conversation Integration Guide](guides/guide-ai-voice-en.md) |
-| **Embedded Firmware Engineer** (reference + hardware) | [MQTT Protocol Reference](reference/ref-mqtt-en.md) / [BLE Protocol Reference](reference/ref-ble-en.md) -> fork [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample) to build & flash |
-| **App Developer (using the white-label Flutter template)** | [Architecture & Concepts](./architecture-en.md) -> Fork [`sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample) directly and follow its `doc/quick-start.md` to get it running -> Come back to this repo's [REST API Reference](reference/ref-rest-api-en.md) for field details |
-| **App Developer (writing an App from scratch)** | [Architecture & Concepts](./architecture-en.md) -> [Quick Start (App)](tutorials/quickstart-app-en.md) -> [App Integration Guide](guides/guide-app-en.md) -> [REST API Reference](reference/ref-rest-api-en.md) |
-| **Product / Project Manager** | [Architecture & Concepts](./architecture-en.md) -> [AI Toy Integration Solution](solutions/solution-ai-toy-en.md) |
-| **Partner Technical Lead** | [Architecture & Concepts](./architecture-en.md) -> [AI Toy Integration Solution](solutions/solution-ai-toy-en.md) -> Browse the [Related Open-Source Repositories](#related-open-source-repositories) for sample depth |
+- **Writing embedded firmware** — [Device quickstart](tutorials/quickstart-device-en.md) → [Device integration](guides/guide-device-en.md) → [AI voice](guides/guide-ai-voice-en.md) → protocol references ([MQTT](reference/ref-mqtt-en.md) / [BLE](reference/ref-ble-en.md)); for real-hardware firmware fork [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample)
+- **Building an App** — White-label template: fork [`sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample), rebrand the UI; check field details in [REST API](reference/ref-rest-api-en.md). From scratch: [App quickstart](tutorials/quickstart-app-en.md) → [App integration](guides/guide-app-en.md) → [REST API](reference/ref-rest-api-en.md)
+- **Evaluating / business contact** — [AI Toy Integration Solution](solutions/solution-ai-toy-en.md), and browse the [Related Open-Source Repositories](#related-open-source-repositories) to gauge sample depth
 
 ---
 

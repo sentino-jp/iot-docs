@@ -22,16 +22,11 @@
 
 ## 阅读指引
 
-根据你的角色选择阅读路径：
+按你要做的事选路径（先读 [架构与概念](./architecture.md) 再下钻）：
 
-| 你的角色 | 推荐阅读顺序 |
-|---|---|
-| **嵌入式固件工程师**（基础） | [架构与概念](./architecture.md) → [快速入门(设备端)](tutorials/quickstart-device.md) → [设备端集成指南](guides/guide-device.md) → [AI 语音对话集成指南](guides/guide-ai-voice.md) |
-| **嵌入式固件工程师**（参考 + 实物） | [MQTT 协议参考](reference/ref-mqtt.md) / [BLE 协议参考](reference/ref-ble.md) → fork [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample) 编译烧录 |
-| **App 开发者（拿白标 Flutter 模板改）** | [架构与概念](./architecture.md) → 直接 fork [`sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample)，跟其 `doc/quick-start.md` 跑起来 → 字段细节回到本仓 [REST API 参考](reference/ref-rest-api.md) |
-| **App 开发者（从零写 App）** | [架构与概念](./architecture.md) → [快速入门(App端)](tutorials/quickstart-app.md) → [App 端集成指南](guides/guide-app.md) → [REST API 参考](reference/ref-rest-api.md) |
-| **产品 / 项目经理** | [架构与概念](./architecture.md) → [AI 玩偶接入方案](solutions/solution-ai-toy.md) |
-| **合作伙伴技术负责人** | [架构与概念](./architecture.md) → [AI 玩偶接入方案](solutions/solution-ai-toy.md) → 浏览[相关开源仓库](#相关开源仓库)看 sample 厚度 |
+- **写嵌入式固件**——[设备端 quickstart](tutorials/quickstart-device.md) → [设备集成](guides/guide-device.md) → [AI 语音](guides/guide-ai-voice.md) → 协议参考（[MQTT](reference/ref-mqtt.md) / [BLE](reference/ref-ble.md)）；跑实物固件 fork [`sentino-iot-sample`](https://github.com/sentino-jp/sentino-iot-sample)
+- **做 App**——拿白标模板：fork [`sentino-app-sample`](https://github.com/sentino-jp/sentino-app-sample) 改 UI 即可，字段细节查 [REST API](reference/ref-rest-api.md)；从零写：[App quickstart](tutorials/quickstart-app.md) → [App 集成](guides/guide-app.md) → [REST API](reference/ref-rest-api.md)
+- **评估方案 / 商务对接**——[AI 玩偶接入方案](solutions/solution-ai-toy.md)，配合浏览[相关开源仓库](#相关开源仓库)看 sample 厚度
 
 ---
 
