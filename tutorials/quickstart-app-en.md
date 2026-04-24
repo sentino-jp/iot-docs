@@ -129,7 +129,7 @@ Take note of the root node's `id` (the account ID, i.e. assetId); it will be use
 Query the product's provisioning mode and basic configuration by product ID.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=OQm9yRoaLq1gbK" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
@@ -141,20 +141,21 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByPro
   "code": 200,
   "message": "success",
   "data": {
-    "id": "sEF4ljjdH8mo",
-    "productName": "AI Toy",
+    "id": "OQm9yRoaLq1gbK",
+    "name": "Kumamoto",
+    "imageUrl": "https://...",
+    "model": "...",
+    "tenantId": "...",
+    "typeId": "...",
     "protocolType": "MQTT",
-    "distributionNetMode": "1",
-    "bindMode": 1,
-    "status": 1
+    "protocolName": "MQTT 5.0",
+    "connectCloudType": 1,
+    "nodeType": 1
   }
 }
 ```
 
-| Key field | Description |
-|---|---|
-| `distributionNetMode` | Provisioning mode: `1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
-| `bindMode` | Binding mode: `1`=strong binding (only one user may bind at a time), `2`=weak binding |
+> Depending on the product type, the server may return additional fields such as `distributionNetMode` / `bindMode`; rely on the actual response.
 
 ---
 
@@ -166,7 +167,7 @@ Query a device's basic info and binding status by device UUID and product ID.
 curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}' | jq .
+  -d '{"productId": "OQm9yRoaLq1gbK", "uuid": "ct013P3QJR5SdaW9"}' | jq .
 ```
 
 **Expected response**:
@@ -176,26 +177,33 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimple
   "code": 200,
   "message": "success",
   "data": {
-    "uuid": "ct01wfjSNqGAqUUK",
-    "productId": "sEF4ljjdH8mo",
-    "deviceName": "Smart Device",
+    "id": "...",
+    "uuid": "ct013P3QJR5SdaW9",
+    "productId": "OQm9yRoaLq1gbK",
+    "name": "Smart Speaker",
+    "imageUrl": "https://...",
+    "barcode": "SN...",
     "protocolType": "MQTT",
-    "configMode": "BLE",
-    "bindStatus": 0
+    "nodeType": 1,
+    "distributionNetMode": "...",
+    "distributionNetModes": ["..."],
+    "bindStatus": 0,
+    "isIpc": false,
+    "isLowPower": false
   }
 }
 ```
 
-A `bindStatus` of `0` indicates the device is unbound and ready for provisioning.
+A `bindStatus` of `0` indicates the device is unbound and ready for provisioning; non-`0` (e.g. `1`) means it is already bound by some user.
 
 ---
 
 ## Step 5: List Available Agents
 
-Get the list of officially recommended agents (AI characters).
+Get the list of Agents maintained by the Sentino platform (AI characters).
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}" | jq .
@@ -209,11 +217,11 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend
   "message": "success",
   "data": [
     {
-      "agentId": "1980570366486159361",
-      "avatar": "https://...",
+      "agentId": "2046112542823174144",
+      "avatarUrl": "https://...",
       "name": "Little Helper",
       "description": "I'm your smart assistant",
-      "tags": ["assistant", "smart"]
+      "tagList": []
     }
   ]
 }
@@ -230,13 +238,13 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bi
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
-    "agentId": "1980570366486159361",
-    "agentType": "official",
+    "agentId": "2046112542823174144",
+    "agentType": "sentino",
     "deviceId": "your-device-id"
   }' | jq .
 ```
 
-> Note: The `deviceId` here is the ID assigned by the cloud after the device is bound, not the UUID. It can be obtained via the device list endpoint.
+> Note: `deviceId` is the cloud-assigned ID (not the UUID), available via [§5.4 Get Device List](../reference/ref-rest-api-en.md#54-get-device-list); this step succeeds only when your account already has a real bound device.
 
 **Expected response**:
 

@@ -129,7 +129,7 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/asset/assetTree"
 通过产品 ID 查询产品的配网模式和基本配置。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=sEF4ljjdH8mo" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProductId?productId=OQm9yRoaLq1gbK" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Bearer $TOKEN" | jq .
 ```
@@ -139,22 +139,23 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByPro
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "成功",
   "data": {
-    "id": "sEF4ljjdH8mo",
-    "productName": "智能玩具",
+    "id": "OQm9yRoaLq1gbK",
+    "name": "Kumamoto",
+    "imageUrl": "https://...",
+    "model": "...",
+    "tenantId": "...",
+    "typeId": "...",
     "protocolType": "MQTT",
-    "distributionNetMode": "1",
-    "bindMode": 1,
-    "status": 1
+    "protocolName": "MQTT 5.0",
+    "connectCloudType": 1,
+    "nodeType": 1
   }
 }
 ```
 
-| 关键字段 | 说明 |
-|---|---|
-| `distributionNetMode` | 配网模式：`1`=WiFi+BLE, `2`=WiFi, `3`=BLE |
-| `bindMode` | 绑定模式：`1`=强绑（同一时间仅一个用户可绑定），`2`=弱绑 |
+> 服务端可能根据产品类型扩展返回 `distributionNetMode` / `bindMode` 等字段；以实际响应为准。
 
 ---
 
@@ -166,7 +167,7 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByPro
 curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimpleDeviceInfo" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"productId": "sEF4ljjdH8mo", "uuid": "ct01wfjSNqGAqUUK"}' | jq .
+  -d '{"productId": "OQm9yRoaLq1gbK", "uuid": "ct013P3QJR5SdaW9"}' | jq .
 ```
 
 **预期响应**：
@@ -174,28 +175,35 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getSimple
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "成功",
   "data": {
-    "uuid": "ct01wfjSNqGAqUUK",
-    "productId": "sEF4ljjdH8mo",
-    "deviceName": "智能设备",
+    "id": "...",
+    "uuid": "ct013P3QJR5SdaW9",
+    "productId": "OQm9yRoaLq1gbK",
+    "name": "智能音箱",
+    "imageUrl": "https://...",
+    "barcode": "SN...",
     "protocolType": "MQTT",
-    "configMode": "BLE",
-    "bindStatus": 0
+    "nodeType": 1,
+    "distributionNetMode": "...",
+    "distributionNetModes": ["..."],
+    "bindStatus": 0,
+    "isIpc": false,
+    "isLowPower": false
   }
 }
 ```
 
-`bindStatus` 为 `0` 表示设备未绑定，可以进行配网。
+`bindStatus` 为 `0` 表示设备未绑定、可进行配网；非 `0`（如 `1`）表示已被某用户绑定。
 
 ---
 
 ## 第 5 步：查看智能体列表
 
-获取官方推荐的智能体（AI 角色）列表。
+获取 Sentino 平台维护的智能体（AI 角色）列表。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend/agents-list" \
+curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/recommend/agents-list" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d "{}" | jq .
@@ -206,14 +214,14 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/recommend
 ```json
 {
   "code": 200,
-  "message": "success",
+  "message": "成功",
   "data": [
     {
-      "agentId": "1980570366486159361",
-      "avatar": "https://...",
+      "agentId": "2046112542823174144",
+      "avatarUrl": "https://...",
       "name": "小助手",
       "description": "我是你的智能助手",
-      "tags": ["助手", "智能"]
+      "tagList": []
     }
   ]
 }
@@ -230,13 +238,13 @@ curl -s -X POST "https://api-iot.sentino.jp/api/business-app/v1/agents/device/bi
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
-    "agentId": "1980570366486159361",
-    "agentType": "official",
+    "agentId": "2046112542823174144",
+    "agentType": "sentino",
     "deviceId": "你的设备ID"
   }' | jq .
 ```
 
-> 注意：这里的 `deviceId` 是设备绑定后由云端分配的 ID，不是 UUID。可通过设备列表接口获取。
+> 注意：`deviceId` 是设备绑定后由云端分配的 ID（非 UUID），通过 [§5.4 获取设备列表](../reference/ref-rest-api.md#54-获取设备列表) 取得；本步骤仅在你账号下已有真实绑定设备时才会成功。
 
 **预期响应**：
 
