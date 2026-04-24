@@ -200,6 +200,8 @@ Grouped by business area — click to jump to the corresponding section.
 | [6.13](#613-unbind-agent-device) | Unbind Agent (device) | `POST /business-app/v1/agents/device/unbind-agent` |
 | [6.14](#614-get-agent-bound-to-device) | Get Agent bound to device | `POST /business-app/v1/agents/device/getAgentBaseByDeviceId` |
 | [6.15](#615-helper-endpoints-language--voice--llm-lists) | Helper lists (language / voice / LLM) | `POST /business-app/v1/agents/customize/{language,voice,llm}-list` |
+| [6.16](#616-get-conversation-history) | Get conversation history | `POST /business-app/v1/agents/conversation/history` |
+| [6.17](#617-clear-conversation-history) | Clear conversation history | `POST /business-app/v1/agents/conversation/history/clean` |
 
 ---
 
@@ -1677,6 +1679,60 @@ POST /business-app/v1/agents/customize/llm-list
   {"id": "model_gpt35", "name": "GPT-3.5"}
 ]
 ```
+
+---
+
+### 6.16 Get Conversation History
+
+Fetch the message log for a device × Agent pair.
+
+```
+POST /business-app/v1/agents/conversation/history
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | string | Yes | Agent ID |
+| `targetId` | string | Yes | Target ID (device ID) |
+| `targetType` | string | Yes | Target type, fixed value `device` |
+
+**Response data** (message array):
+
+| Field | Type | Description |
+|---|---|---|
+| `role` | string | `user` or `assistant` |
+| `content` | string | Message content |
+| `createTime` | int | Timestamp in milliseconds |
+
+```json
+{
+  "code": 200,
+  "data": [
+    {"role": "user", "content": "你好", "createTime": 1681234567000},
+    {"role": "assistant", "content": "你好！有什么可以帮你的吗？", "createTime": 1681234568000}
+  ]
+}
+```
+
+---
+
+### 6.17 Clear Conversation History
+
+Clear the entire conversation history for the given Agent.
+
+```
+POST /business-app/v1/agents/conversation/history/clean
+```
+
+**Query parameters**:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | string | Yes | Agent ID |
+
+**Response**: `data: null`, `code: 200` indicates success. Not recoverable.
 
 ---
 

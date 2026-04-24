@@ -200,6 +200,8 @@ Authorization: Bearer {access_token}
 | [6.13](#613-解绑智能体设备) | 解绑智能体（设备） | `POST /business-app/v1/agents/device/unbind-agent` |
 | [6.14](#614-获取设备绑定的智能体) | 获取设备绑定的智能体 | `POST /business-app/v1/agents/device/getAgentBaseByDeviceId` |
 | [6.15](#615-辅助接口语言--音色--llm-列表) | 辅助列表（语言 / 音色 / LLM） | `POST /business-app/v1/agents/customize/{language,voice,llm}-list` |
+| [6.16](#616-获取对话历史) | 获取对话历史 | `POST /business-app/v1/agents/conversation/history` |
+| [6.17](#617-清空对话历史) | 清空对话历史 | `POST /business-app/v1/agents/conversation/history/clean` |
 
 ---
 
@@ -1677,6 +1679,60 @@ POST /business-app/v1/agents/customize/llm-list
   {"id": "model_gpt35", "name": "GPT-3.5"}
 ]
 ```
+
+---
+
+### 6.16 获取对话历史
+
+获取设备 × 智能体的对话消息流水。
+
+```
+POST /business-app/v1/agents/conversation/history
+```
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `agentId` | string | 是 | 智能体 ID |
+| `targetId` | string | 是 | 目标 ID（设备 ID） |
+| `targetType` | string | 是 | 目标类型，固定值 `device` |
+
+**响应 data**（消息数组）：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `role` | string | `user` 或 `assistant` |
+| `content` | string | 消息内容 |
+| `createTime` | int | 时间戳（毫秒） |
+
+```json
+{
+  "code": 200,
+  "data": [
+    {"role": "user", "content": "你好", "createTime": 1681234567000},
+    {"role": "assistant", "content": "你好！有什么可以帮你的吗？", "createTime": 1681234568000}
+  ]
+}
+```
+
+---
+
+### 6.17 清空对话历史
+
+清空指定智能体的全部对话历史。
+
+```
+POST /business-app/v1/agents/conversation/history/clean
+```
+
+**Query 参数**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `agentId` | string | 是 | 智能体 ID |
+
+**响应**：`data: null`，`code: 200` 表示清空成功。不可恢复。
 
 ---
 
