@@ -118,8 +118,8 @@ An **App** is the identity for a client application (mobile or web) connecting t
 
 | Configuration | Purpose | Example |
 |---------------|---------|---------|
-| `app_id` | Application identifier, required in all REST API headers | `krfjnsim9vs7yd` |
-| Channel identifier (`channel_identifier`) | Identifies the App's distribution channel | `gk6853gq` |
+| `app_id` | Application identifier, required in all REST API headers | `krkfvb4s5e91hq` |
+| Channel identifier (`channel_identifier`) | Identifies the App's distribution channel | `kfvb4s5e` |
 | `package_name` | App package name (iOS / Android) | `jp.sentino.general` |
 | Data center (`data_center_code`) | Server region | `cn` |
 

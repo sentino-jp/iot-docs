@@ -116,8 +116,8 @@ Sentino 为每台设备预分配一组唯一的身份凭证，称为**三元组*
 
 | 配置项 | 用途 | 示例 |
 |--------|------|------|
-| `app_id` | 业务层应用标识，所有 REST API 请求头必带 | `krfjnsim9vs7yd` |
-| 渠道标识符 (`channel_identifier`) | 标识 App 的发布渠道 | `gk6853gq` |
+| `app_id` | 业务层应用标识，所有 REST API 请求头必带 | `krkfvb4s5e91hq` |
+| 渠道标识符 (`channel_identifier`) | 标识 App 的发布渠道 | `kfvb4s5e` |
 | `package_name` | App 包名（iOS / Android） | `jp.sentino.general` |
 | 数据中心 (`data_center_code`) | 服务器区域 | `cn` |
 

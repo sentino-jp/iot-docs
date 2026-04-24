@@ -17,8 +17,8 @@ All curl examples in this document use environment variables. Before running the
 
 ```bash
 # Application credentials (provided by Sentino, unique per customer application)
-export APP_ID="krfjnsim9vs7yd"
-export CHANNEL_IDENTIFIER="gk6853gq"
+export APP_ID="krkfvb4s5e91hq"
+export CHANNEL_IDENTIFIER="kfvb4s5e"
 export PACKAGE_NAME="jp.sentino.general"
 export DATA_CENTER_CODE="cn"
 

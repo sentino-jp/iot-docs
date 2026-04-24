@@ -46,12 +46,12 @@ POST /auth/oauth/token
 **Request**:
 
 ```bash
-curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+curl -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
+  -H "app_id: krkfvb4s5e91hq" \
+  -H "channel_identifier: kfvb4s5e" \
   -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
@@ -99,9 +99,9 @@ All endpoints (including login) must include the following public request header
 | `data_center_code` | `cn` | Data center code |
 | `client_id` | `Y2V0dXMtaW90LWFwcDpv...` | Client identifier |
 | `encrypt_type` | `AES/ECB/PKCS5Padding` | Encryption type |
-| `channel_identifier` | `gk6853gq` | Channel identifier |
+| `channel_identifier` | `kfvb4s5e` | Channel identifier |
 | `package_name` | `jp.sentino.general` | Package name |
-| `app_id` | `krfjnsim9vs7yd` | Application ID |
+| `app_id` | `krkfvb4s5e91hq` | Application ID |
 
 ---
 

@@ -17,7 +17,7 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 | Item | Value |
 |---|---|
 | REST API base URL | `https://api-iot.sentino.jp` |
-| app_id | `krfjnsim9vs7yd` |
+| app_id | `krkfvb4s5e91hq` |
 | Authorization (for login) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 
 ---
@@ -27,12 +27,12 @@ This document helps you run the App-side core flow with curl in **10 minutes**: 
 Sentino uses UID-based login — if the UID does not exist, an account is automatically created.
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
+  -H "app_id: krkfvb4s5e91hq" \
+  -H "channel_identifier: kfvb4s5e" \
   -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
@@ -67,12 +67,12 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
 # Or extract automatically with jq
-TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
+  -H "app_id: krkfvb4s5e91hq" \
+  -H "channel_identifier: kfvb4s5e" \
   -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \

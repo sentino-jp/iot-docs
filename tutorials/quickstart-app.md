@@ -17,7 +17,7 @@
 | 项目 | 值 |
 |---|---|
 | REST API 基础 URL | `https://api-iot.sentino.jp` |
-| app_id | `krfjnsim9vs7yd` |
+| app_id | `krkfvb4s5e91hq` |
 | Authorization (登录用) | `Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==` |
 
 ---
@@ -27,12 +27,12 @@
 Sentino 使用 UID 方式登录 — 如果 UID 不存在则自动注册。
 
 ```bash
-curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
+  -H "app_id: krkfvb4s5e91hq" \
+  -H "channel_identifier: kfvb4s5e" \
   -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \
@@ -67,12 +67,12 @@ curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area
 TOKEN="6ea8368a-127c-4203-b7e8-83fbeb9d0239"
 
 # 或者用 jq 自动提取
-TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krfjnsim9vs7yd" \
+TOKEN=$(curl -s -X POST "https://api-iot.sentino.jp/auth/oauth/token?grant_type=uid&area_code=86&app_id=krkfvb4s5e91hq" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "Authorization: Basic Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
   -H "client_id: Y2V0dXMtaW90LWFwcDpvbEFESkNtV2xGSVZYWTFxMWx4MHdVclViemU3WHdlUg==" \
-  -H "app_id: krfjnsim9vs7yd" \
-  -H "channel_identifier: gk6853gq" \
+  -H "app_id: krkfvb4s5e91hq" \
+  -H "channel_identifier: kfvb4s5e" \
   -H "package_name: jp.sentino.general" \
   -H "encrypt_type: AES/ECB/PKCS5Padding" \
   -H "timezone: Asia/Shanghai" \

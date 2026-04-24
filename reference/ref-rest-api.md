@@ -17,8 +17,8 @@
 
 ```bash
 # 应用凭据（由 Sentino 提供，每个客户应用不同）
-export APP_ID="krfjnsim9vs7yd"
-export CHANNEL_IDENTIFIER="gk6853gq"
+export APP_ID="krkfvb4s5e91hq"
+export CHANNEL_IDENTIFIER="kfvb4s5e"
 export PACKAGE_NAME="jp.sentino.general"
 export DATA_CENTER_CODE="cn"
 
