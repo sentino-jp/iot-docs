@@ -1,5 +1,7 @@
 # Sentino IoT 开发者文档中心
 
+[English](./README-en.md) · 简体中文（当前）
+
 欢迎使用 Sentino IoT 开发者文档。Sentino IoT 是面向 AI 语音交互设备的物联网平台，提供从设备配网、云端通信到 AI 实时语音对话的完整方案。
 
 > **平台定位**：Sentino IoT 是 **Tuya 模式**（你的 App / 设备直接调 Sentino 云，没有客户后端这一层），不是 AWS IoT 模式。本文档只覆盖「物」的部分；自定义 Agent 行为（LLM/TTS 编排、记忆、工作流、自定义工具）属于 Sentino Agent 平台范畴，请联系 Sentino 团队获取相关文档。
@@ -35,9 +37,9 @@
 
 | 文档 | 说明 | 状态 |
 |---|---|---|
-| [架构与概念](./architecture.md) | 整体架构、核心概念、联网模式、术语表 | 已完成 |
-| [快速入门 — 设备端](tutorials/quickstart-device.md) | 10 分钟跑通 MQTT 连接并验证 AI 语音接入 | 已完成 |
-| [快速入门 — App 端](tutorials/quickstart-app.md) | curl 跑通登录 → 获取账户 ID → 设备绑定的完整链路 | 已完成 |
+| [架构与概念](./architecture.md) | 整体架构、产品能力、核心概念、联网模式、AI 语音对话模型、两条产品路径对比、术语表 | 已完成 |
+| [快速入门 — 设备端](tutorials/quickstart-device.md) | 10 分钟跑通 MQTT 连接，验证签名和 Topic | 已完成 |
+| [快速入门 — App 端](tutorials/quickstart-app.md) | curl 跑通登录 → 资产树 → 产品 → 设备 → 智能体 → 绑定的 6 步链路 | 已完成 |
 
 ### 集成指南
 
@@ -52,8 +54,8 @@
 | 文档 | 说明 | 状态 |
 |---|---|---|
 | [MQTT 协议参考](reference/ref-mqtt.md) | 连接参数、Topic、消息格式、全部事件/指令的字段定义 | 已完成 |
-| [BLE 协议参考](reference/ref-ble.md) | 广播格式、V1 分包协议、应用层消息、状态码 | 已完成 |
-| [REST API 参考](reference/ref-rest-api.md) | 认证、配网、设备管理、智能体管理接口 | 已完成 |
+| [BLE 协议参考](reference/ref-ble.md) | 协议分层、广播格式、GATT 服务、V1 分包协议、应用层消息、状态码、配网状态机、平台适配 | 已完成 |
+| [REST API 参考](reference/ref-rest-api.md) | 认证（UID + Password 双模式）、配网、设备管理、Sentino 智能体接入与对话历史 | 已完成 |
 
 ### 产品方案
 
@@ -67,11 +69,11 @@
 
 | 项目 | 测试环境 |
 |---|---|
-| MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0) |
+| MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0，明文，仅供 quickstart 验证使用；生产环境请走 TLS 端口 `8883`) |
 | REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | 参数由云端动态下发 |
 
 ---
 
 **维护者**: Sentino IoT Team
-**最后更新**: 2026-03-25
+**最后更新**: 2026-04-24

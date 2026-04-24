@@ -1,5 +1,7 @@
 # Sentino IoT Developer Documentation Hub
 
+English (current) · [简体中文](./README.md)
+
 Welcome to the Sentino IoT developer documentation. Sentino IoT is an IoT platform purpose-built for AI voice-interaction devices, providing an end-to-end solution from device provisioning and cloud communication to real-time AI voice conversation.
 
 > **Platform Positioning**: Sentino IoT follows the **Tuya model** (your App / device calls the Sentino cloud directly; **there is no customer-owned backend** in between), not the AWS IoT model. This documentation covers only the "thing" layer; customizing Agent behavior (LLM/TTS orchestration, memory, workflows, custom tools) belongs to the Sentino Agent Platform — please contact the Sentino team for those docs.
@@ -35,9 +37,9 @@ Pick a reading path based on your role:
 
 | Document | Description | Status |
 |---|---|---|
-| [Architecture & Concepts](./architecture-en.md) | Overall architecture, core concepts, connectivity modes, glossary | Completed |
-| [Quick Start — Device](tutorials/quickstart-device-en.md) | Get MQTT connected and verify AI voice integration in 10 minutes | Completed |
-| [Quick Start — App](tutorials/quickstart-app-en.md) | Run the full chain via curl: login -> obtain account ID -> device binding | Completed |
+| [Architecture & Concepts](./architecture-en.md) | Overall architecture, product capabilities, core concepts, connectivity modes, AI voice conversation model, two product paths, glossary | Completed |
+| [Quick Start — Device](tutorials/quickstart-device-en.md) | Get MQTT connected in 10 minutes — verifies signing and topics | Completed |
+| [Quick Start — App](tutorials/quickstart-app-en.md) | Run the 6-step curl flow: login -> asset tree -> product -> device -> agent -> bind | Completed |
 
 ### Integration Guides
 
@@ -52,8 +54,8 @@ Pick a reading path based on your role:
 | Document | Description | Status |
 |---|---|---|
 | [MQTT Protocol Reference](reference/ref-mqtt-en.md) | Connection parameters, topics, message formats, field definitions for all events / commands | Completed |
-| [BLE Protocol Reference](reference/ref-ble-en.md) | Advertisement format, V1 packet protocol, application-layer messages, status codes | Completed |
-| [REST API Reference](reference/ref-rest-api-en.md) | Authentication, provisioning, device management, Agent management endpoints | Completed |
+| [BLE Protocol Reference](reference/ref-ble-en.md) | Protocol layering, advertisement format, GATT services, V1 packet protocol, application-layer messages, status codes, provisioning state machine, platform adaptation | Completed |
+| [REST API Reference](reference/ref-rest-api-en.md) | Authentication (UID + Password dual mode), provisioning, device management, Sentino Agent integration, conversation history | Completed |
 
 ### Product Solutions
 
@@ -67,11 +69,11 @@ Pick a reading path based on your role:
 
 | Item | Test Environment |
 |---|---|
-| MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0) |
+| MQTT Broker | `mqtt-iot.sentino.jp:1883` (MQTT 5.0, plaintext — for quickstart only; production should use TLS port `8883`) |
 | REST API | `https://api-iot.sentino.jp/api` |
 | Agora RTC | Parameters dynamically delivered by the cloud |
 
 ---
 
 **Maintainer**: Sentino IoT Team
-**Last Updated**: 2026-03-25
+**Last Updated**: 2026-04-24
