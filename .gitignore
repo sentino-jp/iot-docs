@@ -1,5 +1,8 @@
 .DS_Store
 iot-web-app/
-agora-ble-tool/
-original-docs/sentino-iot.postman_collection.json
 plan/
+
+# Raw reference materials — not part of the published docs
+agora/
+sentino/
+original-docs/
