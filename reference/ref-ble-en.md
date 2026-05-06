@@ -302,7 +302,9 @@ Device reply:
     "userId": "userId",
     "mq": "mqtt-iot.sentino.jp",
     "port": 1883,
+    "mqttSslPort": "8883",
     "country": "CN",
+    "areaCode": "86",
     "tz": "Asia/Shanghai",
     "force_bind": false
   }
@@ -315,12 +317,12 @@ Device reply:
 | `pw` | Yes (WiFi mode) | WiFi password |
 | `bid` | Yes | Account ID (assetId) |
 | `userId` | Yes | User ID |
-| `mq` | Yes (WiFi mode) | MQTT broker address |
-| `port` | Yes (WiFi mode) | MQTT port |
-| `mqttSslPort` | Yes | MQTT SSL port |
-| `areaCode` | Yes | Area code, e.g., US, CN |
-| `country` | Yes | Country code |
-| `tz` | Yes | Time zone |
+| `mq` | Yes (WiFi mode) | MQTT broker address (without port) |
+| `port` | Yes (WiFi mode) | MQTT plaintext port (default `1883`) |
+| `mqttSslPort` | Yes | MQTT SSL port (default `"8883"`, string) |
+| `country` | Yes | Country code (e.g., `CN` / `JP` / `KR` / `US`) |
+| `areaCode` | Yes | **International calling code as digit string** (e.g., `"86"` / `"81"` / `"82"`), NOT a two-letter country code |
+| `tz` | Yes | Time zone (e.g., `Asia/Shanghai`) |
 | `force_bind` | Yes | Whether to force binding |
 
 **4G mode** (Quectel module integration — contact the Sentino team for the dedicated guide):

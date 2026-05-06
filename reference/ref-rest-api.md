@@ -48,8 +48,8 @@ export TOKEN=""
 export USER_ID=""
 
 # 业务上下文（按测试设备/账户填写）
-export PRODUCT_ID="vqB8C7fniWRLWL"   # 当前 mock 设备 PID
-export UUID="ct01kQBXBK7h63H8"        # 当前 mock 设备 UUID
+export PRODUCT_ID="OQm9yRoaLq1gbK"   # Sentino demo PID（产品名 Kumamoto，AI Toy 类目）
+export UUID="ct01VWfvv171KS7s"        # Sentino demo UUID（未绑定，可重复用于配网测试）
 export ASSET_ID=""                    # 通过 §5.1 获取
 export DEVICE_ID=""                   # 通过 §5.4 获取
 export AGENT_ID=""                    # 通过 §6.1 / §6.3 获取
@@ -562,15 +562,19 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
   "code": 200,
   "data": {
     "id": "OQm9yRoaLq1gbK",
-    "name": "智能玩具",
-    "model": "ST-001",
+    "name": "Kumamoto",
+    "productName": "Kumamoto",
+    "model": "S-KUMAMOTO-01",
     "imageUrl": "https://...",
-    "tenantId": "1955088720032829440",
-    "typeId": "...",
-    "protocolType": "MQTT",
-    "protocolName": "MQTT 5.0",
+    "tenantId": "2039278878653296640",
+    "typeId": "AIToy001",
+    "typeName": "AI Toy",
+    "protocolType": "1",
+    "protocolName": "WI-FI+BLE",
     "connectCloudType": 1,
-    "nodeType": 1
+    "nodeType": 1,
+    "distributionNetMode": "1",
+    "bindMode": 2
   }
 }
 ```
@@ -581,16 +585,20 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 |---|---|
 | `id` | 产品 ID（与请求参数 `productId` 一致） |
 | `name` | 产品显示名称 |
+| `productName` | 产品名称（与 `name` 同值，历史命名遗留的别名） |
 | `model` | 产品型号 |
 | `imageUrl` | 产品图片 URL |
 | `tenantId` | 租户 ID |
 | `typeId` | 产品类目 ID |
-| `protocolType` | 通讯协议：`MQTT` / `BLE` |
-| `protocolName` | 协议描述 |
+| `typeName` | 产品类目名称 |
+| `protocolType` | 通讯协议**枚举数字字符串**（实测值 `"1"` 等；**不是 `"MQTT"` / `"BLE"` 字面量**），人可读名称见 `protocolName` |
+| `protocolName` | 协议描述（如 `"WI-FI+BLE"` / `"MQTT 5.0"`） |
 | `connectCloudType` | 云端接入类型 |
 | `nodeType` | 节点类型：`1`=普通设备, `2`=网关, `3`=边缘网关, `4`=子设备 |
+| `distributionNetMode` | 配网模式（**字符串**） |
+| `bindMode` | 绑定模式：`1`=强绑, `2`=弱绑 |
 
-> 服务端可能根据产品类型扩展返回 `distributionNetMode` / `bindMode` / `deviceShare` / `deviceUpgrade` / `status` 等字段；以实际响应为准。
+> 服务端实际响应包含 50+ 字段（含 `accessMethod` / `status` / `publishStatus` / `capacity` / `secret` / `deviceShare` / `deviceUpgrade` / `panelType` / `internetType` / `clickWakeup` / `mainScreen` 等），上表只列常用字段。完整字段以实际响应为准。
 
 ---
 
@@ -648,10 +656,16 @@ EOF
 ```json
 {
   "code": 200,
-  "message": "success",
-  "data": "{加密后的配网数据字符串}"
+  "message": "成功",
+  "data": "{\"type\":\"thing.network.set\",\"data\":{\"sid\":\"MyWiFi\",\"pw\":\"password\",\"bid\":\"...\",\"userID\":\"...\",\"mq\":\"mqtt-iot.sentino.jp\",\"port\":1883,\"country\":\"CN\",\"tz\":\"Asia/Shanghai\",\"force_bind\":true}}"
 }
 ```
+
+> **关于 "Encrypt" 命名**：接口名为 `dataEncrypt` 是历史命名。在标准接入场景下，本接口的实际行为是**装配（wrap）** —— 把 `content` 字符串包进 BLE 设备能识别的 `thing.network.set` 消息壳，原 content 字段不被加密。
+>
+> 实测：不论 `encryptType` 传 `0` / `1` / `2`，不论是否带 `productId` / `uuid`，响应都是上面那种装配明文 JSON 字符串。客户端把 `data` 字段的字符串原样写入 BLE Write 特征值即可，设备端解析 JSON 提取配网信息，无需额外解密。
+>
+> 如需对配网数据做端到端加密（authkey 派生密钥 / ECB 等），请联系 Sentino 团队确认对应的 PID / UUID 是否已开通加密 profile。
 
 ---
 
@@ -719,15 +733,18 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/bind/checkBi
 ```json
 {
   "code": 200,
-  "message": "success",
-  "data": 0
+  "message": "成功",
+  "data": null
 }
 ```
 
-| `data` 值 | 说明 |
-|---|---|
-| `0` | 绑定成功 |
-| 其他 | 绑定未完成或失败 |
+| `data` 值 | 含义 | 客户端处理 |
+|---|---|---|
+| `null` | 当前 UUID 没有进行中的配网/绑定流程（未启动 / 已完成 / 不存在） | 继续轮询；超过 12 次仍 null 视为超时 |
+| `0` | 配网流程进行中且服务端确认绑定成功 | 停止轮询，进入设备列表页 |
+| 其他非零数字 | 配网流程进行中但绑定失败/进行中 | 继续轮询；遇明确失败码视为失败 |
+
+> **实测注意**：对一个已经绑定或从未发起过配网的 UUID 调用本接口，返回的是 `data: null`（不是 `data: 0`）。`data: 0` 仅出现在配网流程的成功瞬间。客户端轮询逻辑必须兼容 `null` 状态。
 
 **使用方式**：配网信息发送后，每 10 秒轮询一次，最多 120 秒（12 次）。
 
@@ -941,9 +958,14 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/category/top" \
   "code": 200,
   "data": [
     {
-      "categoryId": "1001",
-      "categoryName": "智能玩具",
-      "supportProtocols": ["MQTT", "BLE"]
+      "id": "1001",
+      "name": "智能玩具",
+      "pid": "0",
+      "productId": null,
+      "imageUrl": "https://...",
+      "capacity": null,
+      "supportProtocolList": ["MQTT", "BLE"],
+      "childrens": []
     }
   ]
 }
@@ -1003,6 +1025,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
       }
     ],
     "sortIdList": ["2008424975449309184"],
+    "groupList": [],
     "shareGroupList": [],
     "shareList": []
   }
@@ -1015,6 +1038,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
 |---|---|
 | `deviceList` | 设备对象列表（每项 ~89 字段） |
 | `sortIdList` | 用户自定义排序 |
+| `groupList` | 用户创建的群组 |
 | `shareGroupList` | 被分享的群组 |
 | `shareList` | 被分享的设备 |
 
@@ -1311,10 +1335,10 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/reco
   "data": [
     {
       "agentId": "2000436153759152123",
-      "avatar": "https://...",
+      "avatarUrl": "https://...",
       "name": "Sentino 助手",
       "description": "Sentino 智能体角色",
-      "tags": ["Sentino"]
+      "tagList": ["Sentino"]
     }
   ]
 }
@@ -1351,10 +1375,10 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/deta
   "code": 200,
   "data": {
     "agentId": "2000436153759152123",
-    "avatar": "https://...",
+    "avatarUrl": "https://...",
     "name": "Sentino 助手",
     "description": "Sentino 智能体角色",
-    "tags": ["Sentino"]
+    "tagList": ["Sentino"]
   }
 }
 ```

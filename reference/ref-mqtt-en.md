@@ -85,9 +85,10 @@ Only replied when the report has `ack=1`.
 
 | Field | Type | Description |
 |:---|:---|:---|
-| `res` | int | `0` = success, non-`0` = failure |
+| `res` | int | `0` = success, non-`0` = failure (common values see [§3.5 res business codes](#35-res-business-codes)) |
 | `msg` | string | Result description |
 | `id` | string | Matches the report message id |
+| `ts` | int | Server-side processing timestamp (seconds) |
 | `code` | string | Matches the report event code |
 | `data` | object | Reply data, see each event definition |
 
@@ -114,6 +115,17 @@ Only replied when the report has `ack=1`.
   "data": {}
 }
 ```
+
+### 3.5 res Business Codes
+
+Common values for `report_response.res` / `issue_response.res` (observed + known):
+
+| `res` | Meaning | Trigger |
+|:---|:---|:---|
+| `0` | Success | Normal path |
+| `1007` | Asset does not exist | `bind` report sent with an `assetId` that doesn't exist on the cloud / doesn't belong to the current user |
+
+> The list will grow as the platform evolves. For other non-zero values, log `res` / `msg` / `id` and report back to the Sentino team to expand this table.
 
 ---
 

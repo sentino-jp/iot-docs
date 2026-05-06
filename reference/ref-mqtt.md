@@ -85,9 +85,10 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 
 | 字段 | 类型 | 说明 |
 |:---|:---|:---|
-| `res` | int | `0` = 成功，非 `0` = 失败 |
+| `res` | int | `0` = 成功，非 `0` = 失败（常见值见 [§3.5 res 业务码](#35-res-业务码)） |
 | `msg` | string | 结果描述 |
 | `id` | string | 与上报消息 id 一致 |
+| `ts` | int | 服务端处理时间戳（秒） |
 | `code` | string | 与上报事件编码一致 |
 | `data` | object | 回复数据，见各事件定义 |
 
@@ -114,6 +115,17 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
   "data": {}
 }
 ```
+
+### 3.5 res 业务码
+
+`report_response.res` / `issue_response.res` 的常见值（实测 + 已知）：
+
+| `res` | 含义 | 触发场景 |
+|:---|:---|:---|
+| `0` | 成功 | 正常路径 |
+| `1007` | Asset does not exist | `bind` 上报时 `assetId` 在云端不存在 / 不属于当前用户 |
+
+> 业务码列表会随平台迭代扩展。遇到其他非 0 值，把 `res` / `msg` / `id` 完整记录到日志，反馈给 Sentino 团队补全本表。
 
 ---
 

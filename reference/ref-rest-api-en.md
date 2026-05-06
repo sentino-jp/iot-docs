@@ -48,8 +48,8 @@ export TOKEN=""
 export USER_ID=""
 
 # Business context (fill in based on your test device/account)
-export PRODUCT_ID="vqB8C7fniWRLWL"   # Current mock device PID
-export UUID="ct01kQBXBK7h63H8"        # Current mock device UUID
+export PRODUCT_ID="OQm9yRoaLq1gbK"   # Sentino demo PID (product name: Kumamoto, AI Toy category)
+export UUID="ct01VWfvv171KS7s"        # Sentino demo UUID (unbound, reusable for provisioning tests)
 export ASSET_ID=""                    # Obtained via §5.1
 export DEVICE_ID=""                   # Obtained via §5.4
 export AGENT_ID=""                    # Obtained via §6.1 / §6.3
@@ -562,15 +562,19 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
   "code": 200,
   "data": {
     "id": "OQm9yRoaLq1gbK",
-    "name": "智能玩具",
-    "model": "ST-001",
+    "name": "Kumamoto",
+    "productName": "Kumamoto",
+    "model": "S-KUMAMOTO-01",
     "imageUrl": "https://...",
-    "tenantId": "1955088720032829440",
-    "typeId": "...",
-    "protocolType": "MQTT",
-    "protocolName": "MQTT 5.0",
+    "tenantId": "2039278878653296640",
+    "typeId": "AIToy001",
+    "typeName": "AI Toy",
+    "protocolType": "1",
+    "protocolName": "WI-FI+BLE",
     "connectCloudType": 1,
-    "nodeType": 1
+    "nodeType": 1,
+    "distributionNetMode": "1",
+    "bindMode": 2
   }
 }
 ```
@@ -581,16 +585,20 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/product/getByProduc
 |---|---|
 | `id` | Product ID (matches the request parameter `productId`) |
 | `name` | Product display name |
+| `productName` | Product name (same value as `name`, legacy alias) |
 | `model` | Product model |
 | `imageUrl` | Product image URL |
 | `tenantId` | Tenant ID |
 | `typeId` | Product category ID |
-| `protocolType` | Communication protocol: `MQTT` / `BLE` |
-| `protocolName` | Protocol description |
+| `typeName` | Product category name |
+| `protocolType` | Communication protocol **enum digit string** (observed `"1"` etc.; **NOT the literal `"MQTT"` / `"BLE"`**); see `protocolName` for the human-readable name |
+| `protocolName` | Protocol description (e.g. `"WI-FI+BLE"` / `"MQTT 5.0"`) |
 | `connectCloudType` | Cloud connectivity type |
 | `nodeType` | Node type: `1`=standard device, `2`=gateway, `3`=edge gateway, `4`=sub-device |
+| `distributionNetMode` | Provisioning mode (**string**) |
+| `bindMode` | Bind mode: `1`=strict bind, `2`=loose bind |
 
-> The server may return additional fields such as `distributionNetMode` / `bindMode` / `deviceShare` / `deviceUpgrade` / `status` depending on the product type; refer to the actual response.
+> The server actually returns 50+ fields (including `accessMethod` / `status` / `publishStatus` / `capacity` / `secret` / `deviceShare` / `deviceUpgrade` / `panelType` / `internetType` / `clickWakeup` / `mainScreen` etc.); the table above lists only the commonly used ones. Refer to the actual response for the complete set.
 
 ---
 
@@ -649,9 +657,15 @@ EOF
 {
   "code": 200,
   "message": "success",
-  "data": "{encrypted provisioning data string}"
+  "data": "{\"type\":\"thing.network.set\",\"data\":{\"sid\":\"MyWiFi\",\"pw\":\"password\",\"bid\":\"...\",\"userID\":\"...\",\"mq\":\"mqtt-iot.sentino.jp\",\"port\":1883,\"country\":\"CN\",\"tz\":\"Asia/Shanghai\",\"force_bind\":true}}"
 }
 ```
+
+> **About the "Encrypt" naming**: The endpoint is named `dataEncrypt` for historical reasons. In the standard onboarding scenario, this endpoint actually **wraps** the `content` string into a `thing.network.set` envelope that the BLE device can parse — the original `content` fields are NOT encrypted.
+>
+> Observed behavior: regardless of `encryptType` (`0` / `1` / `2`) and whether `productId` / `uuid` are passed, the response is always the wrapped plaintext JSON string above. The client should write the `data` string verbatim to the BLE Write characteristic; the device parses the JSON and extracts the provisioning info — no additional decryption needed.
+>
+> If end-to-end encryption (authkey-derived key / ECB / etc.) is required for provisioning data, contact the Sentino team to confirm whether the PID / UUID has the encryption profile enabled.
 
 ---
 
@@ -720,14 +734,17 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/bind/checkBi
 {
   "code": 200,
   "message": "success",
-  "data": 0
+  "data": null
 }
 ```
 
-| `data` Value | Description |
-|---|---|
-| `0` | Binding succeeded |
-| Other | Binding not completed or failed |
+| `data` Value | Meaning | Client handling |
+|---|---|---|
+| `null` | The current UUID has no provisioning/binding flow in progress (not started / already finished / does not exist) | Keep polling; treat as timeout after 12 null attempts |
+| `0` | Provisioning flow is in progress and server confirms binding succeeded | Stop polling, navigate to device list |
+| Other non-zero number | Provisioning in progress but binding failed/pending | Keep polling; treat well-known failure codes as failure |
+
+> **Observed**: When called for a UUID that is already bound or has never started provisioning, this endpoint returns `data: null` (not `data: 0`). `data: 0` appears only in the success moment of an active provisioning flow. Client polling logic must tolerate the `null` state.
 
 **Usage**: After provisioning data has been sent, poll once every 10 seconds for up to 120 seconds (12 attempts).
 
@@ -941,9 +958,14 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/category/top" \
   "code": 200,
   "data": [
     {
-      "categoryId": "1001",
-      "categoryName": "智能玩具",
-      "supportProtocols": ["MQTT", "BLE"]
+      "id": "1001",
+      "name": "Smart Toy",
+      "pid": "0",
+      "productId": null,
+      "imageUrl": "https://...",
+      "capacity": null,
+      "supportProtocolList": ["MQTT", "BLE"],
+      "childrens": []
     }
   ]
 }
@@ -1003,6 +1025,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
       }
     ],
     "sortIdList": ["2008424975449309184"],
+    "groupList": [],
     "shareGroupList": [],
     "shareList": []
   }
@@ -1015,6 +1038,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/getHomeDevic
 |---|---|
 | `deviceList` | List of device objects (each ~89 fields) |
 | `sortIdList` | User-defined ordering |
+| `groupList` | Groups created by the user |
 | `shareGroupList` | Groups shared with the user |
 | `shareList` | Devices shared with the user |
 
@@ -1311,10 +1335,10 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/reco
   "data": [
     {
       "agentId": "2000436153759152123",
-      "avatar": "https://...",
+      "avatarUrl": "https://...",
       "name": "Sentino 助手",
       "description": "Sentino 智能体角色",
-      "tags": ["Sentino"]
+      "tagList": ["Sentino"]
     }
   ]
 }
@@ -1351,10 +1375,10 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/sentino-agents/deta
   "code": 200,
   "data": {
     "agentId": "2000436153759152123",
-    "avatar": "https://...",
+    "avatarUrl": "https://...",
     "name": "Sentino 助手",
     "description": "Sentino 智能体角色",
-    "tags": ["Sentino"]
+    "tagList": ["Sentino"]
   }
 }
 ```

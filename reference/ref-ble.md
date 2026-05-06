@@ -302,7 +302,9 @@ BLE 单次传输数据量有限（MTU 限制），大于 118 字节的 JSON 消�
     "userId": "userId",
     "mq": "mqtt-iot.sentino.jp",
     "port": 1883,
+    "mqttSslPort": "8883",
     "country": "CN",
+    "areaCode": "86",
     "tz": "Asia/Shanghai",
     "force_bind": false
   }
@@ -315,12 +317,12 @@ BLE 单次传输数据量有限（MTU 限制），大于 118 字节的 JSON 消�
 | `pw` | 是（WiFi 模式） | WiFi 密码 |
 | `bid` | 是 | 账户 ID（assetId） |
 | `userId` | 是 | 用户 ID |
-| `mq` | 是（WiFi 模式） | MQTT Broker 地址 |
-| `port` | 是（WiFi 模式） | MQTT 端口 |
-| `mqttSslPort` | 是 | MQTT SSL 端口 |
-| `areaCode` | 是 | 区域码，如 US、CN |
-| `country` | 是 | 国家代码 |
-| `tz` | 是 | 时区 |
+| `mq` | 是（WiFi 模式） | MQTT Broker 地址（不含端口） |
+| `port` | 是（WiFi 模式） | MQTT 明文端口（默认 `1883`） |
+| `mqttSslPort` | 是 | MQTT SSL 端口（默认 `"8883"`，字符串） |
+| `country` | 是 | 国家代码（如 `CN` / `JP` / `KR` / `US`） |
+| `areaCode` | 是 | **国际区号数字字符串**（如 `"86"` / `"81"` / `"82"`），不是国家两字符码 |
+| `tz` | 是 | 时区（如 `Asia/Shanghai`） |
 | `force_bind` | 是 | 是否强制绑定 |
 
 **4G 模式**（移远模组接入 — 详细指南请联系 Sentino 团队获取）：
@@ -330,7 +332,14 @@ BLE 单次传输数据量有限（MTU 限制），大于 118 字节的 JSON 消�
   "type": "thing.network.set",
   "data": {
     "bid": "assetId",
-    "userId": "userId"
+    "userId": "userId",
+    "mq": "mqtt-iot.sentino.jp",
+    "port": 1883,
+    "mqttSslPort": "8883",
+    "country": "CN",
+    "areaCode": "86",
+    "tz": "Asia/Shanghai",
+    "force_bind": false
   }
 }
 ```
