@@ -93,9 +93,11 @@ Sentino pre-assigns a unique set of identity credentials to each device, called 
 |---|---|---|
 | **UUID** | Unique device identifier | Like a "username" |
 | **KEY** | Device secret key (32 characters) | Like a "password" |
-| **MAC** | Device network address | Like an "ID number" |
+| **MAC** | Device identity string on Sentino's business side | Like a "membership card number" |
 
-Additionally, there is a **Barcode** printed on the device enclosure for users to scan and initiate the provisioning process.
+> **The `MAC` field does not participate in any network communication**: it is merely a string the cloud uses to identify the device, and is distinct from the WiFi MAC and BLE MAC (built into the SoC module) that the device actually uses for communication. Only `UUID` / `KEY` / `PID` appear on the MQTT wire — `MAC` does not appear there at all.
+
+Optional peripheral collateral: **Barcode**. When a product opts for the "barcode-binding" path ([REST §4.6](reference/ref-rest-api-en.md#46-barcode-provisioning)), Sentino delivers the Barcode alongside the triplet, and the factory prints it onto the device enclosure for the App to scan and bind. Other binding paths (BLE provisioning, 4G 5-digit bind code) do not require an enclosure barcode.
 
 The triplet is **flashed to the device's NVS partition** (Non-Volatile Storage — a storage area that retains data after power-off) during manufacturing. The device reads the triplet from NVS on each power-up to connect to the cloud.
 
@@ -230,7 +232,7 @@ graph LR
 
 | Stage | Participants | Key Actions |
 |---|---|---|
-| **Factory** | Factory | Flash triplet (UUID/KEY/MAC) to NVS, print Barcode on enclosure |
+| **Factory** | Factory | Flash triplet (UUID/KEY/MAC) to NVS. **Printing the Barcode on the enclosure is an optional manufacturing step**, required only when the product uses the barcode-binding path |
 | **First Power-Up** | Device (automatic) | Read triplet from NVS -> calculate HMAC signature -> connect to MQTT Broker -> subscribe to Topics |
 | **Provisioning & Binding** | User + App | App scans code -> obtains userId/account ID -> BLE sends to device -> device MQTT reports `bind` |
 | **Daily Use** | User + Device | User triggers conversation -> device MQTT reports `agora_agent_device_access` -> obtains RTC params -> joins Agora channel -> real-time voice |

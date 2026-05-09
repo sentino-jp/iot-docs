@@ -338,7 +338,7 @@ graph TD
 | **Request** | Request device triplets from Sentino, ordered by expected production volume |
 | **Delivery** | Sentino delivers in bulk via CSV file (including UUID, KEY, MAC, Barcode) |
 | **Flashing** | Production line flashes triplet to each device's NVS partition |
-| **Barcode Printing** | Barcode printed on device enclosure or packaging for App scanning during provisioning |
+| **Barcode Printing** (optional) | Required only when the product supports the barcode-binding path ([REST §4.6](../reference/ref-rest-api-en.md#46-barcode-provisioning)): Barcode printed on the device enclosure or packaging for App-side scan-to-bind |
 
 ### 8.2 Launch Checklist
 

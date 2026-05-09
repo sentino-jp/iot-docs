@@ -338,7 +338,7 @@ graph TD
 | **申请** | 向 Sentino 申请设备三元组，按预计产量批次申请 |
 | **交付** | Sentino 以 CSV 文件批量交付（含 UUID、KEY、MAC、Barcode） |
 | **烧录** | 产线将三元组烧录到每台设备的 NVS 分区 |
-| **条码印刷** | Barcode 印刷在设备外壳或包装上，供 App 扫码配网 |
+| **条码印刷**（可选） | 仅当产品支持条码绑定路径（[REST §4.6](../reference/ref-rest-api.md#46-条形码配网)）时需要：Barcode 印刷在设备外壳或包装上，供 App 扫码绑定 |
 
 ### 8.2 上线清单
 
