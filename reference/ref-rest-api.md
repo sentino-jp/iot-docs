@@ -344,6 +344,17 @@ curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token" \
 
 > **关键字段**：`userId` 和 `appMqttPassword` 是 App 端订阅设备实时消息的必需凭证。
 
+> **⚠️ uid 不是 userId（常见踩坑）**
+>
+> 这是两个**不同**的字段，不能互换：
+>
+> | 字段 | 来源 | 长什么样 | 用在哪 |
+> |:---|:---|:---|:---|
+> | `uid`（请求入参 / 响应里的 `username`） | 开发者自定义字符串 | `test_user_001` | 仅用于 `grant_type=uid` 登录入参；登录后通常不再使用 |
+> | `userId`（响应里的 `data.userId`） | 云端分配的内部主键 | `cn2046098354843037696` | **后续所有业务 API、设备 MQTT `thing.bind` 的 `data.userId` 必须填这个** |
+>
+> 把 `uid` 字符串硬编码到设备固件 `thing.bind data.userId` 是常见 bug，云端会返回 [`res=11222 No permission`](./ref-mqtt.md#35-res-业务码)，**不会**自动 fallback 到按 username 查找。
+
 ---
 
 ### 3.2 发送注册验证码（Password 模式）
@@ -752,7 +763,7 @@ curl -X POST "https://api-iot.sentino.jp/api/business-app/v1/device/bind/checkBi
 
 ### 4.5 4G 绑定码配网
 
-4G 设备开机后产生 5 位数字「绑定码」，用户在 App 输入即可绑定（不走 BLE）。
+4G 设备开机联网后产生 5 位数字「绑定码」，用户在 App 输入即可绑定（不走 BLE）。
 
 ```
 POST /business-app/v1/device/bind/bindDeviceBy4gCode
@@ -766,7 +777,16 @@ Content-Type: application/json
 | `assetId` | string | 是 | 资产 ID（账户 ID） |
 | `bindCode` | string | 是 | 5 位数字绑定码 |
 
-**响应**：`data: null`，`code: 200` 表示绑定成功。
+**响应**：`data: null`，`code: 200` 表示绑定成功（同步成功，无需轮询 `checkBindResult`）。
+
+**绑定码的来源与生命周期：**
+
+- 设备上电连上 MQTT 后，主动通过 `report` 通道发送 [`code=get_bind_code`](./ref-mqtt.md#410-get_bind_code--获取-4g-绑定码)，云端通过 `report_response` 返回 `{bindCode, expireSeconds}`
+- 默认 `expireSeconds=120`（2 分钟）
+- 过期未绑定 → 设备重新发送同样的 `get_bind_code` 即可获得新码，旧码自动作废
+- 设备拿到 `bindCode` 后通过自身屏幕、语音或显示模块呈现给用户
+
+> 设备本地若需要确认绑定结果，建议主动发 [`code=get_device_bind_status`](./ref-mqtt.md#411-get_device_bind_status--查询设备绑定状态) 查询云端真实状态，而不是仅依赖本地 `bindStatus`。
 
 ---
 

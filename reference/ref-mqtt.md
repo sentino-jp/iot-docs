@@ -124,6 +124,7 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 |:---|:---|:---|
 | `0` | 成功 | 正常路径 |
 | `1007` | Asset does not exist | `bind` 上报时 `assetId` 在云端不存在 / 不属于当前用户 |
+| `11222` | No permission | `bind` 上报时 `userId` 不是云端真实用户 ID，**或** `assetId` 不属于该 `userId`。常见原因：把 `grant_type=uid` 模式下的 **uid 字符串**（如 `test_user_001`）误填到 `data.userId`，正确值应为登录响应里的 `data.userId`（`cn` 前缀的内部 ID）。详见 [REST §3.1 关于 uid vs userId 的说明](./ref-rest-api.md#31-用户登录授权) |
 
 > 业务码列表会随平台迭代扩展。遇到其他非 0 值，把 `res` / `msg` / `id` 完整记录到日志，反馈给 Sentino 团队补全本表。
 
@@ -161,6 +162,16 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 | `cleanData` | boolean | 否 | 是否清除数据，默认 `false` |
 
 **云端回复 data：** 无额外字段。`res=0` 表示绑定成功。
+
+**云端后续动作（issue 通道）：**
+
+| `bind` 结果 | 设备先前 `info.bindStatus` | 云端通过 `issue` 下发 | 设备建议处理 |
+|:---|:---|:---|:---|
+| `res=0`（成功） | 任意 | `code=clean_data, data={subUuid:null}` （[§5.5](#55-clean_data--绑定后清理)） | 清理本次 bind 之前的临时缓存数据，**不**走网络重置 |
+| `res≠0`（失败） | `1`（设备自报已绑定） | `code=reset, data={clearData:true}` （[§5.1](#51-reset--远程重置设备)） | 清掉本地 user / asset 关联回到未绑定态，触发用户重新配网 |
+| `res≠0`（失败） | `0` 或未上报 | 仅返回 `report_response`，不主动下发 | 设备保持未绑定态，提示用户重试 |
+
+> 第二行场景的根因是"设备本地存的绑定关系跟云端实际状态不一致"，云端通过 reset 强制 reconcile。
 
 ---
 
@@ -552,6 +563,62 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 
 ---
 
+### 4.10 get_bind_code — 获取 4G 绑定码
+
+仅 4G 设备使用。设备上电联网后向云端申请一个 5 位数字「绑定码」，通过自身屏幕/语音播报给用户，用户在 App 输入后即可完成绑定（对应 REST [§4.5 4G 绑定码配网](./ref-rest-api.md#45-4g-绑定码配网)）。
+
+| 属性 | 值 |
+|:---|:---|
+| code | `get_bind_code` |
+| 建议 ack | `1` |
+
+**上报 data：** 无（不传 data 字段或传空对象）。
+
+**云端回复 data：**
+
+```json
+{
+  "bindCode": "12345",
+  "expireSeconds": 120
+}
+```
+
+| 字段 | 类型 | 说明 |
+|:---|:---|:---|
+| `bindCode` | string | 5 位纯数字随机码 |
+| `expireSeconds` | int | 绑定码有效期（秒），默认 `120` |
+
+> **续期**：绑定码到期后再发一次 `get_bind_code` 即可获得新码；旧码自动作废。
+
+---
+
+### 4.11 get_device_bind_status — 查询设备绑定状态
+
+设备主动向云端确认"我现在到底绑没绑"。常用于上电时校对本地 NV 中的 `bindStatus` 与云端是否一致，避免出现"本地已绑、云端未绑"或反过来的脏状态。
+
+| 属性 | 值 |
+|:---|:---|
+| code | `get_device_bind_status` |
+| 建议 ack | `1` |
+
+**上报 data：** 无。
+
+**云端回复 data：**
+
+```json
+{
+  "status": 1
+}
+```
+
+| 字段 | 类型 | 说明 |
+|:---|:---|:---|
+| `status` | int | `0` = 云端无该设备的绑定关系；`1` = 已绑定 |
+
+> 与 `info.bindStatus` 的区别：`info` 是设备**告诉**云端自己的本地状态；本接口是设备**询问**云端的真实状态。两者不一致时以本接口为准。
+
+---
+
 ## 5. 云端下发指令
 
 ### 5.1 reset — 远程重置设备
@@ -573,6 +640,13 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 | `clearData` | boolean | 是否清除设备数据 |
 
 **设备回复 data：** 无额外字段。
+
+**云端主动下发的触发场景：**
+
+- App 通过 REST `/business-app/v1/device/bind/unbind` 解绑设备时，云端推送本指令通知设备清理本地状态。
+- 设备 `info.bindStatus=1` 但发 `bind` 上报失败（`res=11222` / `1007` 等），云端检测到"设备自报已绑定，但本次绑定校验失败"的不一致 → 主动下发 `reset clearData=true` 强制 reconcile。详见 [§4.1 bind 末尾的反馈表](#41-bind--设备绑定)。
+
+> 与 `clean_data`（[§5.5](#55-clean_data--绑定后清理)）的区别：`reset` 把设备拉回未配网态（清网络 + 用户关联），需要重新走配网流程；`clean_data` 只清绑定前的临时缓存，不动网络。
 
 ---
 
@@ -694,6 +768,37 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 
 ---
 
+### 5.5 clean_data — 绑定后清理
+
+云端在确认 `bind` 成功后通过 `issue` 通道主动下发，提示设备清理本次绑定流程之前残留的临时数据（缓存、未上报队列、配网过程中的临时文件等）。
+
+| 属性 | 值 |
+|:---|:---|
+| code | `clean_data` |
+| ack | `0`（云端不要求设备回复） |
+
+**下发 data：**
+
+```json
+{
+  "subUuid": null
+}
+```
+
+| 字段 | 类型 | 说明 |
+|:---|:---|:---|
+| `subUuid` | string \| null | 子设备 UUID。`null` 表示清理本设备自身；非 null 表示清理指定子设备（网关场景） |
+
+**设备建议处理：**
+
+- 清理"绑定前累积的临时数据"，例如尚未上报的离线日志、本地缓存、配网阶段的中间文件
+- **不要**清网络配置、不要清三元组、不要清用户/资产关联——那是 `reset` 的职责（[§5.1](#51-reset--远程重置设备)）
+- 不要把本指令误解读为"出错重置"，它是绑定**成功**后的常规清理
+
+> 触发时机来自 [§4.1 bind 末尾的反馈表](#41-bind--设备绑定)。
+
+---
+
 ## 6. 事件编码速查表
 
 ### 设备上报 (report)
@@ -709,6 +814,8 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 | `ota_progress` | OTA 进度上报 | 0 | [4.7](#47-ota_progress--ota-进度上报) |
 | `agora_agent_device_access` | 请求 AI 语音接入 | 1 | [4.8](#48-agora_agent_device_access--普通设备请求-ai-接入) |
 | `agora_agent_nfc_report` | NFC 设备请求 AI 接入 | 1 | [4.9](#49-agora_agent_nfc_report--nfc-设备请求-ai-接入) |
+| `get_bind_code` | 获取 4G 绑定码 | 1 | [4.10](#410-get_bind_code--获取-4g-绑定码) |
+| `get_device_bind_status` | 查询设备绑定状态 | 1 | [4.11](#411-get_device_bind_status--查询设备绑定状态) |
 
 ### 云端下发 (issue)
 
@@ -718,6 +825,7 @@ password = hmacSha256(content, KEY)     // KEY 为三元组中的 32 字符密�
 | `ota` | 固件升级 | [5.2](#52-ota--固件升级) |
 | `ping` | 在线检测 | [5.3](#53-ping--在线检测) |
 | `property_set` | 设置属性 | [5.4](#54-property_set--设置属性) |
+| `clean_data` | 绑定后清理 | [5.5](#55-clean_data--绑定后清理) |
 
 ---
 

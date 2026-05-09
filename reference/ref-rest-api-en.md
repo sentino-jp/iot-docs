@@ -344,6 +344,17 @@ curl -X POST "https://api-iot.sentino.jp/api/auth/oauth/token" \
 
 > **Key fields**: `userId` and `appMqttPassword` are required credentials for the App to subscribe to real-time device messages.
 
+> **WARNING: `uid` is NOT `userId` (common pitfall)**
+>
+> These are two **different** fields and are not interchangeable:
+>
+> | Field | Source | What it looks like | Where it is used |
+> |:---|:---|:---|:---|
+> | `uid` (request parameter / `username` in the response) | Developer-defined string | `test_user_001` | Only used as the request parameter for `grant_type=uid` login; typically not used after login |
+> | `userId` (`data.userId` in the response) | Internal primary key assigned by the cloud | `cn2046098354843037696` | **All subsequent business APIs and the device-side MQTT `thing.bind` `data.userId` MUST use this value** |
+>
+> Hard-coding the `uid` string into the firmware's `thing.bind data.userId` is a common bug — the cloud will return [`res=11222 No permission`](./ref-mqtt-en.md#35-res-business-codes), and **does not** automatically fall back to a `username` lookup.
+
 ---
 
 ### 3.2 Send Registration Verification Code (Password Mode)
@@ -766,7 +777,16 @@ Content-Type: application/json
 | `assetId` | string | Yes | Asset ID (account ID) |
 | `bindCode` | string | Yes | 5-digit binding code |
 
-**Response**: `data: null`; `code: 200` indicates a successful bind.
+**Response**: `data: null`; `code: 200` indicates a successful bind (synchronously succeeds — no need to poll `checkBindResult`).
+
+**Source and lifecycle of the bind code:**
+
+- After the device boots and connects to MQTT, it actively sends [`code=get_bind_code`](./ref-mqtt-en.md#410-get_bind_code--get-4g-bind-code) over the `report` channel; the cloud returns `{bindCode, expireSeconds}` via `report_response`
+- Default `expireSeconds=120` (2 minutes)
+- If the code expires before binding completes, the device re-sends the same `get_bind_code` to obtain a new code; the old code is automatically invalidated
+- Once the device has the `bindCode`, it presents it to the user via its own screen, voice prompt, or display module
+
+> If the device needs to confirm the binding result locally, it is recommended to actively send [`code=get_device_bind_status`](./ref-mqtt-en.md#411-get_device_bind_status--query-device-binding-status) to query the cloud's authoritative state, rather than relying solely on the local `bindStatus`.
 
 ---
 

@@ -124,6 +124,7 @@ Common values for `report_response.res` / `issue_response.res` (observed + known
 |:---|:---|:---|
 | `0` | Success | Normal path |
 | `1007` | Asset does not exist | `bind` report sent with an `assetId` that doesn't exist on the cloud / doesn't belong to the current user |
+| `11222` | No permission | `bind` report sent with a `userId` that is not a real cloud-side user ID, **or** an `assetId` that doesn't belong to that `userId`. Common cause: filling the **uid string** from `grant_type=uid` mode (e.g. `test_user_001`) into `data.userId` by mistake; the correct value is the `data.userId` returned by the login response (the internal ID prefixed with `cn`). See [REST §3.1 note on uid vs userId](./ref-rest-api-en.md#31-user-login-authorization) for details. |
 
 > The list will grow as the platform evolves. For other non-zero values, log `res` / `msg` / `id` and report back to the Sentino team to expand this table.
 
@@ -161,6 +162,16 @@ After obtaining `userId` / `assetId` from BLE, the device reports a binding requ
 | `cleanData` | boolean | No | Whether to clear data, defaults to `false` |
 
 **Cloud reply data:** No additional fields. `res=0` indicates binding succeeded.
+
+**Cloud-side follow-up actions (issue channel):**
+
+| `bind` result | Device's prior `info.bindStatus` | Cloud issues via `issue` | Recommended device handling |
+|:---|:---|:---|:---|
+| `res=0` (success) | Any | `code=clean_data, data={subUuid:null}` ([§5.5](#55-clean_data--post-binding-cleanup)) | Clean up temporary cached data accumulated before this bind; do **not** touch network configuration |
+| `res≠0` (failure) | `1` (device self-reports as bound) | `code=reset, data={clearData:true}` ([§5.1](#51-reset--remote-device-reset)) | Clear local user / asset associations, return to unbound state, and prompt the user to re-provision |
+| `res≠0` (failure) | `0` or not reported | Only `report_response`; nothing actively issued | Device stays in unbound state and prompts the user to retry |
+
+> The root cause of the second-row scenario is that the device's locally stored binding relationship is out of sync with the cloud's actual state; the cloud uses `reset` to force a reconcile.
 
 ---
 
@@ -552,6 +563,62 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 
 ---
 
+### 4.10 get_bind_code — Get 4G Bind Code
+
+For 4G devices only. After power-up and connection, the device requests a 5-digit numeric "bind code" from the cloud, then displays it on its own screen or announces it via voice for the user to enter in the App to complete binding (corresponds to REST [§4.5 4G binding code provisioning](./ref-rest-api-en.md#45-4g-binding-code-provisioning)).
+
+| Property | Value |
+|:---|:---|
+| code | `get_bind_code` |
+| Recommended ack | `1` |
+
+**Report data:** None (omit the data field or send an empty object).
+
+**Cloud reply data:**
+
+```json
+{
+  "bindCode": "12345",
+  "expireSeconds": 120
+}
+```
+
+| Field | Type | Description |
+|:---|:---|:---|
+| `bindCode` | string | 5-digit purely numeric random code |
+| `expireSeconds` | int | Bind code validity period (seconds), defaults to `120` |
+
+> **Renewal**: After the bind code expires, send `get_bind_code` again to obtain a new one; the old code is automatically invalidated.
+
+---
+
+### 4.11 get_device_bind_status — Query Device Binding Status
+
+The device proactively asks the cloud "am I currently bound or not". Commonly used at boot to reconcile the local NV `bindStatus` with the cloud, avoiding stale states such as "locally bound but unbound on cloud" or vice versa.
+
+| Property | Value |
+|:---|:---|
+| code | `get_device_bind_status` |
+| Recommended ack | `1` |
+
+**Report data:** None.
+
+**Cloud reply data:**
+
+```json
+{
+  "status": 1
+}
+```
+
+| Field | Type | Description |
+|:---|:---|:---|
+| `status` | int | `0` = no binding relationship for this device on the cloud; `1` = bound |
+
+> Difference from `info.bindStatus`: `info` is the device **telling** the cloud its local state; this endpoint is the device **asking** the cloud for the authoritative state. When the two disagree, this endpoint is authoritative.
+
+---
+
 ## 5. Cloud-Issued Commands
 
 ### 5.1 reset — Remote Device Reset
@@ -573,6 +640,13 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 | `clearData` | boolean | Whether to clear device data |
 
 **Device reply data:** No additional fields.
+
+**Cloud-side trigger scenarios:**
+
+- When the App unbinds a device via REST `/business-app/v1/device/bind/unbind`, the cloud pushes this command to notify the device to clean up local state.
+- When the device's `info.bindStatus=1` but its `bind` report fails (`res=11222` / `1007`, etc.), the cloud detects the inconsistency "device self-reports as bound, but this round of bind validation failed" and proactively issues `reset clearData=true` to force a reconcile. See the [feedback table at the end of §4.1 bind](#41-bind--device-binding) for details.
+
+> Difference from `clean_data` ([§5.5](#55-clean_data--post-binding-cleanup)): `reset` returns the device to the unprovisioned state (clears network + user associations) and requires re-running the provisioning flow; `clean_data` only clears temporary caches accumulated before binding and does not touch the network.
 
 ---
 
@@ -694,6 +768,37 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 
 ---
 
+### 5.5 clean_data — Post-Binding Cleanup
+
+After confirming `bind` succeeded, the cloud proactively issues this command via the `issue` channel, prompting the device to clean up temporary data left over from before this binding flow (caches, unreported queues, intermediate files from provisioning, etc.).
+
+| Property | Value |
+|:---|:---|
+| code | `clean_data` |
+| ack | `0` (the cloud does not require a device reply) |
+
+**Issued data:**
+
+```json
+{
+  "subUuid": null
+}
+```
+
+| Field | Type | Description |
+|:---|:---|:---|
+| `subUuid` | string \| null | Sub-device UUID. `null` means clean up the device itself; non-null means clean up the specified sub-device (gateway scenario) |
+
+**Recommended device handling:**
+
+- Clean up "temporary data accumulated before binding", such as offline logs not yet reported, local caches, and intermediate files from the provisioning stage
+- Do **not** clear network configuration, do not clear the triplet, do not clear user / asset associations — that is the job of `reset` ([§5.1](#51-reset--remote-device-reset))
+- Do not misinterpret this command as an "error reset"; it is the routine cleanup that follows a **successful** bind
+
+> The trigger timing comes from the [feedback table at the end of §4.1 bind](#41-bind--device-binding).
+
+---
+
 ## 6. Event Code Quick Reference
 
 ### Device Reports (report)
@@ -709,6 +814,8 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 | `ota_progress` | OTA progress report | 0 | [4.7](#47-ota_progress--ota-progress-report) |
 | `agora_agent_device_access` | Request AI voice access | 1 | [4.8](#48-agora_agent_device_access--standard-device-requests-ai-access) |
 | `agora_agent_nfc_report` | NFC device requests AI access | 1 | [4.9](#49-agora_agent_nfc_report--nfc-device-requests-ai-access) |
+| `get_bind_code` | Get 4G bind code | 1 | [4.10](#410-get_bind_code--get-4g-bind-code) |
+| `get_device_bind_status` | Query device binding status | 1 | [4.11](#411-get_device_bind_status--query-device-binding-status) |
 
 ### Cloud Issues (issue)
 
@@ -718,6 +825,7 @@ Same format as the `agora_agent_device_access` reply (`appId`, `rtcToken`, `chan
 | `ota` | Firmware update | [5.2](#52-ota--firmware-update) |
 | `ping` | Online check | [5.3](#53-ping--online-check) |
 | `property_set` | Set properties | [5.4](#54-property_set--set-properties) |
+| `clean_data` | Post-binding cleanup | [5.5](#55-clean_data--post-binding-cleanup) |
 
 ---
 
