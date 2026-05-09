@@ -24,6 +24,9 @@ Sentino IoT 是面向 AI 语音交互设备的物联网平台。设备配网 →
 
 先读 [架构与概念](./architecture.md)（整体架构 / 产品能力 / 通信协议 / 联网模式 / 术语表），然后按任务下钻：
 
+**选型决策**
+- 4 条绑定路径横向对比 / 出厂烧录 / 错误码速查 → [设备初始化方案总结](tutorials/device-init-overview.md)
+
 **写嵌入式固件**
 - 入门：[设备端 quickstart](tutorials/quickstart-device.md)（10 分钟跑通 MQTT）→ [设备集成](guides/guide-device.md) → [AI 语音](guides/guide-ai-voice.md)
 - 协议：[MQTT 参考](reference/ref-mqtt.md) · [BLE 参考](reference/ref-ble.md)

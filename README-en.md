@@ -24,6 +24,9 @@ Sentino IoT is an IoT platform purpose-built for AI voice-interactive devices. P
 
 Start with [Architecture & Concepts](./architecture-en.md) (overall architecture / product capabilities / communication protocols / connectivity modes / glossary), then dive in by task:
 
+**Selecting an approach**
+- 4 binding paths side-by-side / factory provisioning / error code cheat sheet → [Device Initialization Overview](tutorials/device-init-overview-en.md)
+
 **Writing embedded firmware**
 - Onboarding: [Device quickstart](tutorials/quickstart-device-en.md) (10-min MQTT verification) → [Device integration](guides/guide-device-en.md) → [AI voice](guides/guide-ai-voice-en.md)
 - Protocols: [MQTT reference](reference/ref-mqtt-en.md) · [BLE reference](reference/ref-ble-en.md)
