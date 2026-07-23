@@ -38,6 +38,7 @@ Sentino IoT 是面向 AI 语音交互设备的物联网平台。设备配网 →
 
 **评估方案**
 - [AI 玩偶接入方案](solutions/solution-ai-toy.md)（用户旅程、NFC、家长控制、安全合规）
+- [小智式 WiFi 配网（SoftAP）](solutions/xiaozhi-softap-wifi.md)（不依赖蓝牙的配网；App / 网页 + 三种绑定路径，主推 App 自绑）
 
 ---
 
